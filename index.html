@@ -87,7 +87,6 @@
 					<button onclick="javascript:reload()">刷新</button>
 					<button onclick="javascript:cname()">改名</button>
 					<button onclick="javascript:cch(0,1)">回到主页</button>
-					<!-- <button onclick="javascript:window.open('uf.html', '_blank')">转到上传文件的网页</button> -->
 					<form onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?'+document.getElementById('ch').value;return false;"><input id="ch" placeholder="输入你想去的频道" /><button type="submit">go!</button></form>
 					<div id="nname"></div>
 					<script>
@@ -98,13 +97,10 @@
 					<iframe src="uf.html" width="300px" height="600px" frameborder="0" scrolling="no"></iframe>
 				</aside>
 			</div>
-			<!--从洛谷云剪上抄过来的awa-->
 			<link rel="stylesheet" href="markdown-palettes.css" />
-
 			<script>
 				var editor = new MarkdownPalettes("#editor");
 			</script>
 		</div>
 	</body>
 </html>
-<!--V1.5.1 用了洛谷的Markdown，真好用！-->
