@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="format-detection" content="telephone=no" />
+		<title>test</title>
+	</head>
+	<body>
+		<div>
+			<input type="file" />
+			<input type="file" id="imgFile" />
+			<img src="" id="preview" />
+		</div>
+		<script type="text/javascript">
+			let inputFile = document.querySelector("input[type=file]");
+			inputFile.onchange = function () {
+				var reader = new FileReader();
+				// result 属性中将包含一个字符串以表示所读取的文件内容。
+				reader.readAsText(this.files[0]);
+				reader.onload = function () {
+					console.log(this.result);
+				};
+			};
+
+			let imgFile = document.querySelector("#imgFile");
+			let priview = document.querySelector("#preview");
+			imgFile.onchange = function () {
+				var reader = new FileReader();
+				// result 属性中将包含一个 data: URL 格式的 Base64 字符串以表示所读取文件的内容
+				reader.readAsDataURL(this.files[0]);
+				reader.onload = function () {
+					priview.src = reader.result;
+					console.log(this.result);
+				};
+			};
+		</script>
+	</body>
+</html>
+

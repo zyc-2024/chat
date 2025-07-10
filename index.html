@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh_cn">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="HandheldFriendly" content="True" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<style>
+			body {
+				background-color: rgb(239, 239, 239);
+			}
+			.crow {
+				vertical-align: middle;
+				scroll-margin-top: 3.5rem;
+				--left-side-offset: 64px;
+				width: 768px;
+				background-color: rgb(255, 255, 255);
+				border-bottom: 1.4px solid rgb(52, 152, 219);
+				border-bottom-left-radius: 4px;
+				border-bottom-right-radius: 4px;
+				border-top-left-radius: 4px;
+				border-top-right-radius: 4px;
+				box-shadow: 0 1px 3px rgba(26, 26, 26, 0.1);
+				box-sizing: border-box;
+				color: rgb(64, 64, 64);
+				display: flex;
+				font-size: 16px;
+				font-variant-numeric: tabular-nums;
+				margin-bottom: 15px;
+				padding: 0;
+				scroll-margin-top: 56px;
+				text-size-adjust: 100%;
+			}
+			.cname {
+				margin-left: 20px;
+				margin-top: 5px;
+				font-size: x-large;
+				font-weight: bold;
+				color: #595959;
+			}
+			.ctime {
+				font-size: small + 3px;
+				color: #bcbcbc;
+			}
+			.ccontent {
+				margin-left: 30px;
+				/* text-align: center; */
+				vertical-align: middle;
+			}
+			.call {
+				background-color: rgb(251, 251, 251);
+			}
+			.chat {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			h1 {
+				text-align: center;
+			}
+		</style>
+		<meta name="author" content="zyc2024" />
+		<meta name="description" content="chatting website by zyc2024" />
+
+		<title>zyc2024的聊天网页 V1.8.1fix1</title>
+	</head>
+	<body>
+		<h1>聊天 V1.8.1fix1（第一次加载会慢一点，耐心等待就好了）</h1>
+		<div>
+			<script src="jquery.min.js"></script>
+			<script src="base64.min.js"></script>
+			<script src="MarkdownPalettes.css"></script>
+			<script src="MarkdownPalettes.common.min.js"></script>
+			<script src="markdown-palettes.min.js"></script>
+			<script src="f.js"></script>
+			<div class="chat">
+				<article>
+					<div id="chat"></div>
+					<br />
+					<!-- 上传文件（有文件时不会发送编辑器里的消息）： -->
+					<!-- <input type="file" id="f" /> -->
+					<div style="height: 400px">
+						<div id="editor"></div>
+					</div>
+					<br />
+					<button id="button" onclick="javascript:getch()=='main'||getch()=='changelog'?alert('不能在这些频道里发消息awa，换个频道吧'):upload()">发送</button>
+					<button onclick="javascript:reload()">刷新</button>
+					<button onclick="javascript:cname()">改名</button>
+					<button onclick="javascript:cch(0,1)">回到主页</button>
+					<!-- <button onclick="javascript:window.open('uf.html', '_blank')">转到上传文件的网页</button> -->
+					<form onsubmit="cch(event)"><input id="ch" placeholder="输入你想去的频道" /><button onclick="javascript:document.location.href=document.location.href.split('?')[0]+'?'+document.getElementById('ch').value;document.location.reload();">go!</button></form>
+					<div id="nname"></div>
+					<script>
+						document.getElementById("nname").innerText = "现在的用户名：" + namee;
+					</script>
+				</article>
+				<aside style="position: sticky; top: 0; align-self: flex-start; z-index: 10">
+					<iframe src="uf.html" width="300px" height="600px" frameborder="0" scrolling="no"></iframe>
+				</aside>
+			</div>
+			<!--从洛谷云剪上抄过来的awa-->
+			<link rel="stylesheet" href="markdown-palettes.css" />
+
+			<script>
+				var editor = new MarkdownPalettes("#editor");
+			</script>
+		</div>
+	</body>
+</html>
+<!--V1.5.1 用了洛谷的Markdown，真好用！-->

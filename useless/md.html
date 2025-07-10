@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+  window.addEventListener('message', function (e) {
+    // 收到父页面请求时，主动将内容发回去
+    if (e.data === 'message to iframe') {
+            var content = document.getElementsByClassName("mp-preview-content")[0]?.innerHTML.replaceAll("\n","<br>").replaceAll(/ data-line="[0-9]+"/g, '') || "";
+            window.parent.postMessage(content, '*');
+    }
+});
+    </script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="markdown-palettes.js"></script>
+    <link rel="stylesheet" href="markdown-palettes.css">
+</head>
+<body>
+    <div style="height: 800px">
+        <div id="editor"></div>
+    </div>
+
+    <script>
+        var editor = new MarkdownPalettes('#editor');
+    </script>
+</body>
+</html>
