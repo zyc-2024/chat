@@ -88,7 +88,7 @@
 					<button onclick="javascript:cname()">改名</button>
 					<button onclick="javascript:cch(0,1)">回到主页</button>
 					<!-- <button onclick="javascript:window.open('uf.html', '_blank')">转到上传文件的网页</button> -->
-					<form onsubmit="cch(event)"><input id="ch" placeholder="输入你想去的频道" /><button onclick="javascript:document.location.href=document.location.href.split('?')[0]+'?'+document.getElementById('ch').value;document.location.reload();">go!</button></form>
+					<form onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?'+document.getElementById('ch').value;return false;"><input id="ch" placeholder="输入你想去的频道" /><button type="submit">go!</button></form>
 					<div id="nname"></div>
 					<script>
 						document.getElementById("nname").innerText = "现在的用户名：" + namee;

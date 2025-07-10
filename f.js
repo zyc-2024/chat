@@ -195,13 +195,9 @@ $.ajax({
 	console.log(response);
 });*/
 function cch(event, m = 0) {
-	if (event == "") {
-	} else {
-		event.preventDefault();
-	}
+	if (event) event.preventDefault();
 	let v = m ? "main" : document.getElementById("ch").value;
 	document.location.href = document.location.href.split("?")[0] + "?" + v;
-	document.location.reload();
 }
 function tick() {
 	reload();
