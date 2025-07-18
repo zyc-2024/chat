@@ -47,50 +47,30 @@ function upf() {
 	if (m) {
 		m.innerText = "已经开始上传了，请勿重复点击！";
 	}
-	document.getElementById("p1b").innerText ="读取中……";
+	document.getElementById("p1b").innerText = "读取中……";
 	var fr = new FileReader();
 	fr.readAsArrayBuffer(file);
-	document.getElementById("p1b").innerText ="读取完成！";
+	document.getElementById("p1b").innerText = "读取完成！";
 	fr.onload = function () {
 		var b64ab = fb64(fr.result);
 		fmd5(fr.result).then((md5) => {
 			let xhr = new XMLHttpRequest();
-			xhr.open(
-				"POST",
-				"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/f%2F" +
-					md5.slice(0, 6) +
-					"%2F" +
-					encodeURIComponent(file.name),
-				true
-			);
+			xhr.open("POST", "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name), true);
 			xhr.setRequestHeader("Content-Type", "application/json");
 			xhr.upload.onprogress = function (e) {
 				if (e.lengthComputable) {
-					let percent = (e.loaded / e.total);
+					let percent = e.loaded / e.total;
 					document.getElementById("p2a").value = percent;
-					document.getElementById("p2b").innerText =
-						sc(e.loaded) + " / " + sc(e.total);
+					document.getElementById("p2b").innerText = sc(e.loaded) + " / " + sc(e.total);
 				}
 			};
 			xhr.onreadystatechange = function () {
 				if (xhr.readyState === 4) {
 					if (xhr.status >= 200 && xhr.status < 300) {
-						l.innerHTML +=
-							"上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" +
-							file.name +
-							"](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
-							md5.slice(0, 6) +
-							"%2F" +
-							encodeURIComponent(file.name) +
-							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>或者直接点击下面的链接：<a href='https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
-							md5.slice(0, 6) +
-							"%2F" +
-							encodeURIComponent(file.name) +
-							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa' target='_blank'>下载文件</a>";
+						l.innerHTML += "上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" + file.name + "](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>或者直接点击下面的链接：<a href='https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa' target='_blank'>下载文件</a>";
 					} else {
 						console.error("上传失败：", xhr.status, xhr.statusText);
-						l.innerHTML =
-							"上传失败！你再试试？<br>错误信息：" + xhr.responseText;
+						l.innerHTML = "上传失败！你再试试？<br>错误信息：" + xhr.responseText;
 					}
 				}
 			};
@@ -98,18 +78,11 @@ function upf() {
 				JSON.stringify({
 					access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 					content: b64ab,
-					message:
-						"u[" +
-						file.name +
-						"]s[" +
-						sc(file.size) +
-						"]m[" +
-						md5 +
-						"]",
+					message: "u[" + file.name + "]s[" + sc(file.size) + "]m[" + md5 + "]",
 				})
 			);
 		});
 	};
-	
-	document.getElementById("p1b").innerText ="";
+
+	document.getElementById("p1b").innerText = "";
 }
