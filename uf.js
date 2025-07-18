@@ -16,26 +16,20 @@ function fb64(buffer) {
 	}
 	return btoa(binary);
 }
-async function fmd5(file) {
-	// 读取文件内容为字符串
-	const arrayBuffer = await file.arrayBuffer();
-	let binary = "";
-	const bytes = new Uint8Array(arrayBuffer);
-	for (let i = 0; i < bytes.length; i++) {
-		binary += String.fromCharCode(bytes[i]);
-	}
-	return hex(md51(binary));
+async function fmd5(arrayBuffer) {
+	return SparkMD5.ArrayBuffer.hash(arrayBuffer);
 }
 
 let f = document.getElementById("i");
 let s = document.getElementById("s");
 let l = document.getElementById("l");
+let m = document.getElementById("l2");
 function udf() {
 	let file = f.files[0];
 	if (file) {
-		fmd5(file).then((md5) => {
-			s.innerHTML = "选择了：" + file.name + "<br>大小：" + sc(file.size) + "<br>MD5：" + md5;
-		});
+		// fmd5(file).then((md5) => {
+		s.innerHTML = "选择了：" + file.name + "<br>大小：" + sc(file.size) /* + "<br>MD5：" + md5*/;
+		// });
 	} else {
 		s.innerHTML = "你选了个寂寞a";
 	}
@@ -50,30 +44,72 @@ function upf() {
 		// 100MB
 		alert("文件太大了，不能超过100MB！");
 	}
+	if (m) {
+		m.innerText = "已经开始上传了，请勿重复点击！";
+	}
+	document.getElementById("p1b").innerText ="读取中……";
 	var fr = new FileReader();
 	fr.readAsArrayBuffer(file);
+	document.getElementById("p1b").innerText ="读取完成！";
 	fr.onload = function () {
 		var b64ab = fb64(fr.result);
-		fmd5(file).then((md5) => {
-			$.ajax({
-				url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name),
-				crossDomain: true,
-				method: "post",
-				contentType: "application/json",
-				data: JSON.stringify({
+		fmd5(fr.result).then((md5) => {
+			let xhr = new XMLHttpRequest();
+			xhr.open(
+				"POST",
+				"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/f%2F" +
+					md5.slice(0, 6) +
+					"%2F" +
+					encodeURIComponent(file.name),
+				true
+			);
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.upload.onprogress = function (e) {
+				if (e.lengthComputable) {
+					let percent = (e.loaded / e.total);
+					document.getElementById("p2a").value = percent;
+					document.getElementById("p2b").innerText =
+						sc(e.loaded) + " / " + sc(e.total);
+				}
+			};
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4) {
+					if (xhr.status >= 200 && xhr.status < 300) {
+						l.innerHTML +=
+							"上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" +
+							file.name +
+							"](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
+							md5.slice(0, 6) +
+							"%2F" +
+							encodeURIComponent(file.name) +
+							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>或者直接点击下面的链接：<a href='https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
+							md5.slice(0, 6) +
+							"%2F" +
+							encodeURIComponent(file.name) +
+							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa' target='_blank'>下载文件</a>";
+					} else {
+						console.error("上传失败：", xhr.status, xhr.statusText);
+						l.innerHTML =
+							"上传失败！你再试试？<br>错误信息：" + xhr.responseText;
+					}
+				}
+			};
+			xhr.send(
+				JSON.stringify({
 					access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 					content: b64ab,
-					message: "u[" + file.name + "]s[" + sc(file.size) + "]m[" + md5 + "]",
-				}),
-				success: function (response) {
-					console.log(response);
-					l.innerHTML = "上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" + file.name + "](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>或者直接点击下面的链接：<a href='https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa' target='_blank'>下载文件</a>";
-				},
-				error: function (xhr, status, error) {
-					console.error("上传失败：", status, error);
-					l.innerHTML = "上传失败！你再试试？<br>错误信息：" + xhr.responseText;
-				},
-			});
+					message:
+						"u[" +
+						file.name +
+						"]s[" +
+						sc(file.size) +
+						"]m[" +
+						md5 +
+						"]",
+				})
+			);
 		});
 	};
+	
+	document.getElementById("p1b").innerText ="";
 }

@@ -3,7 +3,7 @@
 	<head>
 		<script src="jquery.min.js"></script>
 		<script src="base64.min.js"></script>
-		<script src="md5.js"></script>
+		<script src="spark-md5.min.js"></script>
 		<script src="crypto-js.js"></script>
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -44,25 +44,25 @@
 				color: #333;
 				font-size: 16px;
 				transition: border-color 0.2s, box-shadow 0.2s;
-				box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 				outline: none;
 				margin: 10px 0;
 				width: 100%;
 				max-width: 250px;
 			}
-			.l1{
+			.l1 {
 				display: flex;
-				width:250px;
+				width: 250px;
 				border: 1px solid #000;
-				word-wrap:break-word;
+				word-wrap: break-word;
 				overflow: hidden;
-				word-break:break-all;
+				word-break: break-all;
 			}
 		</style>
 		<meta name="author" content="zyc2024" />
 		<meta name="description" content="file uploading website, for chatting please goto .." />
 
-		<title>zyc2024的聊天网页 V1.8</title>
+		<title>zyc2024的聊天网页 V1.8.3</title>
 	</head>
 	<body>
 		<h1>文件上传</h1>
@@ -74,7 +74,9 @@
 					<br />
 					<div id="s"></div>
 					<button id="u" class="b" onclick="javascript:upf()">上传</button>
-					<div class="l1"><div id="l"></div></div>
+					<div id="l2"></div><div id="p1b"></div><br>
+					上传：<div id="p2b"></div><progress id="p2a" value="0"></progress><br>输出：<br>
+					<div class="l1"><div id="l">输出：<br></div></div>
 				</article>
 			</div>
 		</div>
