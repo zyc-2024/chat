@@ -70,7 +70,7 @@ function upf() {
 						l.innerHTML = "上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" + file.name + "](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>或者直接点击下面的链接：<a href='https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa' target='_blank'>下载文件</a>";
 					} else {
 						console.error("上传失败：", xhr.status, xhr.statusText);
-						l.innerHTML = "上传失败！你再试试？<br>错误信息：" + xhr.responseText;
+						l.innerHTML = "上传失败！你再试试？<br>错误信息：" + xhr.responseText+"<br><br>虽然上传失败了但是也给你链接：<br><code class='l'>[" + file.name + "](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code>";
 					}
 				}
 			};
