@@ -130,7 +130,7 @@ function reload() {
 		// document.getElementById("chat").innerHTML +=
 		// 	"<table><tr><th>用户名</th><th>时间</th><th>内容</th></tr>";
 		for (let i in msg) {
-			document.getElementById("chat").innerHTML += "<br><div class='crow'><span class='call'><div class='cname'>" + msg[i].name + "</div><div class='ctime'>" + msg[i].time + "</div></span><div class='ccontent mp-preview-area mp-preview-content'><p>" + msg[i].content + "</p></div></div>";
+			document.getElementById("chat").innerHTML += "<br><div class='crow'><span class='call'><div class='cname'>" + msg[i].name + "</div><div class='ctime'>" + msg[i].time + "</div></span><div class='ccontent'><p>" + msg[i].content + "</p></div></div>";
 		}
 		// document.getElementById("chat").innerHTML += "</table>";
 	});
