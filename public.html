@@ -83,10 +83,12 @@
 						<div id="editor"></div>
 					</div>
 					<br />
-					<button id="button" onclick="javascript:getch()=='main'||getch()=='changelog'?alert('不能在这些频道里发消息awa，换个频道吧'):upload()">发送</button>
+					<button id="button" onclick="javascript:upload()">发送</button>
 					<button onclick="javascript:reload()">刷新</button>
 					<button onclick="javascript:cname()">改名</button>
 					<button onclick="javascript:cch(0,1)">回到主页</button>
+					<button onclick="javascript:crt()">修改刷新时间</button>
+					现在刷新时间：<span id="refreshtime">5</span>秒
 					<form onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?'+document.getElementById('ch').value;return false;"><input id="ch" placeholder="输入你想去的频道" /><button type="submit">go!</button></form>
 					<div id="nname"></div>
 					<script>
