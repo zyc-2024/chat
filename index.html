@@ -1,0 +1,56 @@
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src="index.js"></script>
+		<title>zyc2024的聊天网页主页</title>
+	</head>
+	<body>
+		<div style="font-size: x-large; text-align: center"><h1>主页</h1></div>
+		<div style="display: flex; height:80vh">
+			<!-- Left side: Channel list -->
+			<div
+				id="channel-list"
+				style="
+					width: 48%;
+					border-right: 1px solid #ccc;
+					padding: 16px;
+					overflow-y: auto;
+					text-align: center;
+				">
+				<h2>创建新频道</h2>
+				<input
+					type="text"
+					id="new-channel-name"
+					placeholder="频道名称"
+					style="width: 80%; padding: 8px; margin-bottom: 8px" />
+				<button>确定</button>
+				<h2>频道列表</h2>
+				<ul
+					id="channels"
+					style="list-style: none; padding: 0; margin: 0"></ul>
+			</div>
+			<div style="flex: 1; padding: 16px">
+				<!-- 右半边内容 -->
+			</div>
+		</div>
+		<script>
+			function renderChannels() {
+				read("public/index.json").then(function (data) {
+					var channels = data.ch || [];
+					var ul = document.getElementById("channels");
+					ul.innerHTML = "";
+					channels.forEach(function (channel) {
+						var link = document.createElement("a");
+						link.textContent = channel;
+						link.href = "public.html?" + channel;
+						link.style.padding = "8px 0";
+						ul.appendChild(link);
+						ul.appendChild(document.createElement("br"));
+					});
+				});
+			}
+			renderChannels();
+		</script>
+	</body>
+</html>
