@@ -80,8 +80,17 @@
 					<br />
 					<!-- 上传文件（有文件时不会发送编辑器里的消息）： -->
 					<!-- <input type="file" id="f" /> -->
-					<div style="height: 400px">
-						<div id="editor"></div>
+					<div style="height: 100px">
+						<textarea
+							id="text"
+							style="
+								width: 100%;
+								height: 100%;
+								font-size: 16px;
+								font-family: 'Microsoft YaHei', sans-serif;
+								resize: none;
+							"
+							placeholder="输入消息"></textarea>
 					</div>
 					<br />
 					<button id="button" onclick="javascript:upload()">发送</button>
@@ -97,10 +106,6 @@
 					</script>
 				</article>
 			</div>
-			<link rel="stylesheet" href="markdown-palettes.css" />
-			<script>
-				var editor = new MarkdownPalettes("#editor");
-			</script>
 		</div>
 	</body>
 </html>

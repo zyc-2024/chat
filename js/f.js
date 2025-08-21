@@ -1,13 +1,3 @@
-function dset(key, val) {
-	localStorage.setItem(key, val);
-}
-
-function dget(key) {
-	var data = localStorage.getItem(key);
-	var dataObj = JSON.parse(data);
-	return data;
-}
-
 function getname() {
 	if (document.cookie === "") {
 		document.cookie =
@@ -35,43 +25,16 @@ function cname() {
 		";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=2147483647";
 	namee = a;
 }
-
 function getch() {
-	let c = window.location.search.substring(4);
-	return c == "" ? "main" : c;
+	return getarg().ch || "main";
 }
 let namee = (name0 = "Anonymous");
-if (document.location.protocol == "file:") {
-	namee = name0 = prompt("请输入你的名字");
-} else {
-	namee = name0 = getname();
-}
 if (namee === "" || namee === null) {
 	namee = name0 = "Anonymous";
 }
 var ch = getch();
 
 function upload() {
-	if (
-		document.getElementsByClassName("mp-preview-content")[0].innerText ===
-		""
-	) {
-		alert("内容不能为空！");
-		return;
-	}
-	let c =
-		$(".mp-preview-content")[0]
-			?.innerHTML.replaceAll(">\n<", "><")
-			.replaceAll("\n", "<br>")
-			.replaceAll(/ data-line="[0-9]+"/g, "")
-			.replaceAll("</p><br>", "</p>") || "";
-	// if (document.getElementById("f").files.length !== 0 && ff === 0) {
-	// 	uf();
-	// 	return 0;
-	// }
-	// if (ff || document.getElementById("f").files.length !== 0) {
-	// 	c = "发送了一个文件：<a href='https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + m5 + "%2F" + na + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa'>" + na + "</a>";
-	// }
 	document.getElementById("button").disabled = true;
 	setTimeout(function () {
 		document.getElementById("button").disabled = false;
@@ -180,7 +143,7 @@ $.ajax({
 		});
 	})
 	.error(function (response) {
-		window.location.href="404.html?ch="+getch();
+		window.location.href = "404.html?ch=" + getch();
 	});
 //chatkey 19f7b43872c256d52d1bc71cbd2d0ffa
 /*$.ajax({
