@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>404 未找到页面</title>
+    <style>
+        body {
+            background: #f8f8f8;
+            color: #333;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            text-align: center;
+            padding-top: 10%;
+        }
+        .container {
+            display: inline-block;
+            padding: 40px 60px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 72px;
+            margin: 0 0 20px 0;
+            color: #000000;
+        }
+        p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <script src="js/api.js"></script>
+    <div class="container">
+        <h1>404</h1>
+        <p>抱歉，您访问的页面不存在。</p>
+        <a onclick='javascript:document.location.href="/create.html?"+getarg().ch'>返回首页</a>
+    </div>
+</body>
+</html></div>

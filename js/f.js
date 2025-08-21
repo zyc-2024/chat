@@ -8,6 +8,10 @@ function getname() {
 	return document.cookie.split("=")[1].split(";")[0];
 }
 
+let namee = (name0 = "Anonymous");
+
+namee = name0 = getname();
+
 var eee;
 function gettime(time = +new Date()) {
 	var date = new Date(time + 8 * 3600 * 1000);
@@ -18,7 +22,6 @@ function cname() {
 	let a;
 	a = prompt("请输入你的新名字");
 	document.getElementById("nname").innerText = "现在的用户名：" + a;
-	localStorage.setItem("n", a);
 	document.cookie =
 		"n=" +
 		a +
@@ -28,13 +31,13 @@ function cname() {
 function getch() {
 	return getarg().ch || "main";
 }
-let namee = (name0 = "Anonymous");
 if (namee === "" || namee === null) {
 	namee = name0 = "Anonymous";
 }
 var ch = getch();
 
 function upload() {
+	let c=document.getElementById("text").value;
 	document.getElementById("button").disabled = true;
 	setTimeout(function () {
 		document.getElementById("button").disabled = false;
@@ -60,7 +63,7 @@ function upload() {
 			content: c,
 		};
 		$.get(
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
+			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
 				ch +
 				".json",
 			{
@@ -72,7 +75,7 @@ function upload() {
 			var t = new Date();
 			$.ajax({
 				url:
-					"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
+					"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
 					ch +
 					".json",
 				crossDomain: true,
@@ -96,7 +99,7 @@ var rrrr;
 function reload() {
 	var content;
 	$.ajax({
-		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/" + ch + ".json",
+		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/msg/" + ch + ".json",
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
 		data: {
@@ -129,7 +132,7 @@ function reload() {
 setTimeout(reload(), 200);
 $.ajax({
 	url:
-		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" + ch + ".json",
+		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" + ch + ".json",
 	crossDomain: true,
 	data: {
 		access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
