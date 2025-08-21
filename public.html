@@ -1,10 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh_cn">
 	<head>
+		<link
+			rel="icon"
+			type="image/bmp"
+			href="favicon.bmp" />
 		<meta charset="utf-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="HandheldFriendly" content="True" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta
+			http-equiv="X-UA-Compatible"
+			content="IE=edge" />
+		<meta
+			name="HandheldFriendly"
+			content="True" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
 		<style>
 			body {
 				background-color: rgb(239, 239, 239);
@@ -60,15 +70,19 @@
 				text-align: center;
 			}
 		</style>
-		<meta name="author" content="zyc2024" />
-		<meta name="description" content="chatting website by zyc2024" />
+		<meta
+			name="author"
+			content="zyc2024" />
+		<meta
+			name="description"
+			content="chatting website by zyc2024" />
 
 		<title>zyc2024的聊天网页</title>
 	</head>
 	<body>
 		<h1>聊天 V2.0.0.52</h1>
 		<div>
-		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+			<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 			<script src="js/base64.min.js"></script>
 			<script src="js/api.js"></script>
 			<script src="js/f.js"></script>
@@ -91,16 +105,29 @@
 							placeholder="输入消息"></textarea>
 					</div>
 					<br />
-					<button id="button" onclick="javascript:upload()">发送</button>
+					<button
+						id="button"
+						onclick="javascript:upload()">
+						发送
+					</button>
 					<button onclick="javascript:reload()">刷新</button>
 					<button onclick="javascript:cname()">改名</button>
 					<button onclick="javascript:cch(0,1)">回到主页</button>
 					<button onclick="javascript:crt()">修改刷新时间</button>
 					现在刷新时间：<span id="refreshtime">5</span>秒
-					<form onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?'+document.getElementById('ch').value;return false;"><input id="ch" placeholder="输入你想去的频道" /><button type="submit">go!</button></form>
+					<form
+						onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?'+document.getElementById('ch').value;return false;">
+						<input
+							id="ch"
+							placeholder="输入你想去的频道" /><button
+							type="submit">
+							go!
+						</button>
+					</form>
 					<div id="nname"></div>
 					<script>
-						document.getElementById("nname").innerText = "现在的用户名：" + namee;
+						document.getElementById("nname").innerText =
+							"现在的用户名：" + namee;
 					</script>
 				</article>
 			</div>

@@ -1,5 +1,9 @@
 <html>
 	<head>
+		<link
+			rel="icon"
+			type="image/bmp"
+			href="favicon.bmp" />
 		<meta charset="UTF-8" />
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script src="js/api.js"></script>
@@ -7,7 +11,7 @@
 	</head>
 	<body>
 		<div style="font-size: x-large; text-align: center"><h1>主页</h1></div>
-		<div style="display: flex; height:80vh">
+		<div style="display: flex; height: 80vh">
 			<!-- Left side: Channel list -->
 			<div
 				id="channel-list"
@@ -24,7 +28,10 @@
 					id="new-channel-name"
 					placeholder="频道名称"
 					style="width: 80%; padding: 8px; margin-bottom: 8px" />
-				<button onclick="javascript:window.location.href='/create.html?ch='+getarg().ch">确定</button>
+				<button
+					onclick="javascript:window.location.href='/create.html?ch='+getarg().ch">
+					确定
+				</button>
 				<h2>频道列表</h2>
 				<ul
 					id="channels"
