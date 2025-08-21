@@ -1,7 +1,9 @@
 function dset(key, val) {
 	localStorage.setItem(key, val);
 }
-
+function getarg(){
+	window.location.search.substring(1).split("&");
+}
 function dget(key) {
 	var data = localStorage.getItem(key);
 	var dataObj = JSON.parse(data);
@@ -9,11 +11,11 @@ function dget(key) {
 }
 
 function getname() {
-	if (document.cookie == "") {
+	if (document.cookie === "") {
 		document.cookie =
 			"n=" +
 			prompt("请输入你的名字") +
-			";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=9223372036854775807";
+			";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=2147483647";
 	}
 	return document.cookie.split("=")[1].split(";")[0];
 }
@@ -26,14 +28,18 @@ function gettime(time = +new Date()) {
 
 function cname() {
 	let a;
-	document.cookie = a = prompt("请输入你的新名字");
+	a = prompt("请输入你的新名字");
 	document.getElementById("nname").innerText = "现在的用户名：" + a;
 	localStorage.setItem("n", a);
+	document.cookie =
+		"n=" +
+		a +
+		";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=2147483647";
 	namee = a;
 }
 
 function getch() {
-	let c = window.location.search.substring(1);
+	let c = window.location.search.substring(4);
 	return c == "" ? "main" : c;
 }
 let namee = (name0 = "Anonymous");
@@ -42,7 +48,7 @@ if (document.location.protocol == "file:") {
 } else {
 	namee = name0 = getname();
 }
-if (isNaN(namee) || namee === "" || namee === null) {
+if (namee === "" || namee === null) {
 	namee = name0 = "Anonymous";
 }
 var ch = getch();
@@ -168,45 +174,16 @@ $.ajax({
 		access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 	},
 	contentType: "application/json;charset=UTF-8",
-}).done(function (response) {
-	window.scroll({
-		top: document.body.scrollHeight,
-		behavior: "smooth",
+})
+	.done(function (response) {
+		window.scroll({
+			top: document.body.scrollHeight,
+			behavior: "smooth",
+		});
+	})
+	.error(function (response) {
+		window.location.href="404.html?ch="+getch();
 	});
-	let cnt = Base64.encode(
-		JSON.stringify({
-			msg: [
-				{
-					name: namee,
-					time: new Date()
-						.toISOString()
-						.replace("T", " ")
-						.replace("Z", "")
-						.split(".")[0]
-						.replaceAll("-", ""),
-					content: "created " + ch,
-				},
-			],
-		})
-	);
-	console.log("create");
-	$.ajax({
-		url:
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
-			ch +
-			".json",
-		crossDomain: true,
-		method: "post",
-		contentType: "application/json;charset=UTF-8",
-		data: JSON.stringify({
-			content: cnt,
-			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-			message: namee + " created " + ch,
-		}),
-	}).done(function (response) {
-		reload();
-	});
-});
 //chatkey 19f7b43872c256d52d1bc71cbd2d0ffa
 /*$.ajax({
 	url: 'https://gitee.com/api/v5/repos/zyc-2024/chat/contents/xxx.json',
@@ -230,7 +207,7 @@ $.ajax({
 function cch(event, m = 0) {
 	if (event) event.preventDefault();
 	let v = m ? "main" : document.getElementById("ch").value;
-	document.location.href = document.location.href.split("?")[0] + "?" + v;
+	document.location.href = document.location.href.split("?")[0] + "?ch=" + v;
 }
 rtime = 5000;
 function tick() {
