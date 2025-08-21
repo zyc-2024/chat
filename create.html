@@ -3,21 +3,64 @@
 	type="image/bmp"
 	href="favicon.bmp" />
 <script>
+	function getarg() {
+		let a = window.location.search.substring(1).split("&");
+		let c = {};
+		a.forEach(function (e) {
+			let b = e.split("=");
+			c[b[0]] = b[1];
+		});
+		return c;
+	}
 	$.ajax({
-		url:
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
-			getarg().ch +
-			".json",
+		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/index.json",
 		crossDomain: true,
-		method: "post",
 		contentType: "application/json;charset=UTF-8",
-		data: JSON.stringify({
+		data: {
 			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-			content: Base64.encode("This channel was created!"),
-			message: "initial[" + getarg().ch + "]",
-		}),
+		},
 	}).done(function (response) {
-		console.log(response);
+		r = JSON.parse(response);
+		r.ch[r.ch.length] = getarg().ch;
+		$.get(
+			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
+				ch +
+				".json",
+			{
+				access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
+			}
+		).done(function (response) {
+			sha = response.sha;
+			var t = new Date();
+			$.ajax({
+				url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Findex.json",
+				crossDomain: true,
+				method: "PUT",
+				contentType: "application/json;charset=UTF-8",
+				data: JSON.stringify({
+					access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
+					content: Base64.encode(JSON.stringify(r)),
+					sha: sha,
+					message: "update index",
+				}),
+			}).done(function (response) {
+				$.ajax({
+					url:
+						"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
+						getarg().ch +
+						".json",
+					crossDomain: true,
+					method: "post",
+					contentType: "application/json;charset=UTF-8",
+					data: JSON.stringify({
+						access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
+						content: Base64.encode("This channel was created!"),
+						message: "initial[" + getarg().ch + "]",
+					}),
+				}).done(function (response) {
+					window.location.href = "public.html?ch=" + getarg().ch;
+				});
+			});
+		});
 	});
-	window.location.href = "public.html?ch=" + getarg().ch;
 </script>
