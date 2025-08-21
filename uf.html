@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh_cn">
 	<head>
-		<script src="jquery.min.js"></script>
-		<script src="base64.min.js"></script>
-		<script src="spark-md5.min.js"></script>
-		<script src="crypto-js.js"></script>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src="js/base64.min.js"></script>
+		<script src="js/spark-md5.min.js"></script>
+		<script src="js/crypto-js.js"></script>
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="HandheldFriendly" content="True" />
@@ -47,12 +47,11 @@
 				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 				outline: none;
 				margin: 10px 0;
-				width: 100%;
-				max-width: 250px;
 			}
 			.l1 {
 				display: flex;
-				width: 250px;
+				width: 412.594px;
+				/* dont ask me how this strange width comes...... */
 				border: 1px solid #000;
 				word-wrap: break-word;
 				overflow: hidden;
@@ -77,16 +76,16 @@
 					<div id="l2"></div>
 					<div id="p1b"></div>
 					<br />
-					上传：
+					<div style="text-align: center;">↓上传进度条↓</div>
 					<div id="p2b"></div>
-					<progress id="p2a" value="0"></progress><br />
+					<progress id="p2a" value="0" style="width: 100%;"></progress><br />
 					<div class="l1">
 						<div id="l">输出在这里！！</div>
 					</div>
 				</article>
 			</div>
 		</div>
-		<script src="uf.js"></script>
+		<script src="js/uf.js"></script>
 		<!---->
 	</body>
 </html>
