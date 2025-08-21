@@ -37,7 +37,7 @@ if (namee === "" || namee === null) {
 var ch = getch();
 
 function upload() {
-	let c=document.getElementById("text").value;
+	let c = document.getElementById("text").value;
 	document.getElementById("button").disabled = true;
 	setTimeout(function () {
 		document.getElementById("button").disabled = false;
@@ -45,7 +45,10 @@ function upload() {
 
 	var sha;
 	$.ajax({
-		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/" + ch + ".json",
+		url:
+			"https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/msg/" +
+			ch +
+			".json",
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
 		data: {
@@ -99,7 +102,10 @@ var rrrr;
 function reload() {
 	var content;
 	$.ajax({
-		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/msg/" + ch + ".json",
+		url:
+			"https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/msg/" +
+			ch +
+			".json",
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
 		data: {
@@ -132,7 +138,9 @@ function reload() {
 setTimeout(reload(), 200);
 $.ajax({
 	url:
-		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" + ch + ".json",
+		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
+		ch +
+		".json",
 	crossDomain: true,
 	data: {
 		access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
@@ -145,29 +153,10 @@ $.ajax({
 			behavior: "smooth",
 		});
 	})
-	.error(function (response) {
+	.fail(function (response) {
 		window.location.href = "404.html?ch=" + getch();
 	});
 //chatkey 19f7b43872c256d52d1bc71cbd2d0ffa
-/*$.ajax({
-	url: 'https://gitee.com/api/v5/repos/zyc-2024/chat/contents/xxx.json',
-	crossDomain: true,access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-	method: 'post',
-	contentType: 'application/json;charset=UTF-8',
-	data: JSON.stringify({
-		'content': 'xxx',
-		'message': 'xxx'
-	})
-}).done(function(response) {
-	console.log(response);
-});*/
-/*$.ajax({
-	url: 'https://gitee.com/api/v5/repos/zyc-2024/chat/contents/xxx.json',
-	crossDomain: true,access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-	contentType: 'application/json;charset=UTF-8'
-}).done(function(response) {
-	console.log(response);
-});*/
 function cch(event, m = 0) {
 	if (event) event.preventDefault();
 	let v = m ? "main" : document.getElementById("ch").value;

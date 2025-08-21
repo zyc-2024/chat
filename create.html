@@ -1,0 +1,16 @@
+<script>
+	$.ajax({
+  url: 'https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F'+getarg().ch+'.json',
+  crossDomain: true,
+  method: 'post',
+  contentType: 'application/json;charset=UTF-8',
+  data: JSON.stringify({
+    'access_token': '19f7b43872c256d52d1bc71cbd2d0ffa',
+    'content': Base64.encode("This channel was created!"),
+    'message': 'initial['+getarg().ch+']',
+  })
+}).done(function(response) {
+  console.log(response);
+});
+window.location.href = 'public.html?ch=' + getarg().ch;
+</script>

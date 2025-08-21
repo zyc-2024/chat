@@ -24,7 +24,7 @@
 					id="new-channel-name"
 					placeholder="频道名称"
 					style="width: 80%; padding: 8px; margin-bottom: 8px" />
-				<button>确定</button>
+				<button onclick="javascript:window.location.href='/create.html?ch='+getarg().ch">确定</button>
 				<h2>频道列表</h2>
 				<ul
 					id="channels"
@@ -44,7 +44,7 @@
 					channels.forEach(function (channel) {
 						var link = document.createElement("a");
 						link.textContent = channel;
-						link.href = "public.html?" + channel;
+						link.href = "public.html?ch=" + channel;
 						link.style.padding = "8px 0";
 						ul.appendChild(link);
 						ul.appendChild(document.createElement("br"));
