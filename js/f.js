@@ -1,9 +1,7 @@
 function dset(key, val) {
 	localStorage.setItem(key, val);
 }
-function getarg(){
-	window.location.search.substring(1).split("&");
-}
+
 function dget(key) {
 	var data = localStorage.getItem(key);
 	var dataObj = JSON.parse(data);

@@ -7,7 +7,7 @@ function read(f) {
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
 	}).then(function (response) {
-		console.log(response);
+		// console.log(response);
 		return JSON.parse(response);
 	});
 }
@@ -26,7 +26,16 @@ function write(f, d) {
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
 	}).then(function (response) {
-		console.log(response);
+		// console.log(response);
 		return response;
 	});
+}
+function getarg(){
+	let a=window.location.search.substring(1).split("&");
+	let c={};
+	a.forEach(function (e) {
+		let b = e.split("=");
+		c[b[0]] = b[1];
+	});
+	return c;
 }
