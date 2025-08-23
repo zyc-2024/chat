@@ -29,7 +29,7 @@
 					placeholder="频道名称"
 					style="width: 80%; padding: 8px; margin-bottom: 8px" />
 				<button
-					onclick="javascript:window.location.href='/create.html?ch='+getarg().ch">
+					onclick="javascript:window.location.href='/create.html?type=u&ch='+getarg().ch">
 					确定
 				</button>
 				<h2>频道列表</h2>
@@ -39,6 +39,11 @@
 			</div>
 			<div style="flex: 1; padding: 16px">
 				<!-- 右半边内容 -->
+				<h2>不公开的，适合自己用</h2>
+				<br>
+				<div id="id"></div><br>
+				<input type="text" id="key" placeholder="一串字符，作为凭证" style="width: 80%; padding: 8px; margin-bottom: 8px">
+				<button onclick="javascript:window.location.href='/create.html?type=r&key='+getarg().ch">创建</button>
 			</div>
 		</div>
 		<script>
