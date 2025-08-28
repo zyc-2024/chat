@@ -16,17 +16,18 @@
 		return c;
 	}
 	function getid() {
-		return $.get(
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json",
-			{
+		var id = 0;
+		$.ajax({
+			url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json",
+			data: {
 				access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-			}
-		).done(function (response) {
-			console.log(response)
-			var id = parseInt(Base64.decode(response.content));
-			console.log(id);
-			return id;
+			},
+			async: false,
+			success: function (response) {
+				id = parseInt(Base64.decode(response.content));
+			},
 		});
+		return id;
 	}
 	function addid() {
 		$.get(
@@ -35,7 +36,7 @@
 				access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 			}
 		).done(function (response) {
-			console.log(response)
+			console.log(response);
 			var sha = response.sha;
 			var id = parseInt(Base64.decode(response.content));
 			console.log(id);
@@ -46,7 +47,7 @@
 				contentType: "application/json;charset=UTF-8",
 				data: JSON.stringify({
 					access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-					content: Base64.encode(String(Number(id) + 1)),
+					content: Base64.encode(String(getid() + 1)),
 					sha: sha,
 					message: "id add 1",
 				}),
