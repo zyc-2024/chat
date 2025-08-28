@@ -10,59 +10,11 @@
 		<script src="/js/spark-md5.min.js"></script>
 		<script src="/js/base64.min.js"></script>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src="/js/api.js"></script>
 	</head>
 	<body>
 		<script>
-			function getarg() {
-				let a = window.location.search.substring(1).split("&");
-				let c = {};
-				a.forEach(function (e) {
-					let b = e.split("=");
-					c[b[0]] = b[1];
-				});
-				return c;
-			}
-			function getid() {
-				var id = 0;
-				$.ajax({
-					url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json",
-					data: {
-						access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-					},
-					async: false,
-					success: function (response) {
-						id = parseInt(Base64.decode(response.content));
-					},
-				});
-				return id;
-			}
-			function addid() {
-				$.get(
-					"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json",
-					{
-						access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-					}
-				).done(function (response) {
-					console.log(response);
-					var sha = response.sha;
-					var id = parseInt(Base64.decode(response.content));
-					console.log(id);
-					$.ajax({
-						url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json",
-						crossDomain: true,
-						method: "PUT",
-						contentType: "application/json;charset=UTF-8",
-						data: JSON.stringify({
-							access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-							content: Base64.encode(String(getid() + 1)),
-							sha: sha,
-							message: "id add 1",
-						}),
-					}).done(function (response) {
-						return;
-					});
-				});
-			}
+			
 			function getkey() {
 				return SparkMD5.hash(String(getid()) + String(getarg().key));
 			}
@@ -133,24 +85,24 @@
 			} else {
 				$.ajax({
 					url:
-						"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2F" +
+						"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fmsg%2F" +
 						getid() +
-						"%2F" +
-						getarg().key +
+						"_" +
+						SparkMD5.hash(getarg().key) +
 						".json",
 					crossDomain: true,
 					method: "post",
 					contentType: "application/json;charset=UTF-8",
 					data: JSON.stringify({
 						access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-						content: Base64.encode("This channel was created!"),
-						message: "initial private[" + getarg().key + "]",
+						content: Base64.encode(JSON.stringify({"msg":[{"name":getname(),"time":gettime(),"content":"This channel has just been created!"}]})),
+						message: "initial private[" + SparkMD5.hash(getarg().key) + "]",
 					}),
 				}).done(function (response) {
 					addid();
 					window.location.href =
 						"private.html?id=" +
-						(getid() - 1) +
+						(getid()) +
 						"&key=" +
 						getarg().key;
 				});
