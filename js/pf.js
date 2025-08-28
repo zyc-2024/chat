@@ -1,5 +1,3 @@
-
-
 /*
 let me think...
 the file is /private/id_{md5 of the key}.json?
@@ -10,10 +8,9 @@ let namee = (name0 = "Anonymous");
 
 namee = name0 = getname();
 //md stands for message directory
-let md="private/msg/"+getarg().id+"_"+SparkMD5.hash(getarg().key)+".json";
+let md =
+	"private/msg/" + getarg().id + "_" + SparkMD5.hash(getarg().key) + ".json";
 var eee;
-
-
 
 function getch() {
 	return getarg().ch || "main";
@@ -32,8 +29,7 @@ function upload() {
 
 	var sha;
 	$.ajax({
-		url:
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/raw/"+md,
+		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/" + md,
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
 		data: {
@@ -47,7 +43,8 @@ function upload() {
 			content: c,
 		};
 		$.get(
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/"+encodeURIComponent(md),
+			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
+				encodeURIComponent(md),
 			{
 				access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 			}
@@ -57,7 +54,8 @@ function upload() {
 			var t = new Date();
 			$.ajax({
 				url:
-					"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/"+encodeURIComponent(md),
+					"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
+					encodeURIComponent(md),
 				crossDomain: true,
 				method: "PUT",
 				contentType: "application/json;charset=UTF-8",
@@ -79,8 +77,7 @@ var rrrr;
 function reload() {
 	var content;
 	$.ajax({
-		url:
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/raw/"+md,
+		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/" + md,
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
 		data: {
@@ -113,7 +110,8 @@ function reload() {
 setTimeout(reload(), 200);
 $.ajax({
 	url:
-		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/"+encodeURIComponent(md),
+		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
+		encodeURIComponent(md),
 	crossDomain: true,
 	data: {
 		access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",

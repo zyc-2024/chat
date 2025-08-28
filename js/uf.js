@@ -28,7 +28,11 @@ function udf() {
 	let file = f.files[0];
 	if (file) {
 		// fmd5(file).then((md5) => {
-		s.innerHTML = "选择了：" + file.name + "<br>大小：" + sc(file.size) /* + "<br>MD5：" + md5*/;
+		s.innerHTML =
+			"选择了：" +
+			file.name +
+			"<br>大小：" +
+			sc(file.size) /* + "<br>MD5：" + md5*/;
 		// });
 	} else {
 		s.innerHTML = "你选了个寂寞a";
@@ -55,23 +59,54 @@ function upf() {
 		var b64ab = fb64(fr.result);
 		fmd5(fr.result).then((md5) => {
 			let xhr = new XMLHttpRequest();
-			xhr.open("POST", "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name), true);
+			xhr.open(
+				"POST",
+				"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/f%2F" +
+					md5.slice(0, 6) +
+					"%2F" +
+					encodeURIComponent(file.name),
+				true
+			);
 			xhr.setRequestHeader("Content-Type", "application/json");
 			xhr.upload.onprogress = function (e) {
 				if (e.lengthComputable) {
 					let percent = e.loaded / e.total;
 					document.getElementById("p2a").value = percent;
-					document.getElementById("p2b").innerText = sc(e.loaded) + " / " + sc(e.total);
+					document.getElementById("p2b").innerText =
+						sc(e.loaded) + " / " + sc(e.total);
 				}
 			};
 			xhr.onreadystatechange = function () {
 				if (xhr.readyState === 4) {
-					if(l.innerHTML==="输出在这里！！"){l.innerHTML=""}
-					if ((xhr.status >= 200 && xhr.status < 300) || xhr.responseText=={"message":"文件名已存在"}) {
-						l.innerHTML = "上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" + file.name + "](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>"+l.innerHTML;
+					if (l.innerHTML === "输出在这里！！") {
+						l.innerHTML = "";
+					}
+					if (
+						(xhr.status >= 200 && xhr.status < 300) ||
+						xhr.responseText == { message: "文件名已存在" }
+					) {
+						l.innerHTML =
+							"上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" +
+							file.name +
+							"](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
+							md5.slice(0, 6) +
+							"%2F" +
+							encodeURIComponent(file.name) +
+							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>" +
+							l.innerHTML;
 					} else {
 						console.error("上传失败：", xhr.status, xhr.statusText);
-						l.innerHTML = "上传失败！你再试试？<br>错误信息：" + xhr.responseText+"<br><br>虽然上传失败了但是也给你链接：<br><code class='l'>[" + file.name + "](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + md5.slice(0, 6) + "%2F" + encodeURIComponent(file.name) + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>"+l.innerHTML;
+						l.innerHTML =
+							"上传失败！你再试试？<br>错误信息：" +
+							xhr.responseText +
+							"<br><br>虽然上传失败了但是也给你链接：<br><code class='l'>[" +
+							file.name +
+							"](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
+							md5.slice(0, 6) +
+							"%2F" +
+							encodeURIComponent(file.name) +
+							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>" +
+							l.innerHTML;
 					}
 				}
 			};
@@ -79,7 +114,14 @@ function upf() {
 				JSON.stringify({
 					access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 					content: b64ab,
-					message: "u[" + file.name + "]s[" + sc(file.size) + "]m[" + md5 + "]",
+					message:
+						"u[" +
+						file.name +
+						"]s[" +
+						sc(file.size) +
+						"]m[" +
+						md5 +
+						"]",
 				})
 			);
 		});

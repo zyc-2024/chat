@@ -14,7 +14,6 @@
 	</head>
 	<body>
 		<script>
-			
 			function getkey() {
 				return SparkMD5.hash(String(getid()) + String(getarg().key));
 			}
@@ -95,16 +94,27 @@
 					contentType: "application/json;charset=UTF-8",
 					data: JSON.stringify({
 						access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-						content: Base64.encode(JSON.stringify({"msg":[{"name":getname(),"time":gettime(),"content":"This channel has just been created!"}]})),
-						message: "initial private[" + SparkMD5.hash(getarg().key) + "]",
+						content: Base64.encode(
+							JSON.stringify({
+								msg: [
+									{
+										name: getname(),
+										time: gettime(),
+										content:
+											"This channel has just been created!",
+									},
+								],
+							})
+						),
+						message:
+							"initial private[" +
+							SparkMD5.hash(getarg().key) +
+							"]",
 					}),
 				}).done(function (response) {
 					addid();
 					window.location.href =
-						"private.html?id=" +
-						(getid()) +
-						"&key=" +
-						getarg().key;
+						"private.html?id=" + getid() + "&key=" + getarg().key;
 				});
 			}
 		</script>
