@@ -15,61 +15,9 @@
 		<meta
 			name="viewport"
 			content="width=device-width, initial-scale=1.0" />
-		<style>
-			body {
-				background-color: rgb(239, 239, 239);
-			}
-			.crow {
-				vertical-align: middle;
-				scroll-margin-top: 3.5rem;
-				--left-side-offset: 64px;
-				width: 768px;
-				background-color: rgb(255, 255, 255);
-				border-bottom: 1.4px solid rgb(52, 152, 219);
-				border-bottom-left-radius: 4px;
-				border-bottom-right-radius: 4px;
-				border-top-left-radius: 4px;
-				border-top-right-radius: 4px;
-				box-shadow: 0 1px 3px rgba(26, 26, 26, 0.1);
-				box-sizing: border-box;
-				color: rgb(64, 64, 64);
-				display: flex;
-				font-size: 16px;
-				font-variant-numeric: tabular-nums;
-				margin-bottom: 15px;
-				padding: 0;
-				scroll-margin-top: 56px;
-				text-size-adjust: 100%;
-			}
-			.cname {
-				margin-left: 20px;
-				margin-top: 5px;
-				font-size: x-large;
-				font-weight: bold;
-				color: #595959;
-			}
-			.ctime {
-				font-size: small + 3px;
-				color: #bcbcbc;
-				text-align: center;
-			}
-			.ccontent {
-				margin-left: 30px;
-				/* text-align: center; */
-				vertical-align: middle;
-			}
-			.call {
-				background-color: rgb(251, 251, 251);
-			}
-			.chat {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
-			h1 {
-				text-align: center;
-			}
-		</style>
+		<link
+			rel="stylesheet"
+			href="/css/chat.css" />
 		<meta
 			name="author"
 			content="zyc2024" />
@@ -95,13 +43,6 @@
 					<div style="height: 100px">
 						<textarea
 							id="text"
-							style="
-								width: 100%;
-								height: 100%;
-								font-size: 16px;
-								font-family: 'Microsoft YaHei', sans-serif;
-								resize: none;
-							"
 							placeholder="输入消息"></textarea>
 					</div>
 					<br />
