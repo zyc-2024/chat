@@ -28,7 +28,19 @@
 		<title>zyc2024的聊天网页</title>
 	</head>
 	<body>
-		<h1>聊天 V2.0.0.52</h1>
+		<h1 id="titlee">Loading...</h1>
+		<script>
+			fetch("/version")
+				.then((response) => response.text())
+				.then((version) => {
+					document.getElementById("titlee").innerText =
+						"zyc2024的聊天网页Ver" + version;
+				})
+				.catch(() => {
+					document.getElementById("titlee").innerText =
+						"zyc2024的聊天网页Ver¯\\_(ツ)_/¯";
+				});
+		</script>
 		<div>
 			<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 			<script src="js/base64.min.js"></script>
