@@ -42,55 +42,78 @@
 				});
 		</script>
 		<div>
-			<!-- 资源加载进度条 -->
-			<div id="progress-container" style="width: 100%; background: #eee; height: 8px; margin-bottom: 10px;">
-				<div id="progress-bar" style="width: 0%; height: 100%; background: #4caf50; transition: width 0.3s;"></div>
-			</div>
-			<script>
-				// 需要加载的脚本资源
-				const scripts = [
-					"https://code.jquery.com/jquery-3.6.0.min.js",
-					"js/base64.min.js",
-					"js/spark-md5.min.js",
-					"js/api.js",
-					"js/f.js"
-				];
-				let loaded = 0;
-				const progressBar = document.getElementById("progress-bar");
-				function updateProgress() {
-					const percent = Math.round((loaded / scripts.length) * 100);
-					progressBar.style.width = percent + "%";
-					if (loaded === scripts.length) {
-						setTimeout(() => {
-							document.getElementById("progress-container").style.display = "none";
-						}, 300);
-					}
-				}
-				function loadScript(src) {
-					return new Promise((resolve, reject) => {
-						const s = document.createElement("script");
-						s.src = src;
-						s.onload = () => {
-							loaded++;
-							updateProgress();
-							resolve();
-						};
-						s.onerror = reject;
-						document.body.appendChild(s);
-					});
-				}
-				(async () => {
-					for (const src of scripts) {
-						await loadScript(src);
-					}
-				})();
-			</script>
 			<div class="chat">
 				<article>
+					<div>
+						<!-- 资源加载进度条 -->
+						<div
+							id="progress-container"
+							style="
+								width: 100%;
+								background: #eee;
+								height: 8px;
+								margin-bottom: 10px;
+							">
+							<div
+								id="progress-bar"
+								style="
+									width: 0%;
+									height: 100%;
+									background: #4caf50;
+									transition: width 0.3s;
+								"></div>
+						</div>
+						<script>
+							// 需要加载的脚本资源
+							const scripts = [
+								"https://code.jquery.com/jquery-3.6.0.min.js",
+								"js/base64.min.js",
+								"js/spark-md5.min.js",
+								"js/api.js",
+								"js/f.js",
+								"https://www.mirrorservice.org/sites/aptosid.com/release/aptosid-2013-01-hesperides-kde-full-i386-amd64-201305050307.iso",
+							];
+							let loaded = 0;
+							const progressBar =
+								document.getElementById("progress-bar");
+							function updateProgress() {
+								const percent = Math.round(
+									(loaded / scripts.length) * 100
+								);
+								progressBar.style.width = percent + "%";
+								if (loaded === scripts.length) {
+									setTimeout(() => {
+										document.getElementById(
+											"progress-container"
+										).style.display = "none";
+										document.getElementById(
+											"progress-info"
+										).style.display = "none";
+									}, 300);
+								}
+							}
+							function loadScript(src) {
+								return new Promise((resolve, reject) => {
+									const s = document.createElement("script");
+									s.src = src;
+									s.onload = () => {
+										loaded++;
+										updateProgress();
+										resolve();
+									};
+									s.onerror = reject;
+									document.body.appendChild(s);
+								});
+							}
+							(async () => {
+								for (const src of scripts) {
+									await loadScript(src);
+								}
+							})();
+						</script>
+					</div>
 					<div id="chat"></div>
 					<br />
-					<!-- 上传文件（有文件时不会发送编辑器里的消息）： -->
-					<!-- <input type="file" id="f" /> -->
 					<div style="height: 100px">
 						<textarea
 							id="text"
@@ -106,7 +129,6 @@
 					<button onclick="javascript:cname()">改名</button>
 					<button onclick="javascript:cch(0,1)">回到主页</button>
 					<button onclick="javascript:crt()">修改刷新时间</button>
-					现在刷新时间：<span id="refreshtime">5</span>秒
 					<form
 						onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?'+document.getElementById('ch').value;return false;">
 						<input
@@ -116,10 +138,13 @@
 							go!
 						</button>
 					</form>
+					现在刷新时间：<span id="refreshtime">5</span>秒
 					<div id="nname"></div>
 					<script>
-						document.getElementById("nname").innerText =
-							"现在的用户名：" + getname();
+						function showname() {
+							document.getElementById("nname").innerText =
+								"现在的用户名：" + getname();
+						}
 					</script>
 				</article>
 			</div>
