@@ -104,4 +104,6 @@ function cname() {
 		";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=2147483647";
 	namee = a;
 }
-showname();
+if (window.location.pathname != "/") {
+	showname();
+}
