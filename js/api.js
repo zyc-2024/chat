@@ -116,6 +116,9 @@ setTimeout(() => {
 				"zyc2024的聊天网页Ver¯\\_(ツ)_/¯";
 		});
 }, 500);
-if (window.location.pathname != "/chat/") {
+if (
+	window.location.pathname != "/chat/" &&
+	window.location.pathname != "/chat/index.html"
+) {
 	showname();
 }
