@@ -12,19 +12,7 @@
 	<body>
 		<div style="font-size: x-large; text-align: center">
 			<h1>主页</h1>
-			<h3 id="titlee">Version:2.0.1.60</h3>
-			<script>
-			fetch("version")
-				.then((response) => response.text())
-				.then((version) => {
-					document.getElementById("titlee").innerText =
-						"Ver" + version;
-				})
-				.catch(() => {
-					document.getElementById("titlee").innerText =
-						"Ver¯\\_(ツ)_/¯";
-				});
-		</script>
+			<h3 id="titlee">Loading...</h3>
 		</div>
 		<div style="display: flex; height: 80vh">
 			<!-- Left side: Channel list -->

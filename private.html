@@ -29,18 +29,6 @@
 	</head>
 	<body>
 		<h1>Loading...</h1>
-		<script>
-			fetch("/version")
-				.then((response) => response.text())
-				.then((version) => {
-					document.getElementById("titlee").innerText =
-						"zyc2024的聊天网页Ver" + version;
-				})
-				.catch(() => {
-					document.getElementById("titlee").innerText =
-						"zyc2024的聊天网页Ver¯\\_(ツ)_/¯";
-				});
-		</script>
 		<div>
 			<div class="chat">
 				<article>
