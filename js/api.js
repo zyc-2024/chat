@@ -104,19 +104,18 @@ function cname() {
 		";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=2147483647";
 	namee = a;
 }
-if (
-	window.location.pathname != "/chat/" ||
-	window.location.pathname != "/chat/index.html"
-) {
+setTimeout(() => {
+	fetch("version.txt")
+		.then((response) => response.text())
+		.then((version) => {
+			document.getElementById("titlee").innerText =
+				"zyc2024的聊天网页Ver" + version;
+		})
+		.catch(() => {
+			document.getElementById("titlee").innerText =
+				"zyc2024的聊天网页Ver¯\\_(ツ)_/¯";
+		});
+}, 500);
+if (window.location.pathname != "/chat/") {
 	showname();
 }
-fetch("version.txt")
-	.then((response) => response.text())
-	.then((version) => {
-		document.getElementById("titlee").innerText =
-			"zyc2024的聊天网页Ver" + version;
-	})
-	.catch(() => {
-		document.getElementById("titlee").innerText =
-			"zyc2024的聊天网页Ver¯\\_(ツ)_/¯";
-	});
