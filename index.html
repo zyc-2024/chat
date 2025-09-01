@@ -14,7 +14,7 @@
 			<h1>主页</h1>
 			<h3 id="titlee">Version:2.0.1.60</h3>
 			<script>
-			fetch("/version")
+			fetch("version")
 				.then((response) => response.text())
 				.then((version) => {
 					document.getElementById("titlee").innerText =
