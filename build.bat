@@ -15,8 +15,8 @@ pyinstaller --noconsole --onefile ^
   app.py
 
 rmdir /s /q build
-delete app.spec
+del /f /q app.spec
 move dist\app.exe .
 ren app.exe chat.exe
-move app.exe ..
+move app.exe /
 rmdir /s /q dist
