@@ -18,5 +18,5 @@ rmdir /s /q build
 del /f /q app.spec
 move dist\app.exe .
 ren app.exe chat.exe
-move app.exe /
+move chat.exe ..
 rmdir /s /q dist
