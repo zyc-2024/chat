@@ -7,6 +7,7 @@
 		<meta charset="UTF-8" />
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script src="js/api.js"></script>
+		<script src="js/base64.min.js"></script>
 		<title>zyc2024的聊天网页主页</title>
 	</head>
 	<body>
@@ -53,6 +54,24 @@
 					style="width: 80%; padding: 8px; margin-bottom: 8px" />
 				<button
 					onclick="javascript:window.location.href='create.html?type=r&key='+document.getElementById('key').value">
+					创建
+				</button>
+				<br />
+				<br />
+				<br />
+				<input
+					type="text"
+					id="iddd"
+					placeholder="生成的id"
+					style="width: 80%; padding: 8px; margin-bottom: 8px" />
+
+				<input
+					type="text"
+					id="keyyy"
+					placeholder="你输入的凭证"
+					style="width: 80%; padding: 8px; margin-bottom: 8px" />
+				<button
+					onclick="javascript:window.location.href='private.html?id=' +document.getElementById('iddd').value + '&key=' + document.getElementById('keyyy').value">
 					创建
 				</button>
 			</div>

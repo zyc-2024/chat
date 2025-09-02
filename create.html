@@ -103,11 +103,27 @@
 										content:
 											"This channel has just been created!",
 									},
+									{
+										name: getname(),
+										time: gettime(),
+										content:
+											"Id:" +
+											getid() +
+											"\nKey:" +
+											getarg().key,
+									},
+									{
+										name: getname(),
+										time: gettime(),
+										content: "Please remember them!",
+									},
 								],
 							})
 						),
 						message:
 							"initial private[" +
+							getid() +
+							"]+[" +
 							SparkMD5.hash(getarg().key) +
 							"]",
 					}),
