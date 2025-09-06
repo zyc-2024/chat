@@ -43,10 +43,7 @@ function getarg() {
 function getid() {
 	var id = 0;
 	$.ajax({
-		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json",
-		data: {
-			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-		},
+		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json?access_token=19f7b43872c256d52d1bc71cbd2d0ffa",
 		async: false,
 		success: function (response) {
 			id = parseInt(Base64.decode(response.content));
@@ -56,10 +53,7 @@ function getid() {
 }
 function addid() {
 	$.get(
-		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json",
-		{
-			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-		}
+		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json?access_token=19f7b43872c256d52d1bc71cbd2d0ffa"
 	).done(function (response) {
 		console.log(response);
 		var sha = response.sha;
