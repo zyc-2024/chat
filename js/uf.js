@@ -38,6 +38,37 @@ function udf() {
 		s.innerHTML = "你选了个寂寞a";
 	}
 }
+// const octokit = new Octokit({
+// 	auth: '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'
+// })
+/*const data = '{"message":"my commit message","committer":{"name":"Monalisa Octocat","email":"octocat@github.com"},"content":"bXkgbmV3IGZpbGUgY29udGVudHM="}';
+
+let xhr = new XMLHttpRequest();
+xhr.withCredentials = true;
+xhr.open('PUT', 'https://api.github.com/repos/OWNER/REPO/contents/PATH');
+xhr.setRequestHeader('Accept', 'application/vnd.github+json');
+xhr.setRequestHeader('Authorization', 'Bearer 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');
+xhr.setRequestHeader('X-GitHub-Api-Version', '2022-11-28');
+xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+xhr.onload = function() {
+};
+
+xhr.send(data); */
+// await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+// 	owner: 'OWNER',
+// 	repo: 'REPO',
+// 	path: 'PATH',
+// 	message: 'my commit message',
+// 	committer: {
+// 		name: 'Monalisa Octocat',
+// 		email: 'octocat@github.com'
+// 	},
+// 	content: 'bXkgbmV3IGZpbGUgY29udGVudHM=',
+// 	headers: {
+// 		'X-GitHub-Api-Version': '2022-11-28'
+// 	}
+// });
 function upf() {
 	let file = f.files[0];
 	if (!file) {
@@ -58,16 +89,25 @@ function upf() {
 	fr.onload = function () {
 		var b64ab = fb64(fr.result);
 		fmd5(fr.result).then((md5) => {
+			const data = JSON.stringify({
+				"message": "upload",
+				"committer": {
+					"name": "Monalisa Octocat",
+					"email": "octocat@github.com"
+				},
+				"content": "bXkgbmV3IGZpbGUgY29udGVudHM="
+			});
+
 			let xhr = new XMLHttpRequest();
-			xhr.open(
-				"POST",
-				"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/f%2F" +
-					md5.slice(0, 6) +
-					"%2F" +
-					encodeURIComponent(file.name),
-				true
-			);
-			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.withCredentials = true;
+			xhr.open('PUT', 'https://api.github.com/repos/zyc-2024/chat-file/contents/f/' +
+				md5.slice(0, 6) +
+				"%2F" +
+				encodeURIComponent(file.name));
+			xhr.setRequestHeader('Accept', 'application/vnd.github+json');
+			xhr.setRequestHeader('Authorization', 'Bearer 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');
+			xhr.setRequestHeader('X-GitHub-Api-Version', '2022-11-28');
+			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 			xhr.upload.onprogress = function (e) {
 				if (e.lengthComputable) {
 					let percent = e.loaded / e.total;
@@ -85,6 +125,13 @@ function upf() {
 						(xhr.status >= 200 && xhr.status < 300) ||
 						xhr.responseText == { message: "文件名已存在" }
 					) {
+						// fetch('https://api.github.com/repos/OWNER/REPO/contents/PATH', {
+						//   headers: {
+						//     'Accept': 'application/vnd.github.object',
+						//     'Authorization': 'Bearer <YOUR-TOKEN>',
+						//     'X-GitHub-Api-Version': '2022-11-28'
+						//   }
+						// });
 						l.innerHTML =
 							"上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" +
 							file.name +
@@ -110,20 +157,7 @@ function upf() {
 					}
 				}
 			};
-			xhr.send(
-				JSON.stringify({
-					access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-					content: b64ab,
-					message:
-						"u[" +
-						file.name +
-						"]s[" +
-						sc(file.size) +
-						"]m[" +
-						md5 +
-						"]",
-				})
-			);
+			xhr.send(data);
 		});
 	};
 
