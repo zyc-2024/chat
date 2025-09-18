@@ -8,15 +8,18 @@
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script src="js/api.js"></script>
 		<script src="js/base64.min.js"></script>
+		<link
+			rel="stylesheet"
+			href="css/all.css" />
 		<title>zyc2024的聊天网页主页</title>
 	</head>
 	<body>
 		<div style="font-size: x-large; text-align: center">
 			<h1>主页</h1>
 			<h3 id="titlee">Loading...</h3>
-			<h4>你可以在<a href="https://github.com/zyc-2024/chat/releases/latest">Github</a>或者<a>Gitee</a>上下载到应用版！</h4>
+			<h4>你可以在<a href="https://github.com/zyc-2024/chat/releases/latest">Github</a>或者<a href="https://gitee.com/zyc-2024/chat-realease/releases/latest">Gitee</a>上下载到应用版！</h4>
 		</div>
-		<div style="display: flex; height: 70vh">
+		<div style="display: flex; height: 60vh">
 			<!-- Left side: Channel list -->
 			<div
 				id="channel-list"
@@ -31,8 +34,7 @@
 				<input
 					type="text"
 					id="ch"
-					placeholder="频道名称"
-					style="width: 80%; padding: 8px; margin-bottom: 8px" />
+					placeholder="频道名称" />
 				<button
 					onclick="javascript:window.location.href='create.html?type=u&ch='+document.getElementById('ch').value">
 					确定
@@ -51,8 +53,7 @@
 				<input
 					type="text"
 					id="key"
-					placeholder="一串字符，作为凭证"
-					style="width: 80%; padding: 8px; margin-bottom: 8px" />
+					placeholder="一串字符，作为凭证" />
 				<button
 					onclick="javascript:window.location.href='create.html?type=r&key='+document.getElementById('key').value">
 					创建
@@ -63,14 +64,12 @@
 				<input
 					type="text"
 					id="iddd"
-					placeholder="生成的id"
-					style="width: 80%; padding: 8px; margin-bottom: 8px" />
+					placeholder="生成的id" />
 
 				<input
 					type="text"
 					id="keyyy"
-					placeholder="你输入的凭证"
-					style="width: 80%; padding: 8px; margin-bottom: 8px" />
+					placeholder="你输入的凭证" />
 				<button
 					onclick="javascript:window.location.href='private.html?id=' +document.getElementById('iddd').value + '&key=' + document.getElementById('keyyy').value">
 					创建
