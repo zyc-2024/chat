@@ -57,8 +57,9 @@
 						<script>
 							// 需要加载的脚本资源
 							let typee = getarg().type;
+							let scripts = [];
 							if (typee == "u") {
-								const scripts = [
+								scripts = [
 									"https://code.jquery.com/jquery-3.6.0.min.js",
 									"js/base64.min.js",
 									"js/spark-md5.min.js",
@@ -66,12 +67,12 @@
 									"js/f.js",
 								];
 							} else {
-								const scripts = [
+								scripts = [
 									"https://code.jquery.com/jquery-3.6.0.min.js",
 									"js/base64.min.js",
 									"js/spark-md5.min.js",
 									"js/api.js",
-									"js/uf.js",
+									"js/pf.js",
 								];
 							}
 							let loaded = 0;
@@ -132,13 +133,13 @@
 						回到主页
 					</button>
 					<button onclick="javascript:crt()">修改刷新时间</button>
-
+					<br /><br />
 					<script>
 						if (getarg().type == "u") {
 							document.getElementsByTagName(
 								"article"
 							)[0].innerHTML +=
-								'<form onsubmit="event.preventDefault();window.location.href=window.location.href.split(\'?\')[0]+\'?\'+document.getElementById(\'ch\').value;return false;"><input id="ch" placeholder="输入你想去的频道"><buttontype="submit">go!</button></form>';
+								'<form onsubmit="event.preventDefault();window.location.href=window.location.href.split(\'?\')[0]+\'?\'+document.getElementById(\'ch\').value;return false;"><input id="ch" placeholder="输入你想去的频道"><button type="submit">go!</button></form>';
 						}
 					</script>
 					现在刷新时间：<span id="refreshtime">5</span>秒
@@ -148,7 +149,7 @@
 							document.getElementById("nname").innerText =
 								"现在的用户名：" + getname();
 						}
-						showname();
+						// showname();
 					</script>
 				</article>
 			</div>
