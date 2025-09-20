@@ -140,7 +140,7 @@
 							document.getElementsByTagName(
 								"article"
 							)[0].innerHTML +=
-								'<form onsubmit="event.preventDefault();window.location.href=window.location.href.split(\'?\')[0]+\'?\'+document.getElementById(\'ch\').value;return false;"><input id="ch" placeholder="输入你想去的频道"><button type="submit">go!</button></form>';
+								'<form onsubmit="event.preventDefault();window.location.href=window.location.href.split(\'?\')[0]+\'?type=u&ch=\'+document.getElementById(\'ch\').value;return false;"><input id="ch" placeholder="输入你想去的频道"><button type="submit">go!</button></form>';
 						}
 					</script>
 					现在刷新时间：<span id="refreshtime">5</span>秒
