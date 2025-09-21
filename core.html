@@ -65,8 +65,8 @@
 								"js/base64.min.js",
 								"js/spark-md5.min.js",
 								"js/api.js",
-								"js/md.js",
-								"npmjs/markdown-it.min.js",
+								// "js/md.js",
+								"https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js",
 								"npmjs/markdown-it-task-lists.min.js",
 								"npmjs/markdown-it-multimd-table.min.js",
 								"npmjs/katex.min.js",
@@ -118,12 +118,74 @@
 					</div>
 					<div id="chat"></div>
 					<br />
-					<div style="display: flex; height: 100px">
+					<div style="display: flex; height: 200px">
 						<textarea
 							id="editor"
 							placeholder="输入消息，右边是Markdown的预览"></textarea>
 
 						<div id="preview"></div>
+						<script src="npmjs/markdown-it.min.js"></script>
+						<!-- <script src="https://cdn.jsdelivr.net/npm/markdown-it-emoji/dist/markdown-it-emoji.min.js"></script> -->
+						<script src="npmjs/markdown-it-task-lists.min.js"></script>
+						<script src="npmjs/markdown-it-multimd-table.min.js"></script>
+						<script src="npmjs/katex.min.js"></script>
+						<script src="npmjs/purify.min.js"></script>
+						<script>
+							// 初始化 markdown-it
+							const md = window
+								.markdownit({ html: true })
+								// .use(window.markdownitEmoji)
+								.use(window.markdownitTaskLists)
+								.use(window.markdownitMultimdTable);
+
+							// KaTeX 预处理
+							function preRenderTex(source) {
+								// 块级公式
+								source = source.replace(
+									/\$\$([\s\S]+?)\$\$/g,
+									(m, tex) =>
+										katex.renderToString(tex, {
+											displayMode: true,
+											throwOnError: false,
+											output: "html",
+										})
+								);
+								// 行内公式
+								source = source.replace(
+									/(^|[^$])\$([^\n$][^$]*?)\$([^$]|$)/g,
+									(m, p1, tex, p3) =>
+										p1 +
+										katex.renderToString(tex, {
+											displayMode: false,
+											throwOnError: false,
+											output: "html",
+										}) +
+										p3
+								);
+								return source;
+							}
+
+							function render() {
+								const src =
+									document.getElementById("editor").value;
+								const preProcessed = preRenderTex(src);
+								const dirty = md.render(preProcessed);
+
+								// 清理 XSS，同时保留 KaTeX 生成的 span/class
+								const clean = DOMPurify.sanitize(dirty, {
+									ADD_TAGS: ["span"],
+									ADD_ATTR: ["class", "style"],
+								});
+
+								document.getElementById("preview").innerHTML =
+									clean;
+							}
+
+							document
+								.getElementById("editor")
+								.addEventListener("input", render);
+							render();
+						</script>
 					</div>
 					<br />
 					<button
@@ -134,7 +196,10 @@
 					<button onclick="javascript:reload()">刷新</button>
 					<button onclick="javascript:cname()">改名</button>
 					<button onclick="javascript:window.location.href='/chat/'">
-						回到主页
+						回到主页</button
+					><button
+						onclick="javascript:window.location.href='/chat/mdtest.html'">
+						全屏预览Markdown
 					</button>
 					<button
 						onclick="javascript:document.location.href='uf.html'">

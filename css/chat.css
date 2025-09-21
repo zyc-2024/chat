@@ -61,11 +61,21 @@ h1 {
 	resize: none;
 }
 #preview {
-	width: 40%;
-	height: 71%;
+	/* width: 40%; */
+	height: 86%;
 	font-size: 16px;
 	font-family: "Microsoft YaHei", sans-serif;
 	padding: 1rem;
 	border: 2px solid #ccc;
 	background-color: #fff;
+}
+textarea {
+	width: 40%;
+	height: 90vh;
+}
+#preview {
+	width: 55%;
+	padding: 1rem;
+	border: 1px solid #ccc;
+	overflow: auto;
 }
