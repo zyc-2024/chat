@@ -53,8 +53,8 @@ body {
 h1 {
 	text-align: center;
 }
-#text {
-	width: 100%;
+#editor {
+	width: 50%;
 	height: 100%;
 	font-size: 16px;
 	font-family: "Microsoft YaHei", sans-serif;
