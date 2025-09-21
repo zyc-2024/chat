@@ -5,7 +5,6 @@ pyinstaller --noconsole --onefile ^
   --add-data "create.html;." ^
   --add-data "favicon.bmp;." ^
   --add-data "favicon.png;." ^
-  --add-data "LICENSE;." ^
   --add-data "private.html;." ^
   --add-data "public.html;." ^
   --add-data "uf.html;." ^

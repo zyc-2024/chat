@@ -57,23 +57,22 @@
 						<script>
 							// 需要加载的脚本资源
 							let typee = getarg().type;
-							let scripts = [];
+							let scripts = [
+								"https://code.jquery.com/jquery-3.6.0.min.js",
+								"js/base64.min.js",
+								"js/spark-md5.min.js",
+								"js/api.js",
+								"js/f.js",
+								"https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js",
+								"https://cdn.jsdelivr.net/npm/markdown-it-task-lists/dist/markdown-it-task-lists.min.js",
+								"https://cdn.jsdelivr.net/npm/markdown-it-multimd-table/dist/markdown-it-multimd-table.min.js",
+								"https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js",
+								"https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js",
+							];
 							if (typee == "u") {
-								scripts = [
-									"https://code.jquery.com/jquery-3.6.0.min.js",
-									"js/base64.min.js",
-									"js/spark-md5.min.js",
-									"js/api.js",
-									"js/f.js",
-								];
+								scripts += ["js/f.js"];
 							} else {
-								scripts = [
-									"https://code.jquery.com/jquery-3.6.0.min.js",
-									"js/base64.min.js",
-									"js/spark-md5.min.js",
-									"js/api.js",
-									"js/pf.js",
-								];
+								scripts += ["js/pf.js"];
 							}
 							let loaded = 0;
 							const progressBar =
@@ -116,10 +115,12 @@
 					</div>
 					<div id="chat"></div>
 					<br />
-					<div style="height: 100px">
+					<div style="display: flex; height: 100px">
 						<textarea
 							id="text"
 							placeholder="输入消息"></textarea>
+
+						<div id="preview"></div>
 					</div>
 					<br />
 					<button
@@ -132,7 +133,10 @@
 					<button onclick="javascript:window.location.href='/chat/'">
 						回到主页
 					</button>
-					<button onclick="javascript:document.location.href='uf.html'">上传文件界面</button>
+					<button
+						onclick="javascript:document.location.href='uf.html'">
+						上传文件界面
+					</button>
 					<button onclick="javascript:crt()">修改刷新时间</button>
 					<br /><br />
 					<script>
@@ -153,6 +157,60 @@
 						// showname();
 					</script>
 				</article>
+				<script>
+					// 初始化 markdown-it
+					const md = window
+						.markdownit({ html: true })
+						// .use(window.markdownitEmoji)
+						.use(window.markdownitTaskLists)
+						.use(window.markdownitMultimdTable);
+
+					// KaTeX 预处理
+					function preRenderTex(source) {
+						// 块级公式
+						source = source.replace(
+							/\$\$([\s\S]+?)\$\$/g,
+							(m, tex) =>
+								katex.renderToString(tex, {
+									displayMode: true,
+									throwOnError: false,
+									output: "html",
+								})
+						);
+						// 行内公式
+						source = source.replace(
+							/(^|[^$])\$([^\n$][^$]*?)\$([^$]|$)/g,
+							(m, p1, tex, p3) =>
+								p1 +
+								katex.renderToString(tex, {
+									displayMode: false,
+									throwOnError: false,
+									output: "html",
+								}) +
+								p3
+						);
+						return source;
+					}
+
+					function render() {
+						const src = document.getElementById("editor").value;
+						const preProcessed = preRenderTex(src);
+						const dirty = md.render(preProcessed);
+
+						// 清理 XSS，同时保留 KaTeX 生成的 span/class
+						const clean = DOMPurify.sanitize(dirty, {
+							ADD_TAGS: ["span"],
+							ADD_ATTR: ["class", "style"],
+						});
+
+						document.getElementById("preview").innerHTML = clean;
+					}
+
+					document
+						.getElementById("text")
+						.addEventListener("input", render);
+					render();
+				</script>
 			</div>
 		</div>
 	</body>

@@ -133,20 +133,20 @@ function upf() {
 						//   }
 						// });
 						l.innerHTML =
-							"上传成功！这是链接：<br><code class='l'>https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
+							"上传成功！这是链接：<br><code class='l'>https://zyc2024.com.cn/chat/file.html?md5=" +
 							md5.slice(0, 6) +
-							"%2F" +
+							"&name=" +
 							encodeURIComponent(file.name) +
-							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>" +
+							"</code><br><br>" +
 							l.innerHTML;
 					} else {
 						console.error("上传失败：", xhr.status, xhr.statusText);
 						l.innerHTML =
-							"上传失败！这是链接：<br><code class='l'>https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
+							"上传失败！这是链接：<br><code class='l'>https://zyc2024.com.cn/chat/file.html?md5=" +
 							md5.slice(0, 6) +
-							"%2F" +
+							"&name=" +
 							encodeURIComponent(file.name) +
-							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>" +
+							"</code><br><br>" +
 							l.innerHTML;
 					}
 				}

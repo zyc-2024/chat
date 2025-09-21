@@ -54,9 +54,18 @@ h1 {
 	text-align: center;
 }
 #text {
-	width: 100%;
+	width: 50%;
 	height: 100%;
 	font-size: 16px;
 	font-family: "Microsoft YaHei", sans-serif;
 	resize: none;
+}
+#preview {
+	width: 40%;
+	height: 71%;
+	font-size: 16px;
+	font-family: "Microsoft YaHei", sans-serif;
+	padding: 1rem;
+	border: 2px solid #ccc;
+	background-color: #fff;
 }
