@@ -21,7 +21,7 @@ if (namee === "" || namee === null) {
 var ch = getch();
 
 function upload() {
-	let c = document.getElementById("text").value;
+	let c = document.getElementById("editor").value;
 	document.getElementById("button").disabled = true;
 	setTimeout(function () {
 		document.getElementById("button").disabled = false;

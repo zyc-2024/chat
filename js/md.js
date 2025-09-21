@@ -48,6 +48,6 @@ function render() {
 }
 
 document
-    .getElementById("text")
+    .getElementById("editor")
     .addEventListener("input", render);
 render();
