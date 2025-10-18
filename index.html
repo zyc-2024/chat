@@ -1,16 +1,11 @@
 <html>
 	<head>
-		<link
-			rel="icon"
-			type="image/bmp"
-			href="favicon.bmp" />
+		<link rel="icon" type="image/bmp" href="favicon.bmp" />
 		<meta charset="UTF-8" />
-		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src="lib/jquery-3.6.0.min.js"></script>
 		<script src="js/api.js"></script>
 		<script src="js/base64.min.js"></script>
-		<link
-			rel="stylesheet"
-			href="css/all.css" />
+		<link rel="stylesheet" href="css/all.css" />
 		<title>zyc2024的聊天网页主页</title>
 	</head>
 	<body>
@@ -45,10 +40,7 @@
 					text-align: center;
 				">
 				<h2>创建新频道</h2>
-				<input
-					type="text"
-					id="ch"
-					placeholder="频道名称" />
+				<input type="text" id="ch" placeholder="频道名称" />
 				<button
 					onclick="javascript:window.location.href='create.html?type=u&ch='+document.getElementById('ch').value">
 					确定
@@ -64,10 +56,7 @@
 				<br />
 				<div id="id"></div>
 				<br />
-				<input
-					type="text"
-					id="key"
-					placeholder="一串字符，作为凭证" />
+				<input type="text" id="key" placeholder="一串字符，作为凭证" />
 				<button
 					onclick="javascript:window.location.href='create.html?type=r&key='+document.getElementById('key').value">
 					创建
@@ -75,15 +64,9 @@
 				<br />
 				<br />
 				<br />
-				<input
-					type="text"
-					id="iddd"
-					placeholder="生成的id" />
+				<input type="text" id="iddd" placeholder="生成的id" />
 
-				<input
-					type="text"
-					id="keyyy"
-					placeholder="你输入的凭证" />
+				<input type="text" id="keyyy" placeholder="你输入的凭证" />
 				<button
 					onclick="javascript:window.location.href='core.html?type=r&id=' +document.getElementById('iddd').value + '&key=' + document.getElementById('keyyy').value">
 					创建

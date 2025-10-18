@@ -1,27 +1,40 @@
 @echo off
 setlocal enabledelayedexpansion
+title ¹¹½¨¾²Ì¬ Flask Ó¦ÓÃ£¨Éú²úÄ£Ê½£©
 
-:: è®¾ç½®åŸºç¡€å‘½ä»¤
-set CMD=pyinstaller --noconsole --onefile
+cd /d "%~dp0"
 
-:: è‡ªåŠ¨æ‰«æå½“å‰ç›®å½•ä¸‹çš„èµ„æºæ–‡ä»¶
-for %%f in (*.html *.bmp *.txt) do (
-    set CMD=!CMD! --add-data "%%f;."
+echo [1/5] ´´½¨ĞéÄâ»·¾³...
+python -m venv .venv
+
+echo [2/5] °²×°ÒÀÀµ£¨Çå»ª¾µÏñ£©...
+python -m pip install --upgrade pip
+pip install flask pyinstaller
+
+echo [3/5] Éú³ÉÒÀÀµÇåµ¥...
+pip freeze > requirements.txt
+
+echo [4/5] ´ò°üÓ¦ÓÃ...
+pyinstaller --noconfirm --onefile --add-data ".;." app.py
+
+if %errorlevel% neq 0 (
+    echo  ´ò°üÊ§°Ü£¡
+    pause
+    exit /b %errorlevel%
 )
 
-:: æ‰«æ css å’Œ js ç›®å½•ï¼ˆæ•´ä¸ªæ–‡ä»¶å¤¹æ‰“è¿›å»ï¼‰
-if exist css (
-    set CMD=!CMD! --add-data "css;css"
-)
-if exist js (
-    set CMD=!CMD! --add-data "js;js"
+echo [5/5] ÇåÀíÓëÊÕÎ²...
+if exist dist\app.exe (
+    move /Y dist\app.exe .
 )
 
-:: æ‰§è¡Œå‘½ä»¤
-%CMD% app.py
-rmdir /s /q build
-del /f /q app.spec
-move dist\app.exe .
-ren app.exe chat.exe
-move chat.exe ..
-rmdir /s /q dist
+if exist build rd /s /q build
+if exist dist rd /s /q dist
+if exist .venv rd /s /q .venv
+if exist app.spec del /f /q app.spec
+if exist requirements.txt del /f /q requirements.txt
+
+echo.
+echo  ¹¹½¨Íê³É£¡ÇëÖ±½ÓÔËĞĞ app.exe Æô¶¯·şÎñ¡£
+echo ½«×Ô¶¯´ò¿ªÄ¬ÈÏä¯ÀÀÆ÷·ÃÎÊ£ºhttp://127.0.0.1:5000
+pause

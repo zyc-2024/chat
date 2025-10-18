@@ -1,24 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh_cn">
 	<head>
-		<link
-			rel="icon"
-			type="image/bmp"
-			href="favicon.bmp" />
-		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<link rel="icon" type="image/bmp" href="favicon.bmp" />
+		<!-- <script type="module">
+			import { Octokit } from "https://esm.sh/@octokit/core";
+		</script> -->
+		<link rel="stylesheet" href="css/all.css" />
+		<script src="lib/jquery-3.6.0.min.js"></script>
 		<script src="js/base64.min.js"></script>
 		<script src="js/spark-md5.min.js"></script>
-		<script src="js/crypto-js.js"></script>
+		<!-- <script src="js/crypto-js.js"></script> -->
 		<meta charset="utf-8" />
-		<meta
-			http-equiv="X-UA-Compatible"
-			content="IE=edge" />
-		<meta
-			name="HandheldFriendly"
-			content="True" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="HandheldFriendly" content="True" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<style>
 			body {
 				background-color: rgb(239, 239, 239);
@@ -68,9 +63,7 @@
 				word-break: break-all;
 			}
 		</style>
-		<meta
-			name="author"
-			content="zyc2024" />
+		<meta name="author" content="zyc2024" />
 		<meta
 			name="description"
 			content="file uploading website, for chatting please goto .." />
@@ -78,21 +71,15 @@
 		<title>上传文件界面</title>
 	</head>
 	<body>
-		<h1>文件上传</h1>
+		<h1 id="titlee">Loading...</h1>
 		<div>
 			<div class="a">
 				<article>
 					上传文件：
-					<input
-						type="file"
-						id="i"
-						onchange="javascript:udf();" />
+					<input type="file" id="i" onchange="javascript:udf();" />
 					<br />
 					<div id="s"></div>
-					<button
-						id="u"
-						class="b"
-						onclick="javascript:upf()">
+					<button id="u" class="b" onclick="javascript:upf()">
 						上传
 					</button>
 					<div id="l2"></div>
@@ -100,10 +87,7 @@
 					<br />
 					<div style="text-align: center">↓上传进度条↓</div>
 					<div id="p2b"></div>
-					<progress
-						id="p2a"
-						value="0"
-						style="width: 100%"></progress
+					<progress id="p2a" value="0" style="width: 100%"></progress
 					><br />
 					<div class="l1">
 						<div id="l">输出在这里！！</div>
