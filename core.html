@@ -1,35 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh_cn">
 	<head>
-		<link
-			rel="icon"
-			type="image/bmp"
-			href="favicon.bmp" />
-		<link
-			rel="stylesheet"
-			href="css/all.css" />
+		<link rel="icon" type="image/bmp" href="favicon.bmp" />
+		<link rel="stylesheet" href="css/all.css" />
 		<meta charset="utf-8" />
-		<meta
-			http-equiv="X-UA-Compatible"
-			content="IE=edge" />
-		<meta
-			name="HandheldFriendly"
-			content="True" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0" />
-		<link
-			rel="stylesheet"
-			href="css/chat.css" />
-		<meta
-			name="author"
-			content="zyc2024" />
-		<link
-			rel="stylesheet"
-			href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
-		<meta
-			name="description"
-			content="chatting website by zyc2024" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="HandheldFriendly" content="True" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="css/chat.css" />
+		<meta name="author" content="zyc2024" />
+		<link rel="stylesheet" href="katex/katex.min.css" />
+		<meta name="description" content="chatting website by zyc2024" />
 		<script src="js/api.js"></script>
 		<title>zyc2024的聊天网页</title>
 	</head>
@@ -66,7 +47,7 @@
 								"js/spark-md5.min.js",
 								"js/api.js",
 								// "js/md.js",
-								"https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js",
+								"npmjs/markdown-it.min.js",
 								"npmjs/markdown-it-task-lists.min.js",
 								"npmjs/markdown-it-multimd-table.min.js",
 								"npmjs/katex.min.js",
@@ -188,9 +169,7 @@
 						</script>
 					</div>
 					<br />
-					<button
-						id="button"
-						onclick="javascript:upload()">
+					<button id="button" onclick="javascript:upload()">
 						发送
 					</button>
 					<button onclick="javascript:reload()">刷新</button>
