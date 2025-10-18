@@ -74,6 +74,36 @@ function upload() {
 	document.getElementsByClassName("content").innerText = "";
 }
 var rrrr;
+function preRenderTex(source) {
+	// 块级公式
+	source = source.replace(/\$\$([\s\S]+?)\$\$/g, (m, tex) =>
+		katex.renderToString(tex, {
+			displayMode: true,
+			throwOnError: false,
+			output: "html",
+		})
+	);
+	// 行内公式
+	source = source.replace(
+		/(^|[^$])\$([^\n$][^$]*?)\$([^$]|$)/g,
+		(m, p1, tex, p3) =>
+			p1 +
+			katex.renderToString(tex, {
+				displayMode: false,
+				throwOnError: false,
+				output: "html",
+			}) +
+			p3
+	);
+	return source;
+}
+
+const md = window
+	.markdownit({ html: true })
+	// .use(window.markdownitEmoji)
+	.use(window.markdownitTaskLists)
+	.use(window.markdownitMultimdTable);
+
 function reload() {
 	var content;
 	$.ajax({
@@ -95,14 +125,36 @@ function reload() {
 		// document.getElementById("chat").innerHTML +=
 		// 	"<table><tr><th>用户名</th><th>时间</th><th>内容</th></tr>";
 		for (let i in msg) {
+			let raw = msg[i].content || "";
+
+			// 先用 KaTeX 预处理，再用 markdown-it 渲染
+			const preProcessed = preRenderTex(raw);
+			const dirty = md.render(preProcessed);
+
+			// 清理 XSS，同时保留 KaTeX 生成的 span/class
+			const clean = DOMPurify.sanitize(dirty, {
+				ADD_TAGS: ["span"],
+				ADD_ATTR: ["class", "style"],
+			});
+
+			// 对用户名和时间也进行简单清理
+			const safeName = DOMPurify.sanitize(msg[i].name || "Anonymous", {
+				ALLOWED_TAGS: [],
+				ALLOWED_ATTR: [],
+			});
+			const safeTime = DOMPurify.sanitize(msg[i].time || "", {
+				ALLOWED_TAGS: [],
+				ALLOWED_ATTR: [],
+			});
+
 			document.getElementById("chat").innerHTML +=
 				"<br><div class='crow'><span class='call'><div class='cname'>" +
-				msg[i].name +
+				safeName +
 				"</div><div class='ctime'>" +
-				msg[i].time +
-				"</div></span><div class='ccontent'><p>" +
-				msg[i].content +
-				"</p></div></div>";
+				safeTime +
+				"</div></span><div class='ccontent'>" +
+				clean +
+				"</div></div>";
 		}
 		// document.getElementById("chat").innerHTML += "</table>";
 	});
