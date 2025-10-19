@@ -23,6 +23,14 @@ body {
 	scroll-margin-top: 56px;
 	text-size-adjust: 100%;
 }
+.hljs {
+	background: #1e1e1e;
+	color: #dcdcdc;
+	padding: 1em;
+	border-radius: 10px;
+	font-family: "Fira Code", "Consolas", monospace;
+	line-height: 1.5;
+}
 .cname {
 	margin-left: 20px;
 	margin-top: 5px;
