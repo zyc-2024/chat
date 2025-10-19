@@ -32,6 +32,9 @@ if exist dist\app.exe (
 if exist build rd /s /q build
 if exist dist rd /s /q dist
 if exist .venv rd /s /q .venv
+if exist __pycache__ rd /s /q __pycache__
+if exist app.spec del /f /q app.spec
+if exist requirements.txt del /f /q requirements.txt
 
 echo.
 echo 构建完成！请直接运行 app.exe 启动服务。
