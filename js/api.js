@@ -51,30 +51,6 @@ function getid() {
 	});
 	return id;
 }
-function addid() {
-	$.get(
-		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json?access_token=19f7b43872c256d52d1bc71cbd2d0ffa"
-	).done(function (response) {
-		console.log(response);
-		var sha = response.sha;
-		var id = parseInt(Base64.decode(response.content));
-		console.log(id);
-		$.ajax({
-			url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/private%2Fid.json",
-			crossDomain: true,
-			method: "PUT",
-			contentType: "application/json;charset=UTF-8",
-			data: JSON.stringify({
-				access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-				content: Base64.encode(String(getid() + 1)),
-				sha: sha,
-				message: "id add 1",
-			}),
-		}).done(function (response) {
-			return;
-		});
-	});
-}
 function gettime(time = +new Date()) {
 	var date = new Date(time + 8 * 3600 * 1000);
 	return date.toJSON().substr(0, 19).replace("T", " ").replaceAll("-", "");
