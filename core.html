@@ -9,7 +9,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href="css/chat.css" />
 		<meta name="author" content="zyc2024" />
-		<link rel="stylesheet" href="lib/line-numbers.min.css" />
+		<!-- <link rel="stylesheet" href="lib/line-numbers.min.css" /> -->
 		<link rel="stylesheet" href="katex/katex.min.css" />
 		<meta name="description" content="chatting website by zyc2024" />
 		<script src="js/api.js"></script>
@@ -54,7 +54,7 @@
 								"lib/purify.min.js",
 								"hljs/highlight.min.js",
 								"lib/highlightjs-line-numbers.min.js",
-								"hljs/highlight.min.js"
+								// "hljs/highlight.min.js"
 							];
 							if (typee == "u") {
 								scripts.push("js/f.js");
@@ -187,6 +187,7 @@
 									render();
 
 									hljs.highlightAll();
+									// hljs.initHighlightingOnLoad();
 									hljs.initLineNumbersOnLoad();
 								}
 
