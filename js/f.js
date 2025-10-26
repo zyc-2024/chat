@@ -183,6 +183,8 @@ function reload() {
 				"</div></span><div class='ccontent'>" +
 				clean +
 				"</div></div>";
+				
+			hljs.highlightAll();
 		}
 		// document.getElementById("chat").innerHTML += "</table>";
 	});
