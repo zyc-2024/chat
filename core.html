@@ -12,6 +12,7 @@
 		<!-- <link rel="stylesheet" href="lib/line-numbers.min.css" /> -->
 		<link rel="stylesheet" href="katex/katex.min.css" />
 		<meta name="description" content="chatting website by zyc2024" />
+		<link rel="stylesheet" href="hljs/styles/a11y-light.min.css">
 		<script src="js/api.js"></script>
 		<title>zyc2024的聊天网页</title>
 	</head>
@@ -53,7 +54,7 @@
 								"katex/katex.min.js",
 								"lib/purify.min.js",
 								"hljs/highlight.min.js",
-								"lib/highlightjs-line-numbers.min.js",
+								// "hljs/highlightjs-line-numbers.min.js",
 								// "hljs/highlight.min.js"
 							];
 							if (typee == "u") {
@@ -119,10 +120,11 @@
 					<div style="display: flex; height: 200px">
 						<textarea
 							id="editor"
-							placeholder="输入消息，右边是Markdown的预览"></textarea>
+							placeholder="输入消息，按Shift+Enter发送，右边是Markdown的预览" onkeydown="if (event.key === 'Enter' && event.shiftKey) { event.preventDefault(); upload(); }"></textarea>
 
 						<div id="preview"></div>
 						<script>
+							// import hljs from "highlight.js";
 							(function () {
 								function init() {
 									// 初始化 markdown-it
@@ -179,16 +181,16 @@
 										document.getElementById(
 											"preview"
 										).innerHTML = clean;
+										
+									hljs.highlightAll();
 									}
 
 									document
 										.getElementById("editor")
 										.addEventListener("input", render);
 									render();
-
-									hljs.highlightAll();
 									// hljs.initHighlightingOnLoad();
-									hljs.initLineNumbersOnLoad();
+									// hljs.initLineNumbersOnLoad();
 								}
 
 								// 如果依赖脚本已经就绪立即执行，否则等待 allScriptsLoaded 事件
