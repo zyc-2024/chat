@@ -5,12 +5,13 @@
 		<title>创建聊天频道</title>
 		<link rel="icon" type="image/bmp" href="favicon.bmp" />
 		<link rel="stylesheet" href="css/all.css" />
-		<script src="js/spark-md5.min.js"></script>
+		<script src="lib/spark-md5.min.js"></script>
 		<script src="js/base64.min.js"></script>
 		<script src="lib/jquery-3.6.0.min.js"></script>
 		<script src="js/api.js"></script>
 	</head>
 	<body>
+		<h1>正在创建聊天频道...</h1>
 		<script>
 			function getkey() {
 				return SparkMD5.hash(String(getid()) + String(getarg().key));

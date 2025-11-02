@@ -59,23 +59,37 @@ function upf() {
 		var b64ab = fb64(fr.result);
 		fmd5(fr.result).then((md5) => {
 			const data = JSON.stringify({
-				"message": "api-u-n[" + file.name + "]-s[" + file.size + "]-md5[" + md5 + ']',
-				"committer": {
-					"name": "zyc-2024",
-					"email": "61992011@qq.com"
+				message:
+					"api-u-n[" +
+					file.name +
+					"]-s[" +
+					file.size +
+					"]-md5[" +
+					md5 +
+					"]",
+				committer: {
+					name: "zyc-2024",
+					email: "61992011@qq.com",
 				},
-				"content": b64ab
+				content: b64ab,
 			});
 
 			let xhr = new XMLHttpRequest();
-			xhr.open('PUT', 'https://api.github.com/repos/zyc-2024/chat-file/contents/f/' +
-				md5.slice(0, 6) +
-				"%2F" +
-				encodeURIComponent(file.name));
-			xhr.setRequestHeader('Accept', 'application/vnd.github+json');
-			xhr.setRequestHeader('Authorization', 'Bearer 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');
-			xhr.setRequestHeader('X-GitHub-Api-Version', '2022-11-28');
-			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			xhr.open(
+				"PUT",
+				"https://api.github.com/repos/zyc-2024/chat-file/contents/f/" +
+					md5
+			);
+			xhr.setRequestHeader("Accept", "application/vnd.github+json");
+			xhr.setRequestHeader(
+				"Authorization",
+				"Bearer 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"
+			);
+			xhr.setRequestHeader("X-GitHub-Api-Version", "2022-11-28");
+			xhr.setRequestHeader(
+				"Content-Type",
+				"application/x-www-form-urlencoded"
+			);
 			xhr.upload.onprogress = function (e) {
 				if (e.lengthComputable) {
 					let percent = e.loaded / e.total;
@@ -102,7 +116,7 @@ function upf() {
 						// });
 						l.innerHTML =
 							"上传成功！这是链接：<br><code class='l'>https://zyc2024.com.cn/chat/file.html?md5=" +
-							md5.slice(0, 6) +
+							md5 +
 							"&name=" +
 							encodeURIComponent(file.name) +
 							"</code><br><br>" +
@@ -111,7 +125,7 @@ function upf() {
 						console.error("上传失败：", xhr.status, xhr.statusText);
 						l.innerHTML =
 							"上传失败！这是链接：<br><code class='l'>https://zyc2024.com.cn/chat/file.html?md5=" +
-							md5.slice(0, 6) +
+							md5 +
 							"&name=" +
 							encodeURIComponent(file.name) +
 							"</code><br><br>" +

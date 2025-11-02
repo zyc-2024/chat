@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 	<head>
 		<meta charset="UTF-8" />
-		<title>获取文件中间页面</title>
+		<title>获取文件页面</title>
 		<link rel="icon" type="image/bmp" href="favicon.bmp" />
 		<link rel="stylesheet" href="css/all.css" />
-		<script src="js/spark-md5.min.js"></script>
+		<script src="lib/spark-md5.min.js"></script>
 		<script src="js/base64.min.js"></script>
 		<script src="lib/jquery-3.6.0.min.js"></script>
 		<script src="js/api.js"></script>
@@ -15,6 +15,140 @@
 			const args = getarg();
 			const md5s = args.md5;
 			const name = args.name;
+			let xhr = new XMLHttpRequest();
+			xhr.open(
+				"GET",
+				"https://api.github.com/repos/zyc-2024/chat-file/contents/f/" +
+					md5s
+			);
+			xhr.setRequestHeader("Accept", "application/vnd.github+json");
+			xhr.setRequestHeader(
+				"Authorization",
+				"Bearer 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"
+			);
+			xhr.setRequestHeader("X-GitHub-Api-Version", "2022-11-28");
+			// UI: progress bar and size text
+			const container = document.createElement("div");
+			container.style.cssText =
+				"width:90%;max-width:800px;margin:20px auto;font-family:Arial, sans-serif;";
+			const barBg = document.createElement("div");
+			barBg.style.cssText =
+				"width:100%;height:25px;background:#eee;border-radius:9px;overflow:hidden;";
+			const bar = document.createElement("div");
+			bar.style.cssText =
+				"width:0%;height:100%;background:#4caf50;transition:width 0.2s;";
+			barBg.appendChild(bar);
+			const text = document.createElement("div");
+			text.style.cssText = "margin-top:8px;font-size:35px;color:#333;";
+			text.textContent = "准备下载...";
+			container.appendChild(barBg);
+			container.appendChild(text);
+			document.body.appendChild(container);
+
+			function formatBytes(bytes) {
+				if (bytes === 0) return "0 B";
+				const k = 1024,
+					sizes = ["B", "KB", "MB", "GB", "TB"],
+					i = Math.floor(Math.log(bytes) / Math.log(k));
+				return (bytes / Math.pow(k, i)).toFixed(2) + " " + sizes[i];
+			}
+
+			xhr.responseType = "text"; // we'll receive JSON text
+			let networkTotal = 0;
+
+			xhr.onprogress = function (e) {
+				// network progress (may not have total)
+				if (e.lengthComputable) {
+					networkTotal = e.total;
+					const pct = Math.round((e.loaded / e.total) * 100);
+					bar.style.width = pct + "%";
+					text.textContent = `下载：${formatBytes(
+						e.loaded
+					)} / ${formatBytes(e.total)} (${pct}%)`;
+				} else {
+					bar.style.width = "50%";
+					text.textContent = `已接收 ${formatBytes(
+						e.loaded
+					)}，总大小未知，正在接收...`;
+				}
+			};
+
+			xhr.onerror = function () {
+				bar.style.background = "#f44336";
+				text.textContent = "下载失败（网络错误）";
+			};
+
+			xhr.onabort = function () {
+				bar.style.background = "#f44336";
+				text.textContent = "下载已取消";
+			};
+
+			xhr.onload = function () {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					try {
+						const obj = JSON.parse(xhr.responseText);
+						if (
+							!obj ||
+							obj.type !== "file" ||
+							obj.encoding !== "base64"
+						) {
+							text.textContent =
+								"返回的不是 base64 文件格式的 JSON。";
+							return;
+						}
+						const fileSize = obj.size || 0; // bytes of original file (not base64)
+						// update UI to show known total size
+						bar.style.width = "80%";
+						text.textContent = `已接收 ${formatBytes(
+							xhr.responseText.length
+						)}，解析中...`;
+
+						// normalize base64 (remove line breaks and whitespace)
+						const b64 = (obj.content || "").replace(/\s+/g, "");
+
+						// decode base64 to Uint8Array
+						const binary = atob(b64);
+						const len = binary.length;
+						const buffer = new Uint8Array(len);
+						for (let i = 0; i < len; i++)
+							buffer[i] = binary.charCodeAt(i);
+
+						// create blob and trigger download with the desired name
+						const blob = new Blob([buffer]);
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement("a");
+						a.href = url;
+						// prefer passed-in name, fallback to file name from JSON
+						a.download =
+							decodeURIComponent(name) ||
+							decodeURIComponent(obj.name) ||
+							md5s;
+						document.body.appendChild(a);
+						a.click();
+						a.remove();
+						URL.revokeObjectURL(url);
+
+						// final UI update: use actual file size if available
+						bar.style.width = "100%";
+						text.innerText = `已下载：${formatBytes(
+							fileSize
+						)} / ${formatBytes(
+							fileSize
+						)}（100%）\n\n下载成功！\n文件已保存为 "${a.download}"`;
+					} catch (err) {
+						bar.style.background = "#f44336";
+						text.textContent =
+							"解析响应或解码失败：" +
+							(err && err.message ? err.message : err);
+					}
+				} else {
+					bar.style.background = "#f44336";
+					text.textContent = `请求失败：${xhr.status} ${xhr.statusText}`;
+				}
+			};
+
+			// send request
+			xhr.send();
 		</script>
 	</body>
 </html>
