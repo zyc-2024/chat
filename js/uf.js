@@ -74,66 +74,68 @@ function upf() {
 				content: b64ab,
 			});
 
-			let xhr = new XMLHttpRequest();
-			xhr.open(
-				"PUT",
-				"https://api.github.com/repos/zyc-2024/chat-file/contents/f/" +
-					md5
-			);
-			xhr.setRequestHeader("Accept", "application/vnd.github+json");
-			xhr.setRequestHeader(
-				"Authorization",
-				"Bearer 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"
-			);
-			xhr.setRequestHeader("X-GitHub-Api-Version", "2022-11-28");
-			xhr.setRequestHeader(
-				"Content-Type",
-				"application/x-www-form-urlencoded"
-			);
-			xhr.upload.onprogress = function (e) {
-				if (e.lengthComputable) {
-					let percent = e.loaded / e.total;
-					document.getElementById("p2a").value = percent;
-					document.getElementById("p2b").innerText =
-						sc(e.loaded) + " / " + sc(e.total);
-				}
-			};
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState === 4) {
-					if (l.innerHTML === "输出在这里！！") {
-						l.innerHTML = "";
+			const GITHUB_TOKEN = "YOUR_GITHUB_TOKEN"; // ← 请自己填，别写在网页源码里
+			const RELEASE_ID = "262674636"; // 你刚创建的 release id
+
+			function uploadToGithubRelease(file, md5) {
+				const url =
+					"https://uploads.github.com/repos/zyc-2024/chat-file/releases/" +
+					RELEASE_ID +
+					"/assets?name=" +
+					encodeURIComponent(md5 + "_" + file.name);
+
+				let xhr = new XMLHttpRequest();
+				xhr.open("POST", url, true);
+
+				xhr.setRequestHeader("Authorization", "Bearer " + GITHUB_TOKEN);
+				xhr.setRequestHeader(
+					"Content-Type",
+					"application/octet-stream"
+				);
+
+				// 上传进度条
+				xhr.upload.onprogress = function (e) {
+					if (e.lengthComputable) {
+						let percent = e.loaded / e.total;
+						document.getElementById("p2a").value = percent;
+						document.getElementById("p2b").innerText =
+							sc(e.loaded) + " / " + sc(e.total);
 					}
-					if (
-						(xhr.status >= 200 && xhr.status < 300) ||
-						xhr.responseText == { message: "文件名已存在" }
-					) {
-						// fetch('https://api.github.com/repos/OWNER/REPO/contents/PATH', {
-						//   headers: {
-						//     'Accept': 'application/vnd.github.object',
-						//     'Authorization': 'Bearer <YOUR-TOKEN>',
-						//     'X-GitHub-Api-Version': '2022-11-28'
-						//   }
-						// });
-						l.innerHTML =
-							"上传成功！这是链接：<br><code class='l'>https://zyc2024.com.cn/chat/file.html?md5=" +
-							md5 +
-							"&name=" +
-							encodeURIComponent(file.name) +
-							"</code><br><br>" +
-							l.innerHTML;
-					} else {
-						console.error("上传失败：", xhr.status, xhr.statusText);
-						l.innerHTML =
-							"上传失败！这是链接：<br><code class='l'>https://zyc2024.com.cn/chat/file.html?md5=" +
-							md5 +
-							"&name=" +
-							encodeURIComponent(file.name) +
-							"</code><br><br>" +
-							l.innerHTML;
+				};
+
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState === 4) {
+						let l = document.getElementById("output"); // 你原来的 l 变量
+
+						if (xhr.status === 201) {
+							const json = JSON.parse(xhr.responseText);
+
+							l.innerHTML =
+								"上传成功！这是下载链接：<br><code class='l'>" +
+								json.browser_download_url +
+								"</code><br><br>" +
+								l.innerHTML;
+						} else {
+							console.error(
+								"上传失败：",
+								xhr.status,
+								xhr.responseText
+							);
+
+							l.innerHTML =
+								"<b>上传失败！</b><br>status: " +
+								xhr.status +
+								"<br>response:<br><code>" +
+								xhr.responseText +
+								"</code><br><br>" +
+								l.innerHTML;
+						}
 					}
-				}
-			};
-			xhr.send(data);
+				};
+
+				// 文件内容直接发，不要 Base64，不要 formdata
+				xhr.send(file);
+			}
 		});
 	};
 
