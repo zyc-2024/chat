@@ -19,7 +19,6 @@ function fb64(buffer) {
 async function fmd5(arrayBuffer) {
 	return SparkMD5.ArrayBuffer.hash(arrayBuffer);
 }
-
 let f = document.getElementById("i");
 let s = document.getElementById("s");
 let l = document.getElementById("l");
@@ -56,88 +55,45 @@ function upf() {
 	fr.readAsArrayBuffer(file);
 	document.getElementById("p1b").innerText = "读取完成！";
 	fr.onload = function () {
-		var b64ab = fb64(fr.result);
 		fmd5(fr.result).then((md5) => {
-			const data = JSON.stringify({
-				message:
-					"api-u-n[" +
-					file.name +
-					"]-s[" +
-					file.size +
-					"]-md5[" +
-					md5 +
-					"]",
-				committer: {
-					name: "zyc-2024",
-					email: "61992011@qq.com",
-				},
-				content: b64ab,
-			});
-
-			const GITHUB_TOKEN = "YOUR_GITHUB_TOKEN"; // ← 请自己填，别写在网页源码里
-			const RELEASE_ID = "262674636"; // 你刚创建的 release id
-
-			function uploadToGithubRelease(file, md5) {
-				const url =
-					"https://uploads.github.com/repos/zyc-2024/chat-file/releases/" +
-					RELEASE_ID +
-					"/assets?name=" +
-					encodeURIComponent(md5 + "_" + file.name);
-
-				let xhr = new XMLHttpRequest();
-				xhr.open("POST", url, true);
-
-				xhr.setRequestHeader("Authorization", "Bearer " + GITHUB_TOKEN);
-				xhr.setRequestHeader(
-					"Content-Type",
-					"application/octet-stream"
-				);
-
-				// 上传进度条
-				xhr.upload.onprogress = function (e) {
-					if (e.lengthComputable) {
-						let percent = e.loaded / e.total;
-						document.getElementById("p2a").value = percent;
-						document.getElementById("p2b").innerText =
-							sc(e.loaded) + " / " + sc(e.total);
+			const url =
+				"https://api.61992011.workers.dev/?md5=" +
+				md5 +
+				"&fname=" +
+				encodeURIComponent(file.name);
+			let xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.upload.onprogress = function (e) {
+				if (e.lengthComputable) {
+					document.getElementById("p2a").value = e.loaded / e.total;
+					document.getElementById("p2b").innerText =
+						(e.loaded / 1024).toFixed(2) +
+						" KB / " +
+						(e.total / 1024).toFixed(2) +
+						" KB";
+				}
+			};
+			xhr.onreadystatechange = function () {
+				let l = document.getElementById("l");
+				if (xhr.readyState === 4) {
+					if (xhr.status === 201) {
+						const json = JSON.parse(xhr.responseText);
+						l.innerHTML =
+							"上传成功！下载链接：<br><code>" +
+							json.browser_download_url +
+							"</code><br><br>" +
+							l.innerHTML;
+					} else {
+						l.innerHTML =
+							"<b>上传失败：</b><br><code>" +
+							xhr.responseText +
+							"</code><br><br>" +
+							l.innerHTML;
 					}
-				};
-
-				xhr.onreadystatechange = function () {
-					if (xhr.readyState === 4) {
-						let l = document.getElementById("output"); // 你原来的 l 变量
-
-						if (xhr.status === 201) {
-							const json = JSON.parse(xhr.responseText);
-
-							l.innerHTML =
-								"上传成功！这是下载链接：<br><code class='l'>" +
-								json.browser_download_url +
-								"</code><br><br>" +
-								l.innerHTML;
-						} else {
-							console.error(
-								"上传失败：",
-								xhr.status,
-								xhr.responseText
-							);
-
-							l.innerHTML =
-								"<b>上传失败！</b><br>status: " +
-								xhr.status +
-								"<br>response:<br><code>" +
-								xhr.responseText +
-								"</code><br><br>" +
-								l.innerHTML;
-						}
-					}
-				};
-
-				// 文件内容直接发，不要 Base64，不要 formdata
-				xhr.send(file);
-			}
+				}
+			};
+			xhr.send(file);
 		});
 	};
-
 	document.getElementById("p1b").innerText = "";
 }

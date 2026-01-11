@@ -7,7 +7,7 @@ function getname() {
 	}
 	return document.cookie.split("=")[1].split(";")[0];
 }
-
+var oricontent={};
 let namee = (name0 = "Anonymous");
 
 namee = name0 = getname();
@@ -17,7 +17,7 @@ function gettime(time = +new Date()) {
 	var date = new Date(time + 8 * 3600 * 1000);
 	return date.toJSON().substr(0, 19).replace("T", " ").replaceAll("-", "");
 }
-
+// function 
 function cname() {
 	let a;
 	a = prompt("请输入你的新名字");
@@ -55,14 +55,11 @@ function upload() {
 			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 		},
 	}).done(function (response) {
-		// if (document.getElementById("f").files.length !== 0) {
-		// 	console.log(c);
-		// 	c = "发送了一个文件：<a href='https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" + m5 + "%2F" + na + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa'>" + na + "</a>";
-		// }
 		r = JSON.parse(response);
 		r.msg[r.msg.length] = {
 			name: namee,
 			time: gettime(),
+			ts:Date.now(),
 			content: c,
 		};
 		$.get(
@@ -75,7 +72,7 @@ function upload() {
 		).done(function (response) {
 			eee = response.sha;
 			sha = response.sha;
-			var t = new Date();
+			// var t = new Date();
 			$.ajax({
 				url:
 					"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
@@ -88,7 +85,7 @@ function upload() {
 					access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 					content: Base64.encode(JSON.stringify(r)),
 					sha: sha,
-					message: namee + " @ " + t.getTime(),
+					message: namee + " @ " + Date.now(),
 				}),
 			}).done(function (response) {
 				location.reload();
@@ -128,9 +125,16 @@ const md = window
 	// .use(window.markdownitEmoji)
 	.use(window.markdownitTaskLists)
 	.use(window.markdownitMultimdTable);
+function diff(a, b) {
+	a.forEach(c => {
+		if (b.includes(c)) {b.pop(c);}
+	});
+	return b;
+}
 
 function reload() {
 	var content;
+
 	$.ajax({
 		url:
 			"https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/msg/" +
@@ -231,3 +235,11 @@ function crt() {
 	rtime = t * 1000;
 	document.getElementById("refreshtime").innerText = t;
 }
+
+
+/*
+New Function:
+1. do not re-render all messages on reload, only append new messages.
+2. add a "load more" button to load older messages.
+3. implement infinite scrolling to load messages as the user scrolls up.
+*/
