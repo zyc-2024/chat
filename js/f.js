@@ -7,17 +7,23 @@ function getname() {
 	}
 	return document.cookie.split("=")[1].split(";")[0];
 }
-var oricontent={};
+var oricontent = {};
 let namee = (name0 = "Anonymous");
 
 namee = name0 = getname();
 
 var eee;
+// message cache and pagination
+var messagesCache = [];
+var loadedStart = 0; // index of first displayed message in messagesCache
+var loadedEnd = 0; // index after last displayed message
+var pageSize = 20;
+var loadingMore = false;
 function gettime(time = +new Date()) {
 	var date = new Date(time + 8 * 3600 * 1000);
 	return date.toJSON().substr(0, 19).replace("T", " ").replaceAll("-", "");
 }
-// function 
+// function
 function cname() {
 	let a;
 	a = prompt("请输入你的新名字");
@@ -44,56 +50,37 @@ function upload() {
 	}, 5000);
 
 	var sha;
-	$.ajax({
-		url:
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/msg/" +
-			ch +
-			".json",
-		crossDomain: true,
-		contentType: "application/json;charset=UTF-8",
-		data: {
-			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-		},
-	}).done(function (response) {
-		r = JSON.parse(response);
+	get("public/msg/" + ch + ".json", function (response,sha) {
+		let r = JSON.parse(response);
+		// sha = r.sha;
+		console.log(r);
+		if (!r.msg) r.msg = [];
 		r.msg[r.msg.length] = {
 			name: namee,
 			time: gettime(),
-			ts:Date.now(),
+			ts: Date.now(),
 			content: c,
 		};
-		$.get(
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
-				ch +
-				".json",
-			{
-				access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-			}
-		).done(function (response) {
-			eee = response.sha;
-			sha = response.sha;
-			// var t = new Date();
-			$.ajax({
-				url:
-					"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
-					ch +
-					".json",
-				crossDomain: true,
-				method: "PUT",
-				contentType: "application/json;charset=UTF-8",
-				data: JSON.stringify({
-					access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-					content: Base64.encode(JSON.stringify(r)),
-					sha: sha,
-					message: namee + " @ " + Date.now(),
-				}),
-			}).done(function (response) {
-				location.reload();
+		put(
+			"public/msg/" + ch + ".json",
+			namee + " @ " + Date.now(),
+			JSON.stringify(r), // ensure data is JSON stringified
+			sha,
+			function () {
+				// after successful put, reload messages
 				reload();
-			});
-		});
+			},
+		);
 	});
-	document.getElementsByClassName("content").innerText = "";
+	// editor
+	reload();
+	window.scroll({
+			top: document.body.scrollHeight,
+			behavior: "smooth",
+		});
+	document.getElementsByClassName("editor").innerHTML = "";
+	// document.getElementsByClassName("content").innerText = "";
+	
 }
 var rrrr;
 function preRenderTex(source) {
@@ -103,7 +90,7 @@ function preRenderTex(source) {
 			displayMode: true,
 			throwOnError: false,
 			output: "html",
-		})
+		}),
 	);
 	// 行内公式
 	source = source.replace(
@@ -115,7 +102,7 @@ function preRenderTex(source) {
 				throwOnError: false,
 				output: "html",
 			}) +
-			p3
+			p3,
 	);
 	return source;
 }
@@ -126,95 +113,101 @@ const md = window
 	.use(window.markdownitTaskLists)
 	.use(window.markdownitMultimdTable);
 function diff(a, b) {
-	a.forEach(c => {
-		if (b.includes(c)) {b.pop(c);}
+	a.forEach((c) => {
+		if (b.includes(c)) {
+			b.pop(c);
+		}
 	});
 	return b;
 }
 
 function reload() {
-	var content;
-
-	$.ajax({
-		url:
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/msg/" +
-			ch +
-			".json",
-		crossDomain: true,
-		contentType: "application/json;charset=UTF-8",
-		data: {
-			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-		},
-	}).done(function (response) {
-		content = rrrr = JSON.parse(response);
-		document.getElementById("chat").innerHTML = "";
-		if (content.msg) {
-			var msg = content.msg;
+	get("public/msg/" + ch + ".json", function (response,sha) {
+		let content;
+		try {
+			if (typeof response === "string") {
+				content = JSON.parse(response);
+			} else {
+				content = response;
+			}
+		} catch (e) {
+			console.error("Failed to parse response as JSON", e, response);
+			return;
+		}
+		const msg = content.msg || [];
+		// first time load
+		if (messagesCache.length === 0) {
+			messagesCache = msg.slice();
+			const total = msg.length;
+			loadedEnd = total;
+			loadedStart = Math.max(0, total - pageSize);
+			ensureLoadMoreButton();
+			for (let i = loadedStart; i < loadedEnd; i++) {
+				render(msg[i]);
+			}
+			// scroll to bottom after initial render
+			window.scrollTo(0, document.body.scrollHeight);
 		} else {
-			console.error("response 中没有 msg 属性");
-			var msg = [];
+			// append only new messages
+			if (msg.length > messagesCache.length) {
+				for (let i = messagesCache.length; i < msg.length; i++) {
+					render(msg[i]);
+				}
+			}
+			messagesCache = msg.slice();
+			loadedEnd = msg.length;
 		}
-		// document.getElementById("chat").innerHTML +=
-		// 	"<table><tr><th>用户名</th><th>时间</th><th>内容</th></tr>";
-		for (let i in msg) {
-			let raw = msg[i].content || "";
-
-			// 先用 KaTeX 预处理，再用 markdown-it 渲染
-			const preProcessed = preRenderTex(raw);
-			const dirty = md.render(preProcessed);
-
-			// 清理 XSS，同时保留 KaTeX 生成的 span/class
-			const clean = DOMPurify.sanitize(dirty, {
-				ADD_TAGS: ["span"],
-				ADD_ATTR: ["class", "style"],
-			});
-
-			// 对用户名和时间也进行简单清理
-			const safeName = DOMPurify.sanitize(msg[i].name || "Anonymous", {
-				ALLOWED_TAGS: [],
-				ALLOWED_ATTR: [],
-			});
-			const safeTime = DOMPurify.sanitize(msg[i].time || "", {
-				ALLOWED_TAGS: [],
-				ALLOWED_ATTR: [],
-			});
-
-			document.getElementById("chat").innerHTML +=
-				"<br><div class='crow'><span class='call'><div class='cname'>" +
-				safeName +
-				"</div><div class='ctime'>" +
-				safeTime +
-				"</div></span><div class='ccontent'>" +
-				clean +
-				"</div></div>";
-				
-			hljs.highlightAll();
-		}
-		// document.getElementById("chat").innerHTML += "</table>";
 	});
 }
-setTimeout(reload(), 200);
-$.ajax({
-	url:
-		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/public%2Fmsg%2F" +
-		ch +
-		".json",
-	crossDomain: true,
-	data: {
-		access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
+
+// create or ensure the "加载更多" button is present
+function ensureLoadMoreButton() {
+	if (document.getElementById("load-more")) return;
+	const chat = document.getElementById("chat");
+	const btn = document.createElement("button");
+	btn.id = "load-more";
+	btn.innerText = "加载更多历史消息";
+	btn.style.display = "block";
+	btn.style.margin = "10px auto";
+	btn.onclick = function () {
+		loadMoreMessages();
+	};
+	chat.parentNode.insertBefore(btn, chat);
+}
+
+function loadMoreMessages() {
+	if (loadingMore) return;
+	if (loadedStart <= 0) return;
+	loadingMore = true;
+	const oldHeight = document.body.scrollHeight;
+	const newStart = Math.max(0, loadedStart - pageSize);
+	for (let i = newStart; i < loadedStart; i++) {
+		render(messagesCache[i], "prepend");
+	}
+	loadedStart = newStart;
+	if (loadedStart === 0) {
+		const btn = document.getElementById("load-more");
+		if (btn) btn.style.display = "none";
+	}
+	const newHeight = document.body.scrollHeight;
+	// keep view stable after prepending
+	window.scrollBy(0, newHeight - oldHeight);
+	loadingMore = false;
+}
+
+// infinite scroll: load more when scrolling near top
+window.addEventListener(
+	"scroll",
+	function () {
+		if (window.scrollY <= 120 && loadedStart > 0 && !loadingMore) {
+			loadMoreMessages();
+		}
 	},
-	contentType: "application/json;charset=UTF-8",
-})
-	.done(function (response) {
-		window.scroll({
-			top: document.body.scrollHeight,
-			behavior: "smooth",
-		});
-	})
-	.fail(function (response) {
-		window.location.href = "404.html?ch=" + getch();
-	});
-//chatkey 19f7b43872c256d52d1bc71cbd2d0ffa
+	{ passive: true }
+);
+
+setTimeout(reload, 200);
+
 function cch(event, m = 0) {
 	if (event) event.preventDefault();
 	let v = m ? "main" : document.getElementById("ch").value;
@@ -226,7 +219,6 @@ function tick() {
 	setTimeout(tick, rtime);
 }
 tick();
-
 function crt() {
 	let t = prompt("请输入新的刷新时间（单位：秒）");
 	if (t === null || t === "" || isNaN(t) || !isFinite(t)) {
@@ -235,11 +227,3 @@ function crt() {
 	rtime = t * 1000;
 	document.getElementById("refreshtime").innerText = t;
 }
-
-
-/*
-New Function:
-1. do not re-render all messages on reload, only append new messages.
-2. add a "load more" button to load older messages.
-3. implement infinite scrolling to load messages as the user scrolls up.
-*/

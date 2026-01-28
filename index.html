@@ -42,13 +42,19 @@
 				<h2>创建新频道</h2>
 				<input type="text" id="ch" placeholder="频道名称" />
 				<button
-					onclick="javascript:window.location.href='create.html?type=u&ch='+document.getElementById('ch').value">
+					onclick="
+						javascript: window.location.href =
+							'create.html?type=u&ch=' +
+							document.getElementById('ch').value;
+					">
 					确定
 				</button>
 				<h2>频道列表</h2>
 				<ul
 					id="channels"
-					style="list-style: none; padding: 0; margin: 0">¯\_(ツ)_/¯</ul>
+					style="list-style: none; padding: 0; margin: 0">
+					¯\_(ツ)_/¯
+				</ul>
 			</div>
 			<div style="flex: 1; padding: 16px">
 				<!-- 右半边内容 -->
@@ -58,7 +64,11 @@
 				<br />
 				<input type="text" id="key" placeholder="一串字符，作为凭证" />
 				<button
-					onclick="javascript:window.location.href='create.html?type=r&key='+document.getElementById('key').value">
+					onclick="
+						javascript: window.location.href =
+							'create.html?type=r&key=' +
+							document.getElementById('key').value;
+					">
 					创建
 				</button>
 				<br />
@@ -68,7 +78,13 @@
 
 				<input type="text" id="keyyy" placeholder="你输入的凭证" />
 				<button
-					onclick="javascript:window.location.href='core.html?type=r&id=' +document.getElementById('iddd').value + '&key=' + document.getElementById('keyyy').value">
+					onclick="
+						javascript: window.location.href =
+							'core.html?type=r&id=' +
+							document.getElementById('iddd').value +
+							'&key=' +
+							document.getElementById('keyyy').value;
+					">
 					创建
 				</button>
 			</div>
@@ -78,8 +94,12 @@
 			function renderChannels() {
 				read("public/index.json").then(function (data) {
 					var channels = data.ch || [];
+
 					var ul = document.getElementById("channels");
-					ul.innerHTML = "";
+					if (channels != []) {
+						ul.innerHTML = "";
+					}
+
 					channels.forEach(function (channel) {
 						var link = document.createElement("a");
 						link.textContent = channel;

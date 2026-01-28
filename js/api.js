@@ -11,24 +11,68 @@ function read(f) {
 		return JSON.parse(response);
 	});
 }
-function write(f, d) {
+function put(
+	path,
+	messages,
+	data,
+	sha,
+	nextfunc = function (response) {
+		return response;
+	},
+	failfunc = function (error) {
+		console.error("Error fetching " + path + ": ", error);
+	},
+) {
 	return $.ajax({
 		url:
 			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
-			encodeURIComponent(f),
+			encodeURIComponent(path),
 		type: "PUT",
 		data: JSON.stringify({
 			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-			message: "update",
-			content: Base64.encode(JSON.stringify(d)),
-			sha: d.sha,
+			message: messages,
+			content: Base64.encode(JSON.stringify(data)),
+			sha: sha,
 		}),
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
-	}).then(function (response) {
-		// console.log(response);
+	})
+		.done(function (response) {
+			// console.log(response);
+			return nextfunc(JSON.parse(response));
+		})
+		.fail(function (error) {
+			return failfunc(error);
+		});
+}
+function get(
+	path,
+	nextfunc = function (response) {
 		return response;
-	});
+	},
+	failfunc = function (error) {
+		console.error("Error fetching " + path + ": ", error);
+	},
+) {
+	return $.ajax({
+		url:
+			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
+			encodeURIComponent(path),
+		data: {
+			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
+		},
+		crossDomain: true,
+		contentType: "application/json;charset=UTF-8",
+	})
+		.then(function (response) {
+			return nextfunc(
+				JSON.parse(Base64.decode(response.content)),
+				response.sha,
+			);
+		})
+		.fail(function (error) {
+			return failfunc(error);
+		});
 }
 function getarg() {
 	let a = window.location.search.substring(1).split("&");
@@ -39,7 +83,45 @@ function getarg() {
 	});
 	return c;
 }
+//chatkey 19f7b43872c256d52d1bc71cbd2d0ffa
+function renderMessageHTML(msg) {
+	const preProcessed = preRenderTex(msg.content || "");
+	const dirty = md.render(preProcessed);
+	const clean = DOMPurify.sanitize(dirty, {
+		ADD_TAGS: ["span"],
+		ADD_ATTR: ["class", "style"],
+	});
+	const safeName = DOMPurify.sanitize(msg.name || "Anonymous", {
+		ALLOWED_TAGS: [],
+		ALLOWED_ATTR: [],
+	});
+	const safeTime = DOMPurify.sanitize(msg.time || "", {
+		ALLOWED_TAGS: [],
+		ALLOWED_ATTR: [],
+	});
+	return (
+		"<br><div class='crow'><span class='call'><div class='cname'>" +
+		safeName +
+		"</div><div class='ctime'>" +
+		safeTime +
+		"</div></span><div class='ccontent'>" +
+		clean +
+		"</div></div>"
+	);
+}
 
+function render(msg, mode = "append") {
+	const chat = document.getElementById("chat");
+	const html = renderMessageHTML(msg);
+	if (mode === "prepend") {
+		chat.innerHTML = html + chat.innerHTML;
+	} else {
+		chat.innerHTML += html;
+	}
+	try {
+		hljs.highlightAll();
+	} catch (e) {}
+}
 function getid() {
 	var id = 0;
 	$.ajax({
