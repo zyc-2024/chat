@@ -13,10 +13,9 @@ let namee = (name0 = "Anonymous");
 namee = name0 = getname();
 
 var eee;
-// message cache and pagination
 var messagesCache = [];
-var loadedStart = 0; // index of first displayed message in messagesCache
-var loadedEnd = 0; // index after last displayed message
+var loadedStart = 0;
+var loadedEnd = 0;
 var pageSize = 20;
 var loadingMore = false;
 function gettime(time = +new Date()) {
@@ -50,9 +49,8 @@ function upload() {
 	}, 5000);
 
 	var sha;
-	get("public/msg/" + ch + ".json", function (response,sha) {
+	get("public/msg/" + ch + ".json", function (response, sha) {
 		let r = JSON.parse(response);
-		// sha = r.sha;
 		console.log(r);
 		if (!r.msg) r.msg = [];
 		r.msg[r.msg.length] = {
@@ -64,27 +62,22 @@ function upload() {
 		put(
 			"public/msg/" + ch + ".json",
 			namee + " @ " + Date.now(),
-			JSON.stringify(r), // ensure data is JSON stringified
+			JSON.stringify(r),
 			sha,
 			function () {
-				// after successful put, reload messages
 				reload();
 			},
 		);
 	});
-	// editor
 	reload();
 	window.scroll({
-			top: document.body.scrollHeight,
-			behavior: "smooth",
-		});
+		top: document.body.scrollHeight,
+		behavior: "smooth",
+	});
 	document.getElementsByClassName("editor").innerHTML = "";
-	// document.getElementsByClassName("content").innerText = "";
-	
 }
 var rrrr;
 function preRenderTex(source) {
-	// 块级公式
 	source = source.replace(/\$\$([\s\S]+?)\$\$/g, (m, tex) =>
 		katex.renderToString(tex, {
 			displayMode: true,
@@ -92,7 +85,6 @@ function preRenderTex(source) {
 			output: "html",
 		}),
 	);
-	// 行内公式
 	source = source.replace(
 		/(^|[^$])\$([^\n$][^$]*?)\$([^$]|$)/g,
 		(m, p1, tex, p3) =>
@@ -109,7 +101,6 @@ function preRenderTex(source) {
 
 const md = window
 	.markdownit({ html: true })
-	// .use(window.markdownitEmoji)
 	.use(window.markdownitTaskLists)
 	.use(window.markdownitMultimdTable);
 function diff(a, b) {
@@ -122,7 +113,7 @@ function diff(a, b) {
 }
 
 function reload() {
-	get("public/msg/" + ch + ".json", function (response,sha) {
+	get("public/msg/" + ch + ".json", function (response, sha) {
 		let content;
 		try {
 			if (typeof response === "string") {
@@ -135,7 +126,6 @@ function reload() {
 			return;
 		}
 		const msg = content.msg || [];
-		// first time load
 		if (messagesCache.length === 0) {
 			messagesCache = msg.slice();
 			const total = msg.length;
@@ -145,10 +135,8 @@ function reload() {
 			for (let i = loadedStart; i < loadedEnd; i++) {
 				render(msg[i]);
 			}
-			// scroll to bottom after initial render
 			window.scrollTo(0, document.body.scrollHeight);
 		} else {
-			// append only new messages
 			if (msg.length > messagesCache.length) {
 				for (let i = messagesCache.length; i < msg.length; i++) {
 					render(msg[i]);
@@ -160,7 +148,6 @@ function reload() {
 	});
 }
 
-// create or ensure the "加载更多" button is present
 function ensureLoadMoreButton() {
 	if (document.getElementById("load-more")) return;
 	const chat = document.getElementById("chat");
@@ -203,7 +190,7 @@ window.addEventListener(
 			loadMoreMessages();
 		}
 	},
-	{ passive: true }
+	{ passive: true },
 );
 
 setTimeout(reload, 200);
