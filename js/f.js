@@ -55,10 +55,10 @@ function upload(msg = null) {
 	} else {
 		c = document.getElementById("editor").value;
 	}
-	document.getElementById("button").disabled = true;
-	setTimeout(function () {
-		document.getElementById("button").disabled = false;
-	}, 5000);
+	// document.getElementById("button").disabled = true;
+	// setTimeout(function () {
+	// 	document.getElementById("button").disabled = false;
+	// }, 5000);
 
 	var sha;
 	get("public/msg/" + ch + ".json", function (response, sha) {
@@ -86,7 +86,7 @@ function upload(msg = null) {
 	document.getElementById("preview").innerHTML = "";
 }
 window.addEventListener("message", function (event) {
-	if(event.data=="reload"){
+	if (event.data == "reload") {
 		reload();
 	}
 });
@@ -157,6 +157,11 @@ function reload() {
 			messagesCache = msg.slice();
 			loadedEnd = msg.length;
 		}
+
+		window.scroll({
+			top: document.body.scrollHeight,
+			behavior: "smooth",
+		});
 	});
 }
 
@@ -221,7 +226,7 @@ tickreload();
 function tick1() {
 	// func();\
 	resizemsg();
-	setTimeout(tick1,50);
+	setTimeout(tick1, 50);
 }
 function resizemsg() {
 	document.getElementById("msg").style.height =
@@ -250,5 +255,6 @@ if (getarg().type != "u") {
 	document.getElementById("changechannel").style.display = "none";
 }
 
-
-console.nolog=function(...args){return;}
+console.nolog = function (...args) {
+	return;
+};
