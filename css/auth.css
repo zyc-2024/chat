@@ -73,6 +73,14 @@
 	cursor: pointer;
 	user-select: none;
 	transition: all 200ms ease;
+	position: static;
+	top: auto;
+	transform: none;
+	box-shadow: none;
+}
+
+.buttonnn:hover {
+	transform: none;
 }
 
 .right {
@@ -87,6 +95,8 @@
 
 .graybutton {
 	border-color: #ddd;
+	background-color: #fff;
+	color: #333;
 }
 
 .graybutton:hover,
@@ -96,6 +106,7 @@
 .open > .dropdown-toggle.graybutton {
 	border-color: #ddd;
 	background-color: #f5f5f5;
+	color: #333;
 }
 
 .redbutton {
@@ -118,11 +129,13 @@
 	opacity: 0.7;
 }
 
-#auth-overlay input {
+.auth-overlay input {
 	border-color: #2763a8;
 	border-bottom-left-radius: 0;
 	border-top-right-radius: 0;
 	height: 24px;
+	padding: 0 4px;
+	margin: 0;
 	position: relative;
 	color: rgb(85, 85, 85);
 	background-color: rgb(255, 255, 255);
@@ -132,6 +145,13 @@
 	border-radius: 10px;
 	vertical-align: middle;
 	display: inline;
+	font-family: inherit;
+}
+
+.auth-overlay input:focus {
+	outline: none;
+	border-color: #2763a8;
+	box-shadow: 0 0 0 2px rgba(39, 99, 168, 0.18);
 }
 
 .captcha {
@@ -167,4 +187,22 @@
 	margin-left: 4px;
 	padding: 2px 10px;
 	font-size: 14px;
+}
+
+@media (max-width: 600px) {
+	.alert {
+		width: 94vw;
+	}
+
+	.alerttext {
+		padding: 30px 24px 10px;
+	}
+
+	.auth-body {
+		padding: 0 24px 16px;
+	}
+
+	.alert-actions {
+		padding: 0 14px 14px;
+	}
 }

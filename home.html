@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<link rel="icon" type="image/bmp" href="favicon.bmp" />
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script src="lib/jquery-3.6.0.min.js"></script>
+		<script src="js/api.js"></script>
+		<script src="js/base64.min.js"></script>
+		<script type="module" src="lib/site.min.js" async defer></script>
+		<script nomodule src="lib/site.compat.min.js" async defer></script>
+		<script src="js/auth.js"></script>
+		<link rel="stylesheet" href="css/css.css" />
+		<link rel="stylesheet" href="css/auth.css" />
+		<link rel="stylesheet" href="css/home.css" />
+		<title>zyc2024的聊天网页主页</title>
+	</head>
+
+	<body class="home" data-auth-required="true">
+		<div id="home-app">
+			<aside class="rail">
+				<div class="rail-avatar" id="rail-avatar" title="我的主页">?</div>
+				<nav class="rail-nav">
+					<button class="rail-item active" type="button" title="频道">
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3 8.9 8.9 0 0 1-3.6-.7L4 21l1.6-4.2A8.1 8.1 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"></path>
+						</svg>
+					</button>
+					<button class="rail-item" type="button" id="rail-new" title="新建频道">
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<path d="M12 5v14M5 12h14"></path>
+						</svg>
+					</button>
+				</nav>
+				<div class="rail-spacer"></div>
+				<div class="rail-dot" title="在线"></div>
+			</aside>
+
+			<section class="sidebar">
+				<div class="sidebar-head">
+					<h1 id="titlee">Loading...</h1>
+					<div class="search-wrap">
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<circle cx="11" cy="11" r="7"></circle>
+							<path d="m20 20-3.6-3.6"></path>
+						</svg>
+						<input id="channel-search" type="search" placeholder="搜索频道" autocomplete="off" />
+					</div>
+				</div>
+
+				<div class="sidebar-list">
+					<div class="list-head">
+						<span>公开频道</span>
+						<span id="channel-count"></span>
+					</div>
+					<ul id="channels"></ul>
+				</div>
+
+				<div class="sidebar-foot">
+					<div id="auth-status"></div>
+					<div class="copyright">
+						&copy; zyc-2024, 2025~2026 ·
+						<a href="https://github.com/zyc-2024/chat" target="_blank" rel="noreferrer">Github</a>
+						·
+						<a href="https://gitee.com/zyc-2024/chat-realease" target="_blank" rel="noreferrer">Gitee</a>
+						·
+						<a href="licenses.html" target="_blank" rel="noreferrer">Licenses</a>
+					</div>
+				</div>
+			</section>
+
+			<main class="detail">
+				<div class="detail-head">
+					<div class="detail-title">频道广场</div>
+					<div class="detail-sub">加入一个公开频道，或创建自己的私有频道</div>
+				</div>
+
+				<div class="detail-body">
+					<section class="card">
+						<div class="card-title">
+							创建公开频道
+							<span class="badge">公开</span>
+						</div>
+						<p class="card-desc">公开频道会显示在左侧列表里，所有人都可以进入。</p>
+						<form class="card-form" id="create-public">
+							<input id="ch" type="text" maxlength="32" placeholder="输入频道名称" required />
+							<button type="submit">创建并进入</button>
+						</form>
+					</section>
+
+					<section class="card">
+						<div class="card-title">
+							创建私有频道
+							<span class="badge blue">私密</span>
+						</div>
+						<p class="card-desc">私有频道不会出现在列表中，进入时需要 id 和凭证。</p>
+						<form class="card-form" id="create-private">
+							<input id="key" type="password" placeholder="设置一段凭证字符串" required />
+							<button class="btn-blue" type="submit">创建</button>
+						</form>
+					</section>
+
+					<section class="card">
+						<div class="card-title">
+							进入私有频道
+							<span class="badge blue">私密</span>
+						</div>
+						<p class="card-desc">输入创建时保存的频道 id 和凭证即可进入。</p>
+						<form class="card-form stacked" id="join-private">
+							<input id="iddd" type="text" placeholder="频道 id" required />
+							<input id="keyyy" type="password" placeholder="频道凭证" required />
+							<button class="btn-blue" type="submit">进入</button>
+						</form>
+					</section>
+				</div>
+			</main>
+		</div>
+
+		<script>
+			var allChannels = [];
+
+			function channelColor(name) {
+				var hash = 0;
+				for (var i = 0; i < name.length; i++) {
+					hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+				}
+				return "hsl(" + (hash % 360) + " 58% 52%)";
+			}
+
+			function channelLabel(name) {
+				try {
+					return decodeURIComponent(name);
+				} catch (e) {
+					return name;
+				}
+			}
+
+			function channelInitial(name) {
+				var label = channelLabel(String(name || "?")).trim();
+				return label ? label.charAt(0) : "?";
+			}
+
+			function drawChannels(list) {
+				var ul = document.getElementById("channels");
+				var count = document.getElementById("channel-count");
+				ul.innerHTML = "";
+				count.textContent = list.length + " 个";
+
+				if (!list.length) {
+					var empty = document.createElement("li");
+					empty.className = "empty-channels";
+					empty.textContent = "暂无频道，创建一个吧";
+					ul.appendChild(empty);
+					return;
+				}
+
+				list.forEach(function (channel) {
+					var item = document.createElement("li");
+					item.className = "channel-item";
+
+					var link = document.createElement("a");
+					link.className = "channel-link";
+					link.href = "core.html?type=u&ch=" + channel;
+
+					var avatar = document.createElement("span");
+					avatar.className = "channel-avatar";
+					avatar.textContent = channelInitial(channel);
+					avatar.style.background = channelColor(channel);
+
+					var main = document.createElement("span");
+					main.className = "channel-main";
+
+					var name = document.createElement("span");
+					name.className = "channel-name";
+					name.textContent = channelLabel(channel);
+
+					var preview = document.createElement("span");
+					preview.className = "channel-preview";
+					preview.textContent = "公开频道 · 点击进入";
+
+					var meta = document.createElement("span");
+					meta.className = "channel-meta";
+					meta.textContent = "公开";
+
+					main.appendChild(name);
+					main.appendChild(preview);
+					link.appendChild(avatar);
+					link.appendChild(main);
+					link.appendChild(meta);
+					item.appendChild(link);
+					ul.appendChild(item);
+				});
+			}
+
+			function renderChannels() {
+				read("public/index.json")
+					.then(function (data) {
+						allChannels = (data && data.ch) || [];
+						drawChannels(allChannels);
+					})
+					.catch(function () {
+						allChannels = [];
+						drawChannels([]);
+					});
+			}
+
+			document.getElementById("channel-search").addEventListener("input", function () {
+				var query = this.value.trim().toLowerCase();
+				if (!query) {
+					drawChannels(allChannels);
+					return;
+				}
+				drawChannels(
+					allChannels.filter(function (channel) {
+						return channelLabel(channel).toLowerCase().indexOf(query) !== -1;
+					}),
+				);
+			});
+
+			document.getElementById("create-public").addEventListener("submit", function (event) {
+				event.preventDefault();
+				var value = document.getElementById("ch").value.trim();
+				if (!value) return;
+				window.location.href = "create.html?type=u&ch=" + value;
+			});
+
+			document.getElementById("create-private").addEventListener("submit", function (event) {
+				event.preventDefault();
+				var value = document.getElementById("key").value;
+				if (!value) return;
+				window.location.href = "create.html?type=r&key=" + value;
+			});
+
+			document.getElementById("join-private").addEventListener("submit", function (event) {
+				event.preventDefault();
+				var id = document.getElementById("iddd").value.trim();
+				var key = document.getElementById("keyyy").value;
+				if (!id || !key) return;
+				window.location.href =
+					"core.html?type=r&id=" + id + "&key=" + key;
+			});
+
+			document.getElementById("rail-new").addEventListener("click", function () {
+				var input = document.getElementById("ch");
+				input.focus();
+				input.scrollIntoView({ behavior: "smooth", block: "center" });
+			});
+
+			(function () {
+				var displayName =
+					(window.Auth && Auth.getDisplayName && Auth.getDisplayName()) ||
+					(typeof getCookie === "function" && getCookie("n")) ||
+					"?";
+				var avatar = document.getElementById("rail-avatar");
+				var initial = String(displayName).trim().charAt(0);
+				avatar.textContent = initial || "?";
+				avatar.addEventListener("click", function () {
+					var user = window.Auth && Auth.currentUser && Auth.currentUser();
+					if (user) {
+						window.location.href = "user.html?u=" + encodeURIComponent(user);
+					}
+				});
+			})();
+
+			renderChannels();
+		</script>
+	</body>
+
+</html>
