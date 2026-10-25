@@ -9,6 +9,16 @@ function getname() {
 var oricontent = {};
 let namee = (name0 = "Anonymous");
 
+const iframe = document.getElementById("msg");
+
+iframe.onload = function () {
+	Array.from(document.getElementsByTagName("pre")).forEach(function (r) {
+		r.tagName = "div";
+	});
+	const doc = iframe.contentDocument || iframe.contentWindow.document;
+	iframe.style.height = doc.body.scrollHeight + "px";
+	iframe.style.width = doc.body.scrollWidth + "px";
+};
 namee = name0 = getname();
 
 var eee;
@@ -38,10 +48,13 @@ if (namee === "" || namee === null) {
 }
 var ch = getch();
 
-function upload(msg=null) {
+function upload(msg = null) {
 	let c;
-	if(msg){c=msg;}
-	else{c = document.getElementById("editor").value;}
+	if (msg) {
+		c = msg;
+	} else {
+		c = document.getElementById("editor").value;
+	}
 	document.getElementById("button").disabled = true;
 	setTimeout(function () {
 		document.getElementById("button").disabled = false;
@@ -59,7 +72,9 @@ function upload(msg=null) {
 			content: c,
 		};
 		put("public/msg/" + ch + ".json", namee + " @ " + Date.now(), r, sha, function () {
-			reload();
+			// reload();
+			iframe.contentWindow.postMessage("reload");
+			// window.reload();
 		});
 	});
 	reload();
@@ -70,6 +85,12 @@ function upload(msg=null) {
 	document.getElementById("editor").value = "";
 	document.getElementById("preview").innerHTML = "";
 }
+window.addEventListener("message", function (event) {
+	if(event.data=="reload"){
+		reload();
+	}
+});
+
 var rrrr;
 function preRenderTex(source) {
 	source = source.replace(/\$\$([\s\S]+?)\$\$/g, (m, tex) =>
@@ -93,16 +114,6 @@ function preRenderTex(source) {
 	return source;
 }
 
-const iframe = document.getElementById("msg");
-
-iframe.onload = function () {
-	Array.from(document.getElementsByTagName("pre")).forEach(function(r){
-		r.tagName="div";
-	});
-	const doc = iframe.contentDocument || iframe.contentWindow.document;
-	iframe.style.height = doc.body.scrollHeight + "px";
-	iframe.style.width = doc.body.scrollWidth + "px";
-};
 const md = window.markdownit({ html: true }).use(window.markdownitTaskLists).use(window.markdownitMultimdTable);
 function diff(a, b) {
 	a.forEach((c) => {
@@ -163,36 +174,36 @@ function reload() {
 // 	chat.parentNode.insertBefore(btn, chat);
 // }
 
-// function loadMoreMessages() {
-// 	if (loadingMore) return;
-// 	if (loadedStart <= 0) return;
-// 	loadingMore = true;
-// 	const oldHeight = document.body.scrollHeight;
-// 	const newStart = Math.max(0, loadedStart - pageSize);
-// 	for (let i = newStart; i < loadedStart; i++) {
-// 		render(messagesCache[i], "prepend");
-// 	}
-// 	loadedStart = newStart;
-// 	if (loadedStart === 0) {
-// 		const btn = document.getElementById("load-more");
-// 		if (btn) btn.style.display = "none";
-// 	}
-// 	const newHeight = document.body.scrollHeight;
-// 	// keep view stable after prepending
-// 	window.scrollBy(0, newHeight - oldHeight);
-// 	loadingMore = false;
-// }
+function loadMoreMessages() {
+	if (loadingMore) return;
+	if (loadedStart <= 0) return;
+	loadingMore = true;
+	const oldHeight = document.body.scrollHeight;
+	const newStart = Math.max(0, loadedStart - pageSize);
+	for (let i = newStart; i < loadedStart; i++) {
+		render(messagesCache[i], "prepend");
+	}
+	loadedStart = newStart;
+	if (loadedStart === 0) {
+		const btn = document.getElementById("load-more");
+		if (btn) btn.style.display = "none";
+	}
+	const newHeight = document.body.scrollHeight;
+	// keep view stable after prepending
+	window.scrollBy(0, newHeight - oldHeight);
+	loadingMore = false;
+}
 
 // infinite scroll: load more when scrolling near top
-// window.addEventListener(
-// 	"scroll",
-// 	function () {
-// 		if (window.scrollY <= 120 && loadedStart > 0 && !loadingMore) {
-// 			loadMoreMessages();
-// 		}
-// 	},
-// 	{ passive: true },
-// );
+window.addEventListener(
+	"scroll",
+	function () {
+		if (window.scrollY <= 120 && loadedStart > 0 && !loadingMore) {
+			loadMoreMessages();
+		}
+	},
+	{ passive: true },
+);
 
 setTimeout(reload, 200);
 
@@ -204,19 +215,23 @@ function cch(event, m = 0) {
 rtime = 5000;
 function tickreload() {
 	reload();
-	setTimeout(tick, rtime);
+	setTimeout(tickreload, rtime);
 }
 tickreload();
-function tick(func, time) {
-	func();
-	setTimeout(tick, time, func, time);
+function tick1() {
+	// func();\
+	resizemsg();
+	setTimeout(tick1,50);
 }
 function resizemsg() {
 	document.getElementById("msg").style.height =
-		window.innerHeight/document.body.style.zoom - document.getElementById("toolbox").clientHeight - 2 * document.getElementById("titlee").clientHeight - 30 + "px";
-	
+		window.innerHeight / document.body.style.zoom -
+		document.getElementById("toolbox").clientHeight -
+		2 * document.getElementById("titlee").clientHeight -
+		30 +
+		"px";
 }
-tick(resizemsg,50);
+tick1();
 
 function crt() {
 	let t = prompt("请输入新的刷新时间（单位：秒）");
@@ -234,3 +249,6 @@ showname();
 if (getarg().type != "u") {
 	document.getElementById("changechannel").style.display = "none";
 }
+
+
+console.nolog=function(...args){return;}
