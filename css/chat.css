@@ -52,14 +52,24 @@ body {
 	background-color: rgb(251, 251, 251);
 }
 .chat {
-	display: block;
+	display: flex;
 	justify-content: center;
 	align-items: center;
-	margin-right: 20%;
-	margin-left: 20%;
+	/* margin-right: 20%;
+	margin-left: 20%; */
+	margin-right: 0%;
+	margin-left: 0%;
+	
+}
+::-webkit-scrollbar{
+	width: 0px;
 }
 h1 {
 	text-align: center;
+}
+#chat{
+	display: flex;
+	flex-direction: column;
 }
 #editor {
 	width: 50%;
@@ -86,4 +96,9 @@ textarea {
 	padding: 1rem;
 	border: 1px solid #ccc;
 	overflow: auto;
+}
+
+#msg{
+	display: flex;
+	width: 100%;
 }

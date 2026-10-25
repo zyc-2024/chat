@@ -1,11 +1,10 @@
 function getname() {
-	if (document.cookie === "") {
-		document.cookie =
-			"n=" +
-			prompt("请输入你的名字") +
-			";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=2147483647";
+	let n = getCookie("n");
+	if (!n) {
+		n = prompt("请输入你的名字") || "Anonymous";
+		setCookie("n", n);
 	}
-	return document.cookie.split("=")[1].split(";")[0];
+	return n;
 }
 var oricontent = {};
 let namee = (name0 = "Anonymous");
@@ -26,11 +25,9 @@ function gettime(time = +new Date()) {
 function cname() {
 	let a;
 	a = prompt("请输入你的新名字");
+	if (a === null || a === "") return;
 	document.getElementById("nname").innerText = "现在的用户名：" + a;
-	document.cookie =
-		"n=" +
-		a +
-		";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=2147483647";
+	setCookie("n", a);
 	namee = a;
 }
 function getch() {
@@ -50,7 +47,7 @@ function upload() {
 
 	var sha;
 	get("public/msg/" + ch + ".json", function (response, sha) {
-		let r = JSON.parse(response);
+		let r = typeof response === "string" ? JSON.parse(response) : response;
 		console.log(r);
 		if (!r.msg) r.msg = [];
 		r.msg[r.msg.length] = {
@@ -59,22 +56,17 @@ function upload() {
 			ts: Date.now(),
 			content: c,
 		};
-		put(
-			"public/msg/" + ch + ".json",
-			namee + " @ " + Date.now(),
-			JSON.stringify(r),
-			sha,
-			function () {
-				reload();
-			},
-		);
+		put("public/msg/" + ch + ".json", namee + " @ " + Date.now(), r, sha, function () {
+			reload();
+		});
 	});
 	reload();
 	window.scroll({
 		top: document.body.scrollHeight,
 		behavior: "smooth",
 	});
-	document.getElementsByClassName("editor").innerHTML = "";
+	document.getElementById("editor").value = "";
+	document.getElementById("preview").innerHTML = "";
 }
 var rrrr;
 function preRenderTex(source) {
@@ -99,10 +91,14 @@ function preRenderTex(source) {
 	return source;
 }
 
-const md = window
-	.markdownit({ html: true })
-	.use(window.markdownitTaskLists)
-	.use(window.markdownitMultimdTable);
+const iframe = document.getElementById("msg");
+
+iframe.onload = function () {
+	const doc = iframe.contentDocument || iframe.contentWindow.document;
+	iframe.style.height = doc.body.scrollHeight + "px";
+	iframe.style.width = doc.body.scrollWidth + "px";
+};
+const md = window.markdownit({ html: true }).use(window.markdownitTaskLists).use(window.markdownitMultimdTable);
 function diff(a, b) {
 	a.forEach((c) => {
 		if (b.includes(c)) {
@@ -131,7 +127,7 @@ function reload() {
 			const total = msg.length;
 			loadedEnd = total;
 			loadedStart = Math.max(0, total - pageSize);
-			ensureLoadMoreButton();
+			// ensureLoadMoreButton();
 			for (let i = loadedStart; i < loadedEnd; i++) {
 				render(msg[i]);
 			}
@@ -148,50 +144,50 @@ function reload() {
 	});
 }
 
-function ensureLoadMoreButton() {
-	if (document.getElementById("load-more")) return;
-	const chat = document.getElementById("chat");
-	const btn = document.createElement("button");
-	btn.id = "load-more";
-	btn.innerText = "加载更多历史消息";
-	btn.style.display = "block";
-	btn.style.margin = "10px auto";
-	btn.onclick = function () {
-		loadMoreMessages();
-	};
-	chat.parentNode.insertBefore(btn, chat);
-}
+// function ensureLoadMoreButton() {
+// 	if (document.getElementById("load-more")) return;
+// 	const chat = document.getElementById("chat");
+// 	const btn = document.createElement("button");
+// 	btn.id = "load-more";
+// 	btn.innerText = "加载更多历史消息";
+// 	btn.style.display = "block";
+// 	btn.style.margin = "10px auto";
+// 	btn.onclick = function () {
+// 		loadMoreMessages();
+// 	};
+// 	chat.parentNode.insertBefore(btn, chat);
+// }
 
-function loadMoreMessages() {
-	if (loadingMore) return;
-	if (loadedStart <= 0) return;
-	loadingMore = true;
-	const oldHeight = document.body.scrollHeight;
-	const newStart = Math.max(0, loadedStart - pageSize);
-	for (let i = newStart; i < loadedStart; i++) {
-		render(messagesCache[i], "prepend");
-	}
-	loadedStart = newStart;
-	if (loadedStart === 0) {
-		const btn = document.getElementById("load-more");
-		if (btn) btn.style.display = "none";
-	}
-	const newHeight = document.body.scrollHeight;
-	// keep view stable after prepending
-	window.scrollBy(0, newHeight - oldHeight);
-	loadingMore = false;
-}
+// function loadMoreMessages() {
+// 	if (loadingMore) return;
+// 	if (loadedStart <= 0) return;
+// 	loadingMore = true;
+// 	const oldHeight = document.body.scrollHeight;
+// 	const newStart = Math.max(0, loadedStart - pageSize);
+// 	for (let i = newStart; i < loadedStart; i++) {
+// 		render(messagesCache[i], "prepend");
+// 	}
+// 	loadedStart = newStart;
+// 	if (loadedStart === 0) {
+// 		const btn = document.getElementById("load-more");
+// 		if (btn) btn.style.display = "none";
+// 	}
+// 	const newHeight = document.body.scrollHeight;
+// 	// keep view stable after prepending
+// 	window.scrollBy(0, newHeight - oldHeight);
+// 	loadingMore = false;
+// }
 
 // infinite scroll: load more when scrolling near top
-window.addEventListener(
-	"scroll",
-	function () {
-		if (window.scrollY <= 120 && loadedStart > 0 && !loadingMore) {
-			loadMoreMessages();
-		}
-	},
-	{ passive: true },
-);
+// window.addEventListener(
+// 	"scroll",
+// 	function () {
+// 		if (window.scrollY <= 120 && loadedStart > 0 && !loadingMore) {
+// 			loadMoreMessages();
+// 		}
+// 	},
+// 	{ passive: true },
+// );
 
 setTimeout(reload, 200);
 
@@ -213,4 +209,12 @@ function crt() {
 	}
 	rtime = t * 1000;
 	document.getElementById("refreshtime").innerText = t;
+}
+
+function showname() {
+	document.getElementById("nname").innerText = "现在的用户名：" + getname();
+}
+showname();
+if (getarg().type != "u") {
+	document.getElementById("changechannel").style.display = "none";
 }

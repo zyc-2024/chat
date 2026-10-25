@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh_cn">
+
 	<head>
-		<link rel="icon" type="image/bmp" href="favicon.bmp" />
-		<link rel="stylesheet" href="css/all.css" />
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="HandheldFriendly" content="True" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="css/chat.css" />
 		<meta name="author" content="zyc2024" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content="chatting website by zyc2024" />
+
+		<link rel="icon" type="image/bmp" href="favicon.bmp" />
+		<link rel="stylesheet" href="css/all.css" />
+		<link rel="stylesheet" href="css/chat.css" />
 		<!-- <link rel="stylesheet" href="lib/line-numbers.min.css" /> -->
 		<link rel="stylesheet" href="katex/katex.min.css" />
-		<meta name="description" content="chatting website by zyc2024" />
 		<link rel="stylesheet" href="hljs/styles/a11y-light.min.css">
-		<script src="js/api.js"></script>
+
 		<title>zyc2024的聊天网页</title>
 	</head>
+
 	<body>
 		<h1 id="titlee">Loading...</h1>
 		<div>
@@ -23,231 +26,138 @@
 				<article>
 					<div>
 						<!-- 资源加载进度条 -->
-						<div
-							id="progress-container"
-							style="
+						<div id="progress-container" style="
 								width: 100%;
 								background: #eee;
 								height: 8px;
 								margin-bottom: 10px;
 							">
-							<div
-								id="progress-bar"
-								style="
+							<div id="progress-bar" style="
 									width: 0%;
 									height: 100%;
 									background: #4caf50;
 									transition: width 0.3s;
 								"></div>
 						</div>
-						<script>
-							// 需要加载的脚本资源
-							let typee = getarg().type;
-							let scripts = [
-								"lib/jquery-3.6.0.min.js",
-								"js/base64.min.js",
-								"lib/spark-md5.min.js",
-								"js/api.js",
-								"lib/markdown-it.min.js",
-								"lib/markdown-it-task-lists.min.js",
-								"lib/markdown-it-multimd-table.min.js",
-								"katex/katex.min.js",
-								"lib/purify.min.js",
-								"hljs/highlight.min.js",
-								// "hljs/highlightjs-line-numbers.min.js",
-								// "hljs/highlight.min.js"
-							];
-							if (typee == "u") {
-								scripts.push("js/f.js");
-							} else {
-								scripts.push("js/pf.js");
-							}
-							let loaded = 0;
-							const progressBar =
-								document.getElementById("progress-bar");
-							function updateProgress() {
-								const percent = Math.round(
-									(loaded / scripts.length) * 100
-								);
-								progressBar.style.width = percent + "%";
-								if (loaded === scripts.length) {
-									setTimeout(() => {
-										document.getElementById(
-											"progress-container"
-										).style.display = "none";
-									}, 300);
-								}
-							}
-							function loadScript(src) {
-								return new Promise((resolve, reject) => {
-									const s = document.createElement("script");
-									s.src = src;
-									s.onload = () => {
-										loaded++;
-										updateProgress();
-										resolve();
-									};
-									s.onerror = reject;
-									document.body.appendChild(s);
-								});
-							}
-							(async () => {
-								for (const src of scripts) {
-									// 收集 promise，最后一次迭代时等待全部完成并触发事件
-									window.__scriptLoadPromises =
-										window.__scriptLoadPromises || [];
-									window.__scriptLoadPromises.push(
-										loadScript(src)
-									);
-									if (
-										window.__scriptLoadPromises.length ===
-										scripts.length
-									) {
-										await Promise.all(
-											window.__scriptLoadPromises
-										);
-										// 所有脚本加载完毕，触发事件（或者在这里直接执行第104行的代码）
-										document.dispatchEvent(
-											new Event("allScriptsLoaded")
-										);
-									}
-								}
-							})();
-						</script>
 					</div>
-					<div id="chat"></div>
+					<iframe id="msg" frameborder="0"></iframe>
+					<!-- <div id="chat"></div> -->
 					<br />
-					<div style="display: flex; height: 200px">
-						<textarea
-							id="editor"
-							placeholder="输入消息，按Shift+Enter发送，右边是Markdown的预览" onkeydown="if (event.key === 'Enter' && event.shiftKey) { event.preventDefault(); upload(); }"></textarea>
+					<div id="toolbox">
+						<div style="display: flex; height: 200px">
+							<textarea id="editor" placeholder="输入消息，按Shift+Enter发送，右边是Markdown的预览"
+								onkeydown="if (event.key === 'Enter' && event.shiftKey) { event.preventDefault(); upload(); }"></textarea>
 
-						<div id="preview"></div>
+							<div id="preview"></div>
+						</div>
+						<br />
+						<button id="button" onclick="javascript:upload()">发送</button>
+						<button onclick="javascript:reload()">刷新</button>
+						<button onclick="javascript:cname()">改名</button>
+						<button onclick="javascript:window.location.href='/chat/'">回到主页</button>
+						<button onclick="javascript:crt()">修改刷新时间</button>
+						<br /><br />
+						现在刷新时间：<span id="refreshtime">5</span>秒
+						<div id="nname"></div>
 						<script>
-							// import hljs from "highlight.js";
-							(function () {
-								function init() {
-									// 初始化 markdown-it
-									const md = window
-										.markdownit({ html: true })
-										// .use(window.markdownitEmoji)
-										.use(window.markdownitTaskLists)
-										.use(window.markdownitMultimdTable);
-
-									// KaTeX 预处理
-									function preRenderTex(source) {
-										// 块级公式
-										source = source.replace(
-											/\$\$([\s\S]+?)\$\$/g,
-											(m, tex) =>
-												katex.renderToString(tex, {
-													displayMode: true,
-													throwOnError: false,
-													output: "html",
-												})
-										);
-										// 行内公式
-										source = source.replace(
-											/(^|[^$])\$([^\n$][^$]*?)\$([^$]|$)/g,
-											(m, p1, tex, p3) =>
-												p1 +
-												katex.renderToString(tex, {
-													displayMode: false,
-													throwOnError: false,
-													output: "html",
-												}) +
-												p3
-										);
-										return source;
-									}
-
-									function render() {
-										const src =
-											document.getElementById(
-												"editor"
-											).value;
-										const preProcessed = preRenderTex(src);
-										const dirty = md.render(preProcessed);
-
-										// 清理 XSS，同时保留 KaTeX 生成的 span/class
-										const clean = DOMPurify.sanitize(
-											dirty,
-											{
-												ADD_TAGS: ["span"],
-												ADD_ATTR: ["class", "style"],
-											}
-										);
-
-										document.getElementById(
-											"preview"
-										).innerHTML = clean;
-										
-									hljs.highlightAll();
-									}
-
-									document
-										.getElementById("editor")
-										.addEventListener("input", render);
-									render();
-									// hljs.initHighlightingOnLoad();
-									// hljs.initLineNumbersOnLoad();
-								}
-
-								// 如果依赖脚本已经就绪立即执行，否则等待 allScriptsLoaded 事件
-								if (
-									window.markdownit &&
-									window.katex &&
-									window.DOMPurify
-								) {
-									init();
-								} else {
-									document.addEventListener(
-										"allScriptsLoaded",
-										init,
-										{ once: true }
-									);
-								}
-							})();
 						</script>
+						<form id="changechannel"
+							onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?type=u&amp;ch='+document.getElementById('ch').value;return false;">
+							<input id="ch" placeholder="输入你想去的频道"><button type="submit">go!</button>
+						</form>
 					</div>
-					<br />
-					<button id="button" onclick="javascript:upload()">
-						发送
-					</button>
-					<button onclick="javascript:reload()">刷新</button>
-					<button onclick="javascript:cname()">改名</button>
-					<button onclick="javascript:window.location.href='/chat/'">
-						回到主页
-					</button>
-					<!-- <button
-						onclick="javascript:window.location.href='mdtest.html'">
-						全屏预览Markdown
-					</button> -->
-					<!-- <button
-						onclick="javascript:document.location.href='uf.html'">
-						上传文件界面
-					</button> -->
-					<button onclick="javascript:crt()">修改刷新时间</button>
-					<br /><br />
-					<script>
-						if (getarg().type == "u") {
-							document.getElementsByTagName(
-								"article"
-							)[0].innerHTML +=
-								'<form onsubmit="event.preventDefault();window.location.href=window.location.href.split(\'?\')[0]+\'?type=u&ch=\'+document.getElementById(\'ch\').value;return false;"><input id="ch" placeholder="输入你想去的频道"><button type="submit">go!</button></form>';
-						}
-					</script>
-					现在刷新时间：<span id="refreshtime">5</span>秒
-					<div id="nname"></div>
-					<script>
-						function showname() {
-							document.getElementById("nname").innerText =
-								"现在的用户名：" + getname();
-						}
-						// showname();
-					</script>
 				</article>
 			</div>
 		</div>
 	</body>
+
 </html>
+
+
+<script>
+	//Script loading bar generated by AI. 
+
+	// 需要加载的脚本资源
+	document.getElementById("msg").src = "showmsg.html" + window.location.search;
+	function getarg() {
+		let a = window.location.search.substring(1).split("&");
+		let c = {};
+		a.forEach(function (e) {
+			let b = e.split("=");
+			c[b[0]] = b[1];
+		});
+		return c;
+	}
+	let typee = getarg().type;
+	let scripts = [
+		"lib/jquery-3.6.0.min.js",
+		"js/base64.min.js",
+		"lib/spark-md5.min.js",
+		"js/api.js",
+		"lib/markdown-it.min.js",
+		"lib/markdown-it-task-lists.min.js",
+		"lib/markdown-it-multimd-table.min.js",
+		"katex/katex.min.js",
+		"lib/purify.min.js",
+		"hljs/highlight.min.js",
+		// "hljs/highlightjs-line-numbers.min.js",
+		// "hljs/highlight.min.js"
+		"js/render.js"
+	];
+	if (typee == "u") {
+		scripts.push("js/f.js");
+	} else {
+		scripts.push("js/pf.js");
+	}
+	let loaded = 0;
+	const progressBar =
+		document.getElementById("progress-bar");
+	function updateProgress() {
+		const percent = Math.round(
+			(loaded / scripts.length) * 100
+		);
+		progressBar.style.width = percent + "%";
+		if (loaded === scripts.length) {
+			setTimeout(() => {
+				document.getElementById(
+					"progress-container"
+				).style.display = "none";
+			}, 300);
+		}
+	}
+	function loadScript(src) {
+		return new Promise((resolve, reject) => {
+			const s = document.createElement("script");
+			s.src = src;
+			s.onload = () => {
+				loaded++;
+				updateProgress();
+				resolve();
+			};
+			s.onerror = reject;
+			document.body.appendChild(s);
+		});
+	}
+	(async () => {
+		for (const src of scripts) {
+			// 收集 promise，最后一次迭代时等待全部完成并触发事件
+			window.__scriptLoadPromises =
+				window.__scriptLoadPromises || [];
+			window.__scriptLoadPromises.push(
+				loadScript(src)
+			);
+			if (
+				window.__scriptLoadPromises.length ===
+				scripts.length
+			) {
+				await Promise.all(
+					window.__scriptLoadPromises
+				);
+				// 所有脚本加载完毕，触发事件（或者在这里直接执行第104行的代码）
+				document.dispatchEvent(
+					new Event("allScriptsLoaded")
+				);
+			}
+		}
+	})();
+</script>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh_cn">
+
 	<head>
 		<link rel="icon" type="image/bmp" href="favicon.bmp" />
 		<script src="lib/jquery-3.6.0.min.js"></script>
@@ -7,6 +8,7 @@
 		<script src="lib/spark-md5.min.js"></script>
 		<script src="js/crypto-js.js"></script>
 		<script src="js/api.js"></script>
+		<link rel="stylesheet" href="css/chat.css" />
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="HandheldFriendly" content="True" />
@@ -15,14 +17,17 @@
 			body {
 				background-color: rgb(239, 239, 239);
 			}
+
 			.a {
 				display: flex;
 				justify-content: center;
 				align-items: center;
 			}
+
 			h1 {
 				text-align: center;
 			}
+
 			.b {
 				background-color: rgb(0, 119, 255);
 				border: 1px solid rgb(0, 0, 0);
@@ -34,10 +39,12 @@
 				display: block;
 				margin: 0 auto;
 			}
+
 			#s {
 				display: block;
 				margin: 0 auto;
 			}
+
 			#i {
 				padding: 8px 12px;
 				border: 1px solid #0077ff;
@@ -50,6 +57,7 @@
 				outline: none;
 				margin: 10px 0;
 			}
+
 			.l1 {
 				display: flex;
 				width: 412.594px;
@@ -61,21 +69,18 @@
 			}
 		</style>
 		<meta name="author" content="zyc2024" />
-		<meta
-			name="description"
-			content="file uploading website, for chatting please goto .." />
+		<meta name="description" content="file uploading website, for chatting please goto .." />
 
 		<title>上传文件界面</title>
 	</head>
+
 	<body>
 		<h1 id="titlee">Loading...</h1>
 		<div>
 			<div class="a">
 				<article>
-					上传文件：
-					<input type="file" id="i" onchange="javascript:udf();" />
-					<br />
-					<div id="s"></div>
+					<textarea id="editor" placeholder="输入文件MD5，自动上传到云端，并提供下载链接，嫌泄露隐私的别用！"></textarea>
+
 					<button id="u" class="b" onclick="javascript:upf()">
 						上传
 					</button>
@@ -84,16 +89,15 @@
 					<br />
 					<div style="text-align: center">↓上传进度条↓</div>
 					<div id="p2b"></div>
-					<progress id="p2a" value="0" style="width: 100%"></progress
-					><br />
+					<progress id="p2a" value="0" style="width: 100%"></progress><br />
 					<div class="l1">
 						<div id="l">输出在这里！！</div>
 					</div>
 				</article>
 			</div>
 		</div>
-		<script src="js/ufold.js"></script>
+		<script src="js/ufb64.js"></script>
 		<!---->
 	</body>
-</html>
 
+</html>
