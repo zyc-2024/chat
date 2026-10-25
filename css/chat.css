@@ -1,5 +1,13 @@
 body {
 	background-color: rgb(239, 239, 239);
+	display: flex;
+	justify-content: center;
+	vertical-align: middle;
+	flex-direction: column;
+	align-items: center;
+}
+html {
+	vertical-align: middle;
 }
 .crow {
 	vertical-align: middle;
@@ -55,19 +63,20 @@ body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	width: 970.17px;
 	/* margin-right: 20%;
 	margin-left: 20%; */
 	margin-right: 0%;
 	margin-left: 0%;
-	
 }
-::-webkit-scrollbar{
+::-webkit-scrollbar {
 	width: 0px;
 }
 h1 {
 	text-align: center;
+	margin: 0 0 0 0;
 }
-#chat{
+#chat {
 	display: flex;
 	flex-direction: column;
 }
@@ -98,7 +107,10 @@ textarea {
 	overflow: auto;
 }
 
-#msg{
+#msg {
 	display: flex;
+	width: 100%;
+}
+article{
 	width: 100%;
 }

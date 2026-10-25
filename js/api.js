@@ -163,9 +163,9 @@ setTimeout(() => {
 	fetch("version.txt")
 		.then((response) => response.text())
 		.then((version) => {
-			document.getElementById("titlee").innerText = "zyc2024的聊天网页Ver" + version;
+			document.getElementById("titlee").innerText = "Chat Website Ver" + version;
 		})
 		.catch(() => {
-			document.getElementById("titlee").innerText = "zyc2024的聊天网页Ver¯\\_(ツ)_/¯";
+			document.getElementById("titlee").innerText = "Chat Website Ver¯\\_(ツ)_/¯";
 		});
 }, 500);

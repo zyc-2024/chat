@@ -197,11 +197,21 @@ function cch(event, m = 0) {
 	document.location.href = document.location.href.split("?")[0] + "?ch=" + v;
 }
 rtime = 5000;
-function tick() {
+function tickreload() {
 	reload();
 	setTimeout(tick, rtime);
 }
-tick();
+tickreload();
+function tick(func, time) {
+	func();
+	setTimeout(tick, time, func, time);
+}
+function resizemsg() {
+	document.getElementById("msg").style.height =
+		window.innerHeight - document.getElementById("toolbox").clientHeight - 2 * document.getElementById("titlee").clientHeight - 30 + "px";
+}
+tick(resizemsg,50);
+
 function crt() {
 	let t = prompt("请输入新的刷新时间（单位：秒）");
 	if (t === null || t === "" || isNaN(t) || !isFinite(t)) {
