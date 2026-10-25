@@ -11,6 +11,10 @@
 
 		<link rel="icon" type="image/bmp" href="favicon.bmp" />
 		<link rel="stylesheet" href="css/css.css" />
+		<link rel="stylesheet" href="css/auth.css" />
+		<script type="module" src="lib/site.min.js" async defer></script>
+		<script nomodule src="lib/site.compat.min.js" async defer></script>
+		<script src="js/auth.js"></script>
 		<!-- <link rel="stylesheet" href="lib/line-numbers.min.css" /> -->
 		<link rel="stylesheet" href="katex/katex.min.css" />
 		<link rel="stylesheet" href="hljs/styles/a11y-light.min.css">
@@ -18,7 +22,7 @@
 		<title>zyc2024的聊天网页</title>
 	</head>
 
-	<body>
+	<body data-auth-required="true">
 		<h1 id="titlee">Loading...</h1>
 		<div>
 			<div class="chat">
@@ -64,6 +68,7 @@
 						<!-- <br /><br /> -->
 						现在刷新时间：<span id="refreshtime">5</span>秒
 						<div id="nname"></div>
+						<div id="auth-status"></div>
 					</div>
 				</article>
 			</div>
@@ -170,10 +175,4 @@
 	}
 	window.addEventListener("resize", fitWidth);
 	document.addEventListener("DOMContentLoaded", fitWidth);
-</script>
-<script>
-	// alert("A"+document.getElementById("msg").clientHeight);
-	// alert("B"+window.innerHeight);
-	// alert("C"+document.getElementById("toolbox").clientHeight)
-	// alert("D"+document.getElementById("titlee").clientHeight);
 </script>

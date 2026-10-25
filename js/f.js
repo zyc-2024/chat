@@ -1,4 +1,17 @@
 function getname() {
+	if (
+		window.Auth &&
+		Auth.isRequired &&
+		Auth.isRequired() &&
+		Auth.isLoggedIn &&
+		!Auth.isLoggedIn()
+	) {
+		return "Anonymous";
+	}
+	if (window.Auth && Auth.isLoggedIn && Auth.isLoggedIn()) {
+		const name = Auth.getDisplayName();
+		if (name) return name;
+	}
 	let n = getCookie("n");
 	if (!n) {
 		n = prompt("请输入你的名字") || "Anonymous";
@@ -38,6 +51,11 @@ function cname() {
 	if (a === null || a === "") return;
 	document.getElementById("nname").innerText = "现在的用户名：" + a;
 	setCookie("n", a);
+	if (window.Auth && Auth.setDisplayName) {
+		Auth.setDisplayName(a).catch(function (e) {
+			console.error(e);
+		});
+	}
 	namee = a;
 }
 function getch() {
@@ -55,7 +73,11 @@ function upload(msg = null) {
 	} else {
 		c = document.getElementById("editor").value;
 	}
-	// document.getElementById("button").disabled = true;
+	var aa = document.getElementById("button");
+	aa.disabled = true;
+	aa.innerText = "发送中……";
+	aa.style.background = "#4a4a4a";
+
 	// setTimeout(function () {
 	// 	document.getElementById("button").disabled = false;
 	// }, 5000);
@@ -67,6 +89,7 @@ function upload(msg = null) {
 		if (!r.msg) r.msg = [];
 		r.msg[r.msg.length] = {
 			name: namee,
+			user: (window.Auth && Auth.currentUser && Auth.currentUser()) || "",
 			time: gettime(),
 			ts: Date.now(),
 			content: c,
@@ -77,7 +100,7 @@ function upload(msg = null) {
 			// window.reload();
 		});
 	});
-	reload();
+	reload(true);
 	window.scroll({
 		top: document.body.scrollHeight,
 		behavior: "smooth",
@@ -87,10 +110,17 @@ function upload(msg = null) {
 }
 window.addEventListener("message", function (event) {
 	if (event.data == "reload") {
-		reload();
+		reload(true);
+		window.parent.postMessage("ok");
+	}
+	if (event.data == "ok") {
+		var aa = document.getElementById("button");
+		aa.disabled = false;
+		aa.innerText = "发送";
+		aa.style.background = "#4f8cff";
+		// this.window.location.reload();
 	}
 });
-
 var rrrr;
 function preRenderTex(source) {
 	source = source.replace(/\$\$([\s\S]+?)\$\$/g, (m, tex) =>
@@ -124,7 +154,10 @@ function diff(a, b) {
 	return b;
 }
 
-function reload() {
+function reload(scroll = false) {
+	if (!window.location.href.match("show")) {
+		return;
+	}
 	get("public/msg/" + ch + ".json", function (response, sha) {
 		let content;
 		try {
@@ -157,11 +190,12 @@ function reload() {
 			messagesCache = msg.slice();
 			loadedEnd = msg.length;
 		}
-
-		window.scroll({
-			top: document.body.scrollHeight,
-			behavior: "smooth",
-		});
+		if (scroll) {
+			window.scroll({
+				top: document.body.scrollHeight,
+				behavior: "smooth",
+			});
+		}
 	});
 }
 
@@ -222,7 +256,9 @@ function tickreload() {
 	reload();
 	setTimeout(tickreload, rtime);
 }
-tickreload();
+if (window.location.href.match("show")) {
+	tickreload();
+}
 function tick1() {
 	// func();\
 	resizemsg();

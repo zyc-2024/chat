@@ -45,6 +45,11 @@ html {
 	font-size: x-large;
 	font-weight: bold;
 	color: #595959;
+	display: block;
+	text-decoration: none;
+}
+a.cname:hover {
+	text-decoration: underline;
 }
 .ctime {
 	font-size: small + 3px;

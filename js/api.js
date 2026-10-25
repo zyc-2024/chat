@@ -89,10 +89,18 @@ function renderMessageHTML(msg) {
 		ALLOWED_TAGS: [],
 		ALLOWED_ATTR: [],
 	});
+	const profileUser = msg.user || "";
+	const nameHTML = profileUser
+		? "<a class='cname' href='user.html?u=" +
+			encodeURIComponent(profileUser) +
+			"' target='_top'>" +
+			safeName +
+			"</a>"
+		: "<span class='cname'>" + safeName + "</span>";
 	return (
-		"<br><div class='crow'><span class='call'><div class='cname'>" +
-		safeName +
-		"</div><div class='ctime'>" +
+		"<br><div class='crow'><span class='call'>" +
+		nameHTML +
+		"<div class='ctime'>" +
 		safeTime +
 		"</div></span><div class='ccontent'>" +
 		clean +
@@ -144,6 +152,19 @@ function setCookie(name, value) {
 }
 
 function getname() {
+	if (
+		window.Auth &&
+		Auth.isRequired &&
+		Auth.isRequired() &&
+		Auth.isLoggedIn &&
+		!Auth.isLoggedIn()
+	) {
+		return "Anonymous";
+	}
+	if (window.Auth && Auth.isLoggedIn && Auth.isLoggedIn()) {
+		const name = Auth.getDisplayName();
+		if (name) return name;
+	}
 	let n = getCookie("n");
 	if (!n) {
 		n = prompt("请输入你的名字") || "Anonymous";
@@ -157,6 +178,11 @@ function cname() {
 	if (a === null || a === "") return;
 	document.getElementById("nname").innerText = "现在的用户名：" + a;
 	setCookie("n", a);
+	if (window.Auth && Auth.setDisplayName) {
+		Auth.setDisplayName(a).catch(function (e) {
+			console.error(e);
+		});
+	}
 	namee = a;
 }
 setTimeout(() => {

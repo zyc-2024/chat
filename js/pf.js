@@ -39,6 +39,7 @@ function upload() {
 		r = JSON.parse(response);
 		r.msg[r.msg.length] = {
 			name: namee,
+			user: (window.Auth && Auth.currentUser && Auth.currentUser()) || "",
 			time: gettime(),
 			content: c,
 		};
@@ -147,10 +148,19 @@ function reload() {
 				ALLOWED_ATTR: [],
 			});
 
+			const profileUser = msg[i].user || "";
+			const nameHTML = profileUser
+				? "<a class='cname' href='user.html?u=" +
+					encodeURIComponent(profileUser) +
+					"' target='_top'>" +
+					safeName +
+					"</a>"
+				: "<span class='cname'>" + safeName + "</span>";
+
 			document.getElementById("chat").innerHTML +=
-				"<br><div class='crow'><span class='call'><div class='cname'>" +
-				safeName +
-				"</div><div class='ctime'>" +
+				"<br><div class='crow'><span class='call'>" +
+				nameHTML +
+				"<div class='ctime'>" +
 				safeTime +
 				"</div></span><div class='ccontent'>" +
 				clean +
