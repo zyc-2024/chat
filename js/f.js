@@ -213,7 +213,8 @@ function tick(func, time) {
 }
 function resizemsg() {
 	document.getElementById("msg").style.height =
-		window.innerHeight - document.getElementById("toolbox").clientHeight - 2 * document.getElementById("titlee").clientHeight - 30 + "px";
+		window.innerHeight/document.body.style.zoom - document.getElementById("toolbox").clientHeight - 2 * document.getElementById("titlee").clientHeight - 30 + "px";
+	
 }
 tick(resizemsg,50);
 

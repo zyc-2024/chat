@@ -10,8 +10,7 @@
 		<meta name="description" content="chatting website by zyc2024" />
 
 		<link rel="icon" type="image/bmp" href="favicon.bmp" />
-		<link rel="stylesheet" href="css/all.css" />
-		<link rel="stylesheet" href="css/chat.css" />
+		<link rel="stylesheet" href="css/css.css" />
 		<!-- <link rel="stylesheet" href="lib/line-numbers.min.css" /> -->
 		<link rel="stylesheet" href="katex/katex.min.css" />
 		<link rel="stylesheet" href="hljs/styles/a11y-light.min.css">
@@ -56,15 +55,13 @@
 						<button onclick="javascript:cname()">改名</button>
 						<button onclick="javascript:window.location.href='/chat/'">回到主页</button>
 						<button onclick="javascript:crt()">修改刷新时间</button>
-						<br /><br />
-						现在刷新时间：<span id="refreshtime">5</span>秒
-						<div id="nname"></div>
-						<script>
-						</script>
 						<form id="changechannel"
 							onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?type=u&amp;ch='+document.getElementById('ch').value;return false;">
 							<input id="ch" placeholder="输入你想去的频道"><button type="submit">go!</button>
 						</form>
+						<br /><br />
+						现在刷新时间：<span id="refreshtime">5</span>秒
+						<div id="nname"></div>
 					</div>
 				</article>
 			</div>
@@ -160,6 +157,17 @@
 			}
 		}
 	})();
+
+	const shenmi = 970.16;
+	function fitWidth() {
+		const scale = Math.min(
+			1,
+			window.innerWidth / shenmi,
+		);
+		document.body.style.zoom = scale;
+	}
+	window.addEventListener("resize", fitWidth);
+	document.addEventListener("DOMContentLoaded", fitWidth);
 </script>
 <script>
 	// alert("A"+document.getElementById("msg").clientHeight);
