@@ -54,8 +54,20 @@ html {
 .ccontent {
 	margin-left: 30px;
 	/* text-align: center; */
-	vertical-align: middle;
+	/* vertical-align: middle; */
+	/* display: block;
+	word-wrap: break-word;
+	overflow: hidden;
+	word-break: break-all; */
+	overflow: hidden;
+	width: 940.16px;
 }
+/* pre code span {
+	display: block;
+	word-wrap: break-word;
+	overflow: hidden;
+	word-break: break-all;
+} */
 .call {
 	background-color: rgb(251, 251, 251);
 }
@@ -79,6 +91,7 @@ h1 {
 #chat {
 	display: flex;
 	flex-direction: column;
+	width: 970.16px;
 }
 #editor {
 	width: 50%;
@@ -111,6 +124,6 @@ textarea {
 	display: flex;
 	width: 100%;
 }
-article{
+article {
 	width: 100%;
 }

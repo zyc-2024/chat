@@ -38,8 +38,10 @@ if (namee === "" || namee === null) {
 }
 var ch = getch();
 
-function upload() {
-	let c = document.getElementById("editor").value;
+function upload(msg=null) {
+	let c;
+	if(msg){c=msg;}
+	else{c = document.getElementById("editor").value;}
 	document.getElementById("button").disabled = true;
 	setTimeout(function () {
 		document.getElementById("button").disabled = false;
@@ -94,6 +96,9 @@ function preRenderTex(source) {
 const iframe = document.getElementById("msg");
 
 iframe.onload = function () {
+	Array.from(document.getElementsByTagName("pre")).forEach(function(r){
+		r.tagName="div";
+	});
 	const doc = iframe.contentDocument || iframe.contentWindow.document;
 	iframe.style.height = doc.body.scrollHeight + "px";
 	iframe.style.width = doc.body.scrollWidth + "px";
