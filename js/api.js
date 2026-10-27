@@ -1,4 +1,3 @@
-
 function read(f) {
 	return $.ajax({
 		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/" + f + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa",
@@ -12,7 +11,7 @@ function read(f) {
 function put(
 	path,
 	messages,
-	data,
+	datas,
 	sha,
 	nextfunc = function (response) {
 		return response;
@@ -27,11 +26,41 @@ function put(
 		data: JSON.stringify({
 			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
 			message: messages,
-			content: Base64.encode(JSON.stringify(data)),
+			content: Base64.encode(JSON.stringify(datas)),
 			sha: sha,
 		}),
 		crossDomain: true,
 		contentType: "application/json;charset=UTF-8",
+	})
+		.done(function (response) {
+			// console.log(response);
+			return nextfunc(typeof response === "string" ? JSON.parse(response) : response);
+		})
+		.fail(function (error) {
+			return failfunc(error);
+		});
+}
+function post(
+	path,
+	_message,
+	_data,
+	nextfunc = function (response) {
+		return response;
+	},
+	failfunc = function (error) {
+		console.error("Error fetching " + path + ": ", error);
+	},
+) {
+	return $.ajax({
+		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" + encodeURIComponent(path),
+		crossDomain: true,
+		method: "post",
+		contentType: "application/json;charset=UTF-8",
+		data: JSON.stringify({
+			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
+			content: Base64.encode(JSON.stringify(_data)),
+			message: _message,
+		}),
 	})
 		.done(function (response) {
 			// console.log(response);
@@ -93,11 +122,7 @@ function renderMessageHTML(msg) {
 	});
 	const profileUser = msg.user || "";
 	const nameHTML = profileUser
-		? "<a class='cname' href='user.html?u=" +
-			encodeURIComponent(profileUser) +
-			"' target='_top'>" +
-			safeName +
-			"</a>"
+		? "<a class='cname' href='user.html?u=" + encodeURIComponent(profileUser) + "' target='_top'>" + safeName + "</a>"
 		: "<span class='cname'>" + safeName + "</span>";
 	return (
 		"<br><div class='crow'><span class='call'>" +
@@ -157,13 +182,7 @@ function deleteCookie(name) {
 }
 
 function getname() {
-	if (
-		window.Auth &&
-		Auth.isRequired &&
-		Auth.isRequired() &&
-		Auth.isLoggedIn &&
-		!Auth.isLoggedIn()
-	) {
+	if (window.Auth && Auth.isRequired && Auth.isRequired() && Auth.isLoggedIn && !Auth.isLoggedIn()) {
 		return "Anonymous";
 	}
 	if (window.Auth && Auth.isLoggedIn && Auth.isLoggedIn()) {

@@ -1,18 +1,76 @@
-function register(username, password) {
-	$.ajax({
-		url: "https://global.frcapi.com/api/v2/captcha/siteverify",
-		crossDomain: true,
-		method: "post",
-		headers: {
-			"X-API-Key": "apikey_fc2bLLdeen_MYPz0qV4NbLu7SWFn0IcZUq8CBFR3sWy",
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Methods": "*",
+function register(username, password, password2) {
+	var error = $("#error");
+	error.text("");
+	var notok=false;
+	get(
+		"users/" + username + ".json",
+		function (...e) {},
+		function (...e) {
+			notok = true;
 		},
-		body: {
-			response: $(".frc-captcha>input")[0].value,
-		},
-	}).then(function (response) {
-		console.log(response);
-		return typeof response === "string" ? JSON.parse(response) : response;
+	);
+	if (notok) {
+		a.text("错误：用户名已存在！（此用户名不与实际聊天中用户名对应）");
+		return;
+	}
+	username = username.trim();
+	if (!username || !password) {
+		error.text("错误：请输入用户名和密码！");
+		return;
+	}
+	if (password !== password2) {
+		error.text("错误：两次输入的密码不一致！");
+		return;
+	}
+
+	var captcha = $(".frc-captcha>input")[0];
+	if (!captcha || !captcha.value.startsWith("AQQA.")) {
+		error.text("错误：请完成验证码！");
+		return;
+	}
+
+	var salt = CryptoJS.lib.WordArray.random(16);
+	var iv = CryptoJS.lib.WordArray.random(16);
+	var key = CryptoJS.PBKDF2(password, salt, {
+		keySize: 256 / 32,
+		iterations: 100000,
+		hasher: CryptoJS.algo.SHA256,
 	});
+	var profile = {
+		user: username,
+		reg_time: new Date().toISOString(),
+		pf_header: "https://zyc2024.com.cn/res/1.18.png",
+		avatar: "https://zyc2024.com.cn/res/nailong.png",
+		profile: "Hello everyone!\nMy name is" + username,
+		pf_text: "Nothing here to be viewed...",
+	};
+	var record = {
+		version: 1,
+		salt: salt.toString(),
+		iv: iv.toString(),
+		data: CryptoJS.AES.encrypt(JSON.stringify(profile), key, { iv: iv }).toString(),
+	};
+	var path = "users/" + username + ".json";
+
+	get(
+		path,
+		function () {
+			error.text("错误：用户名已存在！");
+		},
+		function (request) {
+			post(
+				path,
+				"user_register_" + new Date().toISOString() + "_" + username,
+				record,
+				function () {
+					setCookie("session", key.toString());
+					error.text("注册成功！正在跳转回主页……");
+					window.location.href="../"
+				},	
+				function () {
+					error.text("错误：注册数据保存失败，请稍后重试！");
+				},
+			);
+		},
+	);
 }

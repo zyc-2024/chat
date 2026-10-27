@@ -22,13 +22,14 @@
                 <p>用户名</p>
                 <input type="text" id="username" placeholder="请输入用户名"><br>
                 <p>密码</p>
-                <input type="text" id="password" placeholder="请输入密码">
+                <input type="password" id="password" placeholder="请输入密码">
                 <p>重复密码</p>
-                <input type="text" id="password2" placeholder="请再次输入密码">
+                <input type="password" id="password2" placeholder="请再次输入密码">
                 <br>
                 <div class="frc-captcha" data-sitekey="FCMJOIQHSPPBEI93" data-api-endpoint="global"></div><br>
                 <button class="button" type="button"
-                    onclick="javascript:register($('#username').value,$('#password').value)">注册</button>
+                    onclick="javascript:register($('#username')[0].value,$('#password')[0].value,$('#password2')[0].value)">注册</button>
+                <div id="error"></div>
             </div>
         </div>
     </body>
