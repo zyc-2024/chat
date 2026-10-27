@@ -1,0 +1,204 @@
+* {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+.showresult {
+	display: none;
+}
+
+.mask {
+	position: fixed;
+	inset: 0;
+	z-index: 19891014;
+	background: #000;
+	opacity: 0.5;
+}
+
+.bg-image {
+	position: fixed;
+	z-index: -1;
+	/* background-image: url("https://zyc2024.com.cn/res/1.18.png"); */
+	width: 100%;
+	height: 100%;
+	background-repeat: no-repeat;
+}
+
+.alert {
+	position: fixed;
+	top: calc(50% - 86px);
+	left: calc(50% - 284px);
+	/* margin-top: calc(50% - 86px);
+                margin-left: calc(50% - 284px);
+                padding-top: calc(50% - 86px);
+                padding-left: calc(50% - 284px); */
+	z-index: 19891015;
+	margin: 0;
+	padding: 0;
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 1px 1px 50px rgba(0, 0, 0, 0.3);
+}
+
+.alerttext {
+	padding: 50px;
+	font-size: x-large;
+	font-weight: bold;
+}
+
+.buttonnn {
+	display: flex;
+	margin-bottom: 10px;
+	padding: 3px 12px;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	background-image: none;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.42857143;
+	text-align: center;
+	vertical-align: middle;
+	white-space: nowrap;
+	touch-action: manipulation;
+	cursor: pointer;
+	user-select: none;
+	transition: all 200ms ease;
+}
+
+.right {
+	float: right;
+	margin-right: 10px;
+}
+
+.left {
+	float: left;
+	margin-left: 10px;
+}
+
+.graybutton {
+	border-color: #ddd;
+}
+
+.graybutton:hover,
+.graybutton:focus,
+.graybutton:active,
+.graybutton.active,
+.open > .dropdown-toggle.graybutton {
+	border-color: #ddd;
+	background-color: #f5f5f5;
+}
+
+.redbutton {
+	border-color: #a50001;
+	background-color: #a50001;
+	color: #fff;
+}
+
+.redbutton:hover,
+.redbutton:focus,
+.redbutton:active,
+.redbutton.active,
+.open > .dropdown-toggle.redbutton {
+	border-color: #d80001;
+	background-color: #d80001;
+}
+
+.submitbutton {
+	height: 30px;
+	border-color: #1f6b10;
+	background-color: #1f6b10;
+	color: #fff;
+}
+
+.submitbutton:hover,
+.submitbutton:focus,
+.submitbutton:active,
+.submitbutton.active,
+.open > .dropdown-toggle.submitbutton {
+	border-color: #3ace1c;
+	background-color: #3ace1c;
+}
+
+.form {
+	top: 10%;
+	bottom: 10%;
+	left: 55%;
+	right: 5%;
+	border: 6px solid#fff;
+	background-color: #ffffffa2;
+	position: fixed;
+	border-radius: 5%;
+	padding: 3%;
+	color: #000;
+	font-size: clamp(0.85rem, 1.6vw, 1.75rem);
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+input {
+	border-color: #2763a8;
+	border-bottom-left-radius: 0;
+	border-top-right-radius: 0;
+	height: 24px;
+	position: relative;
+	color: rgb(85, 85, 85);
+	background-color: rgb(255, 255, 255);
+	background-image: none;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 10px;
+}
+
+.captcha {
+	vertical-align: middle;
+	display: inline-flex;
+	align-items: center;
+}
+
+.sb-plot-left {
+	left: 5%;
+	right: 70%;
+}
+
+.sb-plot-right {
+	left: 30%;
+	right: 45%;
+}
+
+.sb-plot {
+	position: fixed;
+	border-radius: 5%;
+	top: 10%;
+	bottom: 10%;
+	padding: 0;
+	color: #fff;
+	font-size: xx-large;
+	font-weight: bolder;
+	font-style: italic;
+	overflow-wrap: anywhere;
+	font-size: clamp(0.85rem, 1.7vw, 1.75rem);
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.plot2 {
+	color: #2763a8;
+}
+
+input {
+	vertical-align: middle;
+	display: inline;
+}
+
+@media (max-width: 768px) {
+	body {
+		zoom: 0.85;
+	}
+}
+
+@media (max-width: 480px) {
+	body {
+		zoom: 0.7;
+	}
+}

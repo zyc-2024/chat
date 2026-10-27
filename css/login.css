@@ -1,0 +1,94 @@
+* {
+	padding: 0;
+	margin: 0;
+}
+h2 {
+	vertical-align: middle;
+	text-align: center;
+}
+.bg-image {
+	position: fixed;
+	z-index: -1;
+	background-image: url("https://zyc2024.com.cn/res/1.18.png");
+	width: 100%;
+	height: 100%;
+	background-repeat: no-repeat;
+}
+.margin{
+	height: 10%;
+}
+.button {
+	display: flex;
+	margin-bottom: 10px;
+	padding: 3px 32px;
+	border: 2px solid transparent;
+	border-radius: 8px;
+	background-image: none;
+	font-size: 28px;
+	font-weight: 400;
+	line-height: 1.4;
+	text-align: center;
+	vertical-align: middle;
+	white-space: nowrap;
+	touch-action: manipulation;
+	cursor: pointer;
+	user-select: none;
+	transition: all 200ms ease;
+	border-color: #0a87cf;
+	justify-content: center;
+	align-items: center;
+}
+
+
+.button:hover,
+.button:focus,
+.button:active,
+.button.active,
+.open > .dropdown-toggle.button {
+	border-color: #0a87cf;
+	background-color: #dbdada;
+}
+
+.form {
+	margin: 0% 25% 10% 25%;
+	border: 3px solid#00000013;
+	background-color: #e7e7e7cb;
+	display: flex;
+	flex-direction: column;
+	border-radius: 1%;
+	padding: 3%;
+	color: #000;
+	font-size: clamp(0.85rem, 1.6vw, 1.75rem);
+	overflow-y: auto;
+	overflow-x: hidden;
+	align-items: center;
+}
+
+input {
+	border-color: #16273b;
+	border-bottom-left-radius: 0;
+	border-top-right-radius: 0;
+	height: 50px;
+	position: relative;
+	color: rgb(85, 85, 85);
+	font-size: 28px;
+	background-color: rgb(255, 255, 255);
+	background-image: none;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 10px;
+	vertical-align: middle;
+	display: inline;
+}
+
+@media (max-width: 768px) {
+	body {
+		zoom: 0.85;
+	}
+}
+
+@media (max-width: 480px) {
+	body {
+		zoom: 0.7;
+	}
+}
