@@ -1,161 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>用户主页</title>
-		<link rel="icon" type="image/bmp" href="favicon.bmp" />
-		<style>
-			* {
-				box-sizing: border-box;
-			}
-			body {
-				margin: 0;
-				padding: 40px 16px;
-				background: rgb(239, 239, 239);
-				color: #333;
-				font-family: "Microsoft YaHei", sans-serif;
-			}
-			.card {
-				width: min(640px, 100%);
-				margin: 0 auto;
-				padding: 28px;
-				background: #fff;
-				border-radius: 12px;
-				box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
-			}
-			h1 {
-				margin: 0 0 20px;
-				font-size: 26px;
-				text-align: center;
-				word-break: break-all;
-			}
-			.row {
-				display: flex;
-				gap: 12px;
-				padding: 12px 0;
-				border-bottom: 1px solid #eee;
-			}
-			.row:last-of-type {
-				border-bottom: 0;
-			}
-			.label {
-				flex: 0 0 110px;
-				color: #888;
-			}
-			.value {
-				flex: 1;
-				word-break: break-word;
-				white-space: pre-wrap;
-			}
-			.actions {
-				margin-top: 22px;
-				text-align: center;
-			}
-			.actions a {
-				display: inline-block;
-				padding: 6px 14px;
-				border: 1px solid #ddd;
-				border-radius: 8px;
-				color: #333;
-				text-decoration: none;
-			}
-			.actions a:hover {
-				background: #f5f5f5;
-			}
-			.empty {
-				padding: 30px 0;
-				color: #888;
-				text-align: center;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="card" id="profile">
-			<div class="empty">加载中…</div>
-		</div>
-		<script src="js/auth.js"></script>
-		<script>
-			(function () {
-				const box = document.getElementById("profile");
-				const user = new URLSearchParams(window.location.search).get("u") || "";
 
-				function formatTime(value) {
-					if (!value) return "未知";
-					const date = new Date(value);
-					if (isNaN(date.getTime())) return value;
-					return date.toLocaleString("zh-CN");
-				}
+    <head>
+        <title>xxx的用户主页</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/user.css" />
+    </head>
 
-				function row(label, value) {
-					const wrap = document.createElement("div");
-					wrap.className = "row";
-					const left = document.createElement("div");
-					left.className = "label";
-					left.textContent = label;
-					const right = document.createElement("div");
-					right.className = "value";
-					right.textContent = value || "暂无";
-					wrap.appendChild(left);
-					wrap.appendChild(right);
-					return wrap;
-				}
+    <body>
+        <div class="bg-image"></div>
+        <div class="customtext"></div>
+        <div class="form">
+            <div class="pfp"></div>
+            <div class="name"></div>
+            <div class="large"></div>
+            <div class="info"></div>
+        </div>
+    </body>
+    <script src="js/user.js"></script>
 
-				function renderEmpty(text) {
-					box.innerHTML = "";
-					const empty = document.createElement("div");
-					empty.className = "empty";
-					empty.textContent = text;
-					box.appendChild(empty);
-					box.appendChild(actions());
-				}
-
-				function actions() {
-					const wrap = document.createElement("div");
-					wrap.className = "actions";
-					const link = document.createElement("a");
-					link.href = "index.html";
-					link.textContent = "返回主页";
-					wrap.appendChild(link);
-					return wrap;
-				}
-
-				async function run() {
-					if (!user) {
-						renderEmpty("未指定用户");
-						return;
-					}
-					if (!window.Auth) {
-						renderEmpty("登录模块加载失败");
-						return;
-					}
-					let data;
-					try {
-						data = await Auth.getProfile(user);
-					} catch (error) {
-						renderEmpty("读取失败：" + error.message);
-						return;
-					}
-					if (!data) {
-						renderEmpty("未找到该用户");
-						return;
-					}
-					const settings = data.settings || {};
-					const profile = data.profile || {};
-					box.innerHTML = "";
-					const title = document.createElement("h1");
-					title.textContent = data.username;
-					box.appendChild(title);
-					box.appendChild(row("用户名", data.username));
-					box.appendChild(row("注册时间", formatTime(data.registeredAt)));
-					box.appendChild(row("上次使用的名称", settings.lastName || data.username));
-					box.appendChild(row("上次登录", formatTime(settings.lastLogin)));
-					box.appendChild(row("个人简介", profile.bio || "暂无"));
-					box.appendChild(actions());
-				}
-
-				run();
-			})();
-		</script>
-	</body>
 </html>

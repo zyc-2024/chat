@@ -1,3 +1,4 @@
+
 function read(f) {
 	return $.ajax({
 		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/" + f + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa",
@@ -73,6 +74,7 @@ function getarg() {
 	});
 	return c;
 }
+
 //chatkey 19f7b43872c256d52d1bc71cbd2d0ffa
 function renderMessageHTML(msg) {
 	const preProcessed = preRenderTex(msg.content || "");
@@ -150,6 +152,9 @@ function getCookie(name) {
 function setCookie(name, value) {
 	document.cookie = name + "=" + encodeURIComponent(value) + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;max-age=2147483647";
 }
+function deleteCookie(name) {
+	document.cookie = name + "=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+}
 
 function getname() {
 	if (
@@ -189,9 +194,11 @@ setTimeout(() => {
 	fetch("version.txt")
 		.then((response) => response.text())
 		.then((version) => {
-			document.getElementById("titlee").innerHTML = "Chat Website Ver" + version;
+			const title = document.getElementById("titlee");
+			if (title) title.innerHTML = "Chat Website Ver" + version;
 		})
 		.catch(() => {
-			document.getElementById("titlee").innerHTML = "Chat Website Ver¯\\_(ツ)_/¯";
+			const title = document.getElementById("titlee");
+			if (title) title.innerHTML = "Chat Website Ver¯\\_(ツ)_/¯";
 		});
 }, 500);

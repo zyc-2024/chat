@@ -62,7 +62,7 @@ function upf() {
 			xhr.open(
 				"POST",
 				"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/f%2F" +
-					md5.slice(0, 6) +
+					md5 +
 					"%2F" +
 					encodeURIComponent(file.name),
 				true
@@ -89,7 +89,7 @@ function upf() {
 							"上传成功！要引用这个文件，复制下面的代码到聊天框：<br><code class='l'>[" +
 							file.name +
 							"](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
-							md5.slice(0, 6) +
+							md5 +
 							"%2F" +
 							encodeURIComponent(file.name) +
 							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>" +
@@ -102,7 +102,7 @@ function upf() {
 							"<br><br>虽然上传失败了但是也给你链接：<br><code class='l'>[" +
 							file.name +
 							"](https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F" +
-							md5.slice(0, 6) +
+							md5 +
 							"%2F" +
 							encodeURIComponent(file.name) +
 							"?access_token=19f7b43872c256d52d1bc71cbd2d0ffa)</code><br><br>" +
