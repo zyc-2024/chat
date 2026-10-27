@@ -21,9 +21,9 @@
                 <p>用户名</p>
                 <input type="text" id="username" placeholder="请输入用户名"><br>
                 <p>密码</p>
-                <input type="text" id="" placeholder="请输入密码">
+                <input type="text" id="password" placeholder="请输入密码">
                 <br>
-                <button class="button" type="button" onclick="javascript:login()">登录</button>
+                <button class="button" type="button" onclick="javascript:login($('#username').value,$('#password').value)">登录</button>
             </div>
         </div>
     </body>

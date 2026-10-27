@@ -8,8 +8,7 @@ let namee = (name0 = "Anonymous");
 
 namee = name0 = getname();
 //md stands for message directory
-let md5 =
-	"private/msg/" + getarg().id + "_" + SparkMD5.hash(getarg().key) + ".json";
+let md5 = "private/msg/" + getarg().id + "_" + SparkMD5.hash(getarg().key) + ".json";
 var eee;
 
 function getch() {
@@ -39,24 +38,17 @@ function upload() {
 		r = JSON.parse(response);
 		r.msg[r.msg.length] = {
 			name: namee,
-			user: (window.Auth && Auth.currentUser && Auth.currentUser()) || "",
 			time: gettime(),
 			content: c,
 		};
-		$.get(
-			"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
-				encodeURIComponent(md5),
-			{
-				access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
-			}
-		).done(function (response) {
+		$.get("https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" + encodeURIComponent(md5), {
+			access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",
+		}).done(function (response) {
 			eee = response.sha;
 			sha = response.sha;
 			var t = new Date();
 			$.ajax({
-				url:
-					"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
-					encodeURIComponent(md5),
+				url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" + encodeURIComponent(md5),
 				crossDomain: true,
 				method: "PUT",
 				contentType: "application/json;charset=UTF-8",
@@ -82,7 +74,7 @@ function preRenderTex(source) {
 			displayMode: true,
 			throwOnError: false,
 			output: "html",
-		})
+		}),
 	);
 	// 行内公式
 	source = source.replace(
@@ -94,7 +86,7 @@ function preRenderTex(source) {
 				throwOnError: false,
 				output: "html",
 			}) +
-			p3
+			p3,
 	);
 	return source;
 }
@@ -138,7 +130,6 @@ function reload() {
 				ADD_ATTR: ["class", "style"],
 			});
 
-			// 对用户名和时间也进行简单清理
 			const safeName = DOMPurify.sanitize(msg[i].name || "Anonymous", {
 				ALLOWED_TAGS: [],
 				ALLOWED_ATTR: [],
@@ -148,14 +139,7 @@ function reload() {
 				ALLOWED_ATTR: [],
 			});
 
-			const profileUser = msg[i].user || "";
-			const nameHTML = profileUser
-				? "<a class='cname' href='user.html?u=" +
-					encodeURIComponent(profileUser) +
-					"' target='_top'>" +
-					safeName +
-					"</a>"
-				: "<span class='cname'>" + safeName + "</span>";
+			const nameHTML = "<span class='cname'>" + safeName + "</span>";
 
 			document.getElementById("chat").innerHTML +=
 				"<br><div class='crow'><span class='call'>" +
@@ -171,9 +155,7 @@ function reload() {
 }
 setTimeout(reload(), 200);
 $.ajax({
-	url:
-		"https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" +
-		encodeURIComponent(md5),
+	url: "https://gitee.com/api/v5/repos/zyc-2024/chat/contents/" + encodeURIComponent(md5),
 	crossDomain: true,
 	data: {
 		access_token: "19f7b43872c256d52d1bc71cbd2d0ffa",

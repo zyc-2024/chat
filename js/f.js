@@ -1,17 +1,4 @@
 function getname() {
-	if (
-		window.Auth &&
-		Auth.isRequired &&
-		Auth.isRequired() &&
-		Auth.isLoggedIn &&
-		!Auth.isLoggedIn()
-	) {
-		return "Anonymous";
-	}
-	if (window.Auth && Auth.isLoggedIn && Auth.isLoggedIn()) {
-		const name = Auth.getDisplayName();
-		if (name) return name;
-	}
 	let n = getCookie("n");
 	if (!n) {
 		n = prompt("请输入你的名字") || "Anonymous";
@@ -51,11 +38,6 @@ function cname() {
 	if (a === null || a === "") return;
 	document.getElementById("nname").innerText = "现在的用户名：" + a;
 	setCookie("n", a);
-	if (window.Auth && Auth.setDisplayName) {
-		Auth.setDisplayName(a).catch(function (e) {
-			console.error(e);
-		});
-	}
 	namee = a;
 }
 function getch() {
@@ -89,7 +71,6 @@ function upload(msg = null) {
 		if (!r.msg) r.msg = [];
 		r.msg[r.msg.length] = {
 			name: namee,
-			user: (window.Auth && Auth.currentUser && Auth.currentUser()) || "",
 			time: gettime(),
 			ts: Date.now(),
 			content: c,
