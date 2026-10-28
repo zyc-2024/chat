@@ -1,3 +1,5 @@
+var ch = decodeURIComponent(getch());
+let md5 = getarg().type == "u" ? "public/msg/" + ch + ".json" : "private/msg/" + getarg().id + "_" + SparkMD5.hash(getarg().key) + ".json";
 function getname() {
 	let n = getCookie("n");
 	if (!n) {
@@ -59,13 +61,13 @@ function upload(msg = null) {
 	aa.disabled = true;
 	aa.innerText = "发送中……";
 	aa.style.background = "#4a4a4a";
-
+	reload();
 	// setTimeout(function () {
 	// 	document.getElementById("button").disabled = false;
 	// }, 5000);
 
 	var sha;
-	get("public/msg/" + ch + ".json", function (response, sha) {
+	get(md5, function (response, sha) {
 		let r = typeof response === "string" ? JSON.parse(response) : response;
 		console.log(r);
 		if (!r.msg) r.msg = [];
@@ -75,7 +77,7 @@ function upload(msg = null) {
 			ts: Date.now(),
 			content: c,
 		};
-		put("public/msg/" + ch + ".json", namee + " @ " + Date.now(), r, sha, function () {
+		put(md5, namee + " @ " + Date.now(), r, sha, function () {
 			// reload();
 			iframe.contentWindow.postMessage("reload");
 			// window.reload();
@@ -139,7 +141,7 @@ function reload(scroll = false) {
 	if (!window.location.href.match("show")) {
 		return;
 	}
-	get("public/msg/" + ch + ".json", function (response, sha) {
+	get(md5, function (response, sha) {
 		let content;
 		try {
 			if (typeof response === "string") {
