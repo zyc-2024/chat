@@ -92,6 +92,7 @@ function upload(msg = null) {
 		if (!r.msg) r.msg = [];
 		r.msg[r.msg.length] = {
 			name: namee,
+			user: getCookie("uname"),
 			time: gettime(),
 			ts: Date.now(),
 			content: c,
@@ -189,6 +190,7 @@ function reload(scroll = false) {
 			loadedStart = Math.max(0, total - pageSize);
 			// ensureLoadMoreButton();
 			for (let i = loadedStart; i < loadedEnd; i++) {
+				// console.log(render);
 				render(msg[i]);
 			}
 			window.scrollTo(0, document.body.scrollHeight);

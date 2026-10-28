@@ -244,6 +244,7 @@ function _decrypt(data, password, version = 1) {
 	return JSON.parse(plaintext);
 }
 
+//load version ^v^
 setTimeout(() => {
 	fetch("version.txt")
 		.then((response) => response.text())
@@ -257,6 +258,7 @@ setTimeout(() => {
 		});
 }, 500);
 
+//check login ^v^
 setTimeout(() => {
 	try {
 		var uname = getCookie("uname");
