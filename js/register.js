@@ -1,7 +1,7 @@
 function register(username, password, password2) {
 	var error = $("#error");
 	error.text("");
-	var notok=false;
+	var notok = false;
 	get(
 		"users/" + username + ".json",
 		function (...e) {},
@@ -65,8 +65,8 @@ function register(username, password, password2) {
 				function () {
 					setCookie("session", key.toString());
 					error.text("注册成功！正在跳转回主页……");
-					window.location.href="../"
-				},	
+					window.location.href = "../";
+				},
 				function () {
 					error.text("错误：注册数据保存失败，请稍后重试！");
 				},
@@ -74,3 +74,4 @@ function register(username, password, password2) {
 		},
 	);
 }
+

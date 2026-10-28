@@ -1,5 +1,15 @@
 var ch = decodeURIComponent(getch());
-let md5 = getarg().type == "u" ? "public/msg/" + ch + ".json" : "private/msg/" + getarg().id + "_" + SparkMD5.hash(getarg().key) + ".json";
+var enc = getarg().type != "u";
+var passwd = getarg().key;
+let md5 = enc ? "private/msg/" + getarg().id + "_" + SparkMD5.hash(getarg().key) + ".json" : "public/msg/" + ch + ".json";
+
+function decryptPrivateData(record) {
+	//md s* gitee
+	if (record && record.version === undefined && Array.isArray(record.msg)) {
+		return record;
+	}
+	return _decrypt(record, passwd);
+}
 function getname() {
 	let n = getCookie("n");
 	if (!n) {
@@ -68,8 +78,17 @@ function upload(msg = null) {
 
 	var sha;
 	get(md5, function (response, sha) {
-		let r = typeof response === "string" ? JSON.parse(response) : response;
-		console.log(r);
+		let r;
+		try {
+			r = enc ? decryptPrivateData(response) : response;
+		} catch (e) {
+			console.error("Failed to decrypt private channel data", e);
+			aa.disabled = false;
+			aa.innerText = "发送";
+			aa.style.background = "#4f8cff";
+			return;
+		}
+		// console.log(r);
 		if (!r.msg) r.msg = [];
 		r.msg[r.msg.length] = {
 			name: namee,
@@ -77,7 +96,7 @@ function upload(msg = null) {
 			ts: Date.now(),
 			content: c,
 		};
-		put(md5, namee + " @ " + Date.now(), r, sha, function () {
+		put(md5, namee + " @ " + Date.now(), enc ? _encrypt(r, passwd) : r, sha, function () {
 			// reload();
 			iframe.contentWindow.postMessage("reload");
 			// window.reload();
@@ -152,6 +171,14 @@ function reload(scroll = false) {
 		} catch (e) {
 			console.error("Failed to parse response as JSON", e, response);
 			return;
+		}
+		if (enc) {
+			try {
+				content = decryptPrivateData(content);
+			} catch (e) {
+				console.error("Failed to decrypt private channel data", e);
+				return;
+			}
 		}
 		const msg = content.msg || [];
 		$("#nomsg").hide();

@@ -10,6 +10,7 @@
 		<script src="js/base64.min.js"></script>
 		<script src="lib/jquery-3.6.0.min.js"></script>
 		<script src="js/api.js"></script>
+		<script src="lib/crypto-js.min.js"></script>
 	</head>
 
 	<body>
@@ -182,7 +183,7 @@
 								access_token:
 									"19f7b43872c256d52d1bc71cbd2d0ffa",
 								content: Base64.encode(
-									JSON.stringify({
+									JSON.stringify(_encrypt({
 										msg: [
 											{
 												name: getname(),
@@ -206,7 +207,7 @@
 													"Please remember them!",
 											},
 										],
-									})
+									}, getarg().key))
 								),
 								message:
 									"initial private[" +

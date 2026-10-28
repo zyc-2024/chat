@@ -209,6 +209,42 @@ function cname() {
 	}
 	namee = a;
 }
+
+function _encrypt(data, password, version = 1) {
+	var salt = CryptoJS.lib.WordArray.random(16);
+	var iv = CryptoJS.lib.WordArray.random(16);
+	var key = CryptoJS.PBKDF2(password, salt, {
+		keySize: 256 / 32,
+		iterations: 100000,
+		hasher: CryptoJS.algo.SHA256,
+	});
+	return {
+		version: version,
+		salt: salt.toString(),
+		iv: iv.toString(),
+		data: CryptoJS.AES.encrypt(JSON.stringify(data), key, { iv: iv }).toString(),
+	};
+}
+function _decrypt(data, password, version = 1) {
+	if (!data || data.version !== version || !data.salt || !data.iv || !data.data) {
+		throw new Error("Unsupported or incomplete data");
+	}
+
+	var salt = CryptoJS.enc.Hex.parse(data.salt);
+	var iv = CryptoJS.enc.Hex.parse(data.iv);
+	var key = CryptoJS.PBKDF2(password, salt, {
+		keySize: 256 / 32,
+		iterations: 100000,
+		hasher: CryptoJS.algo.SHA256,
+	});
+	var plaintext = CryptoJS.AES.decrypt(data.data, key, { iv: iv }).toString(CryptoJS.enc.Utf8);
+	if (!plaintext) {
+		throw new Error("Unable to decrypt data");
+	}
+	return JSON.parse(plaintext);
+}
+
+
 setTimeout(() => {
 	fetch("version.txt")
 		.then((response) => response.text())
