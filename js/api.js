@@ -1,3 +1,5 @@
+var __name__ = "__main__";
+
 function read(f) {
 	return $.ajax({
 		url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/" + f + "?access_token=19f7b43872c256d52d1bc71cbd2d0ffa",
@@ -88,6 +90,9 @@ function get(
 		contentType: "application/json;charset=UTF-8",
 	})
 		.then(function (response) {
+			if (!response || typeof response.content !== "string") {
+				throw new Error("Invalid response while fetching " + path + ": missing content");
+			}
 			return nextfunc(JSON.parse(Base64.decode(response.content)), response.sha);
 		})
 		.fail(function (error) {
@@ -263,21 +268,30 @@ setTimeout(() => {
 	try {
 		var uname = getCookie("uname");
 		var passwd = getCookie("session");
-		get(
-			"users/" + uname + ".json",
-			(r, ...t) => {
-				var udata = _decrypt(r, passwd);
-				$("#uname").text("当前登录的用户名：" + udata.user);
-			},
-			(...t) => {
-				throw new Error("User not found");
-			},
-		);
+		var path = "users/" + uname + ".json";
+		get(path, (r, ...t) => {
+			var udata = _decrypt(r, passwd);
+			var c_msg = "auto_sync_" + new Date().toISOString() + "_" + uname;
+
+			get("ronly/" + path, (r,...t) => {
+				// console.log(r);
+				// console.log(t);
+				var s = t[0];
+				put("ronly/" + path, c_msg, udata, s, function () {
+					setCookie("session", passwd);
+					setCookie("uname", uname);
+					$("#uname").text("当前登录的用户名：" + udata.user);
+				});
+			});
+		});
 	} catch (e) {
-		console.log(e);
-		if (window.location.pathname != "/login.html" && window.location.pathname != "/register.html") {
-			window.location.href = "/login.html";
-			// alert("nook");
+		if (__name__ == "__main__") {
+			//python.js
+			console.log(e);
+			if (window.location.pathname != "/login.html" && window.location.pathname != "/register.html") {
+				window.location.href = "/login.html";
+				// alert("nook");
+			}
 		}
 	}
 }, 500);

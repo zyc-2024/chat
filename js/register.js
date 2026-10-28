@@ -28,7 +28,7 @@ function register(username, password, password2) {
 		error.text("错误：请完成验证码！");
 		return;
 	}
-	password=CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+	password = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
 	var salt = CryptoJS.lib.WordArray.random(16);
 	var iv = CryptoJS.lib.WordArray.random(16);
 	var key = CryptoJS.PBKDF2(password, salt, {
@@ -39,8 +39,15 @@ function register(username, password, password2) {
 	var profile = {
 		user: username,
 		reg_time: new Date().toISOString(),
-		pf_header: "https://zyc2024.com.cn/res/1.18.png",
-		avatar: "https://zyc2024.com.cn/res/nailong.png",
+		pf_header: "https://zyc-2024.github.io/res/1.18.png",
+		avatar: "https://zyc-2024.github.io/res/nailong.png",
+		profile: "Hello everyone!\nMy name is" + username,
+		pf_text: "Nothing here to be viewed...",
+	};
+	var safeprofile = {
+		user: username,
+		pf_header: "https://zyc-2024.github.io/res/1.18.png",
+		avatar: "https://zyc-2024.github.io/res/nailong.png",
 		profile: "Hello everyone!\nMy name is" + username,
 		pf_text: "Nothing here to be viewed...",
 	};
@@ -51,7 +58,7 @@ function register(username, password, password2) {
 		data: CryptoJS.AES.encrypt(JSON.stringify(profile), key, { iv: iv }).toString(),
 	};
 	var path = "users/" + username + ".json";
-
+	var c_msg="user_register_" + new Date().toISOString() + "_" + username;
 	get(
 		path,
 		function () {
@@ -60,13 +67,15 @@ function register(username, password, password2) {
 		function (request) {
 			post(
 				path,
-				"user_register_" + new Date().toISOString() + "_" + username,
+				c_msg,
 				record,
 				function () {
-					setCookie("session", password);
-					setCookie("uname", username);
-					error.text("注册成功！正在跳转回主页……");
-					window.location.href = "/";
+					post("ronly/" + path, c_msg, safeprofile, function () {
+						setCookie("session", password);
+						setCookie("uname", username);
+						error.text("注册成功！正在跳转回主页……");
+						window.location.href = "/";
+					});
 				},
 				function () {
 					error.text("错误：注册数据保存失败，请稍后重试！");
@@ -75,4 +84,3 @@ function register(username, password, password2) {
 		},
 	);
 }
-

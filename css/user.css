@@ -156,30 +156,22 @@ input {
 	align-items: center;
 }
 
-.sb-plot-left {
+.customtext {
 	left: 5%;
-	right: 70%;
-}
-
-.sb-plot-right {
-	left: 30%;
 	right: 45%;
-}
-
-.sb-plot {
 	position: fixed;
-	border-radius: 5%;
+	/* border-radius: 5%; */
 	top: 10%;
 	bottom: 10%;
 	padding: 0;
-	color: #fff;
 	font-size: xx-large;
 	font-weight: bolder;
-	font-style: italic;
 	overflow-wrap: anywhere;
 	font-size: clamp(0.85rem, 1.7vw, 1.75rem);
 	overflow-y: auto;
 	overflow-x: hidden;
+	vertical-align: middle;
+	text-align: center;
 }
 
 .plot2 {
