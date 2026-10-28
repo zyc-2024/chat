@@ -4,7 +4,6 @@
 <link rel="stylesheet" href="hljs/styles/a11y-light.min.css">
 
 <div style="display: none;">
-    <!-- To avoid errors -->
     <iframe id="msg"></iframe>
     <h1 id="titlee"></h1>
     <div id="progress-container">
@@ -12,7 +11,9 @@
     </div>
 </div>
 <div class="chat" style="width: 950.17px;">
-    <div id="chat" style="width: 950.17px;"></div>
+    <div id="chat" style="width: 950.17px;">
+        <h1 id="nomsg">聊天记录加载中……<br>如果加载时间过长，则可能是页面不存在</h1>
+    </div>
 </div>
 
 
@@ -78,7 +79,7 @@
             };
             s.onerror = reject;
             document.body.appendChild(s);
-            document.body.style.display="flex";
+            document.body.style.display = "flex";
         });
     }
     (async () => {

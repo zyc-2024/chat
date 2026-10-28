@@ -1,16 +1,27 @@
-function login(username,password){
-	var notok=false;
+function login(username, password) {
+	var notok = false;
+	var userdatar = null;
 	get(
 		"users/" + username + ".json",
-		function (...e) {},
+		function (e, ...f) {
+			userdatar = Base64.decode((typeof e === "string" ? JSON.parse(e) : e).content);
+		},
 		function (...e) {
 			notok = true;
 		},
 	);
 	if (notok) {
-		a.text("错误：用户名已存在！（此用户名不与实际聊天中用户名对应）");
+		a.text("用户名或密码错误");
 		return;
 	}
+	try {
+		getdata(userdatar, password);
+	} catch {
+		var error = $("#error");
+		error.text("用户名或密码错误");
+		return;
+	}
+	alert("ok");
 }
 
 function getdata(record, password) {

@@ -46,7 +46,7 @@ function getch() {
 if (namee === "" || namee === null) {
 	namee = name0 = "Anonymous";
 }
-var ch = getch();
+var ch = decodeURIComponent(getch());
 
 function upload(msg = null) {
 	let c;
@@ -152,6 +152,7 @@ function reload(scroll = false) {
 			return;
 		}
 		const msg = content.msg || [];
+		$("#nomsg").hide();
 		if (messagesCache.length === 0) {
 			messagesCache = msg.slice();
 			const total = msg.length;

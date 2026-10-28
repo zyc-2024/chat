@@ -5,6 +5,7 @@
         <script src="lib/jquery-3.6.0.min.js"></script>
         <script src="js/api.js"></script>
         <script src="js/base64.min.js"></script>
+        <script src="js/login.js"></script>
         <script src="lib/crypto-js.min.js"></script>
         <script type="module" src="lib/site.min.js" async defer></script>
         <script nomodule src="lib/site.compat.min.js" async defer></script>
@@ -21,9 +22,12 @@
                 <p>用户名</p>
                 <input type="text" id="username" placeholder="请输入用户名"><br>
                 <p>密码</p>
-                <input type="text" id="password" placeholder="请输入密码">
+                <input type="password" id="password" placeholder="请输入密码">
                 <br>
-                <button class="button" type="button" onclick="javascript:login($('#username').value,$('#password').value)">登录</button>
+                <div class="frc-captcha" data-sitekey="FCMJOIQHSPPBEI93" data-api-endpoint="global"></div><br>
+                <button class="button" type="button"
+                    onclick="javascript:login($('#username')[0].value,$('#password')[0].value)">注册</button>
+                <div id="error"></div>
             </div>
         </div>
     </body>

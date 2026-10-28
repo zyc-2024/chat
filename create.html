@@ -83,7 +83,7 @@
 															time: gettime(),
 															content:
 																'Created channel "' +
-																getarg().ch +
+																decodeURIComponent(getarg().ch) +
 																'"',
 														},
 													],
@@ -127,7 +127,7 @@
 													time: gettime(),
 													content:
 														'Created channel "' +
-														getarg().ch +
+														decodeURIComponent(getarg().ch) +
 														'"',
 												},
 											],
