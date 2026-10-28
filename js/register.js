@@ -28,7 +28,7 @@ function register(username, password, password2) {
 		error.text("错误：请完成验证码！");
 		return;
 	}
-
+	password=CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
 	var salt = CryptoJS.lib.WordArray.random(16);
 	var iv = CryptoJS.lib.WordArray.random(16);
 	var key = CryptoJS.PBKDF2(password, salt, {
@@ -63,9 +63,10 @@ function register(username, password, password2) {
 				"user_register_" + new Date().toISOString() + "_" + username,
 				record,
 				function () {
-					setCookie("session", key.toString());
+					setCookie("session", password);
+					setCookie("uname", username);
 					error.text("注册成功！正在跳转回主页……");
-					window.location.href = "../";
+					window.location.href = "/";
 				},
 				function () {
 					error.text("错误：注册数据保存失败，请稍后重试！");

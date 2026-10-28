@@ -244,7 +244,6 @@ function _decrypt(data, password, version = 1) {
 	return JSON.parse(plaintext);
 }
 
-
 setTimeout(() => {
 	fetch("version.txt")
 		.then((response) => response.text())
@@ -256,4 +255,27 @@ setTimeout(() => {
 			const title = document.getElementById("titlee");
 			if (title) title.innerHTML = "Chat Website Ver¯\\_(ツ)_/¯";
 		});
+}, 500);
+
+setTimeout(() => {
+	try {
+		var uname = getCookie("uname");
+		var passwd = getCookie("session");
+		get(
+			"users/" + uname + ".json",
+			(r, ...t) => {
+				var udata = _decrypt(r, passwd);
+				$("#uname").text("当前登录的用户名：" + udata.user);
+			},
+			(...t) => {
+				throw new Error("User not found");
+			},
+		);
+	} catch (e) {
+		console.log(e);
+		if (window.location.pathname != "/login.html" && window.location.pathname != "/register.html") {
+			window.location.href = "/login.html";
+			// alert("nook");
+		}
+	}
 }, 500);

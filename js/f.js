@@ -48,7 +48,7 @@ function cname() {
 	let a;
 	a = prompt("请输入你的新名字");
 	if (a === null || a === "") return;
-	document.getElementById("nname").innerText = "现在的用户名：" + a;
+	document.getElementById("nname").innerText = "现在聊天用的的用户名：" + a;
 	setCookie("n", a);
 	namee = a;
 }
@@ -295,7 +295,7 @@ function crt() {
 }
 
 function showname() {
-	document.getElementById("nname").innerText = "现在的用户名：" + getname();
+	document.getElementById("nname").innerText = "现在聊天用的用户名：" + getname();
 }
 showname();
 if (getarg().type != "u") {
