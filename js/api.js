@@ -265,15 +265,21 @@ setTimeout(() => {
 
 //check login ^v^
 setTimeout(() => {
+	if (window.location.pathname.endsWith("/edit.html")) {
+		return;
+	}
 	try {
 		var uname = getCookie("uname");
 		var passwd = getCookie("session");
+		if (!uname || !passwd) {
+			throw new Error("hyw");
+		}
 		var path = "users/" + uname + ".json";
 		get(path, (r, ...t) => {
 			var udata = _decrypt(r, passwd);
 			var c_msg = "auto_sync_" + new Date().toISOString() + "_" + uname;
 
-			get("ronly/" + path, (r,...t) => {
+			get("ronly/" + path, (r, ...t) => {
 				// console.log(r);
 				// console.log(t);
 				var s = t[0];
@@ -288,7 +294,7 @@ setTimeout(() => {
 		if (__name__ == "__main__") {
 			//python.js
 			console.log(e);
-			if (window.location.pathname != "/login.html" && window.location.pathname != "/register.html") {
+			if (window.location.pathname != "/login.html" && window.location.pathname != "/user.html" && window.location.pathname != "/register.html") {
 				window.location.href = "/login.html";
 				// alert("nook");
 			}

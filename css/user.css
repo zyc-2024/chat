@@ -194,3 +194,64 @@ input {
 		zoom: 0.7;
 	}
 }
+
+.profile {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-width: 0;
+}
+
+.pfp {
+	display: flex;
+	flex: 0 0 64px;
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.name {
+	min-width: 0;
+	font-size: larger;
+	font-weight: bold;
+	overflow-wrap: anywhere;
+}
+
+.edit-button {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	color: #555;
+}
+
+.edit-button[hidden] {
+	display: none;
+}
+
+.edit-button:hover,
+.edit-button:focus-visible {
+	background-color: #e5e5e5;
+	color: #333;
+}
+
+.edit-button svg {
+	width: 18px;
+	height: 18px;
+	fill: none;
+	stroke: currentColor;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 2;
+}
+
+.profile-divider {
+	height: 0;
+	margin: 16px 0;
+	border: 0;
+	border-top: 1px solid #d9d9d9;
+}

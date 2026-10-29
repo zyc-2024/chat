@@ -13,7 +13,7 @@ function decryptPrivateData(record) {
 function getname() {
 	let n = getCookie("n");
 	if (!n) {
-		n = prompt("请输入你的名字") || "Anonymous";
+		n = getCookie("uname");
 		setCookie("n", n);
 	}
 	return n;
