@@ -53,12 +53,13 @@
 						<button id="button" onclick="javascript:upload()">发送</button>
 						<button onclick="javascript:reload()">刷新</button>
 						<button onclick="javascript:cname()">改名</button>
-						<button onclick="javascript:window.location.href='/chat/'">回到主页</button>
+						<button onclick="javascript:window.location.href='..'">回到主页</button>
+						<button onclick="javascript:window.location.href='uf.html'">上传文件</button>
 						<button onclick="javascript:crt()">修改刷新时间</button>
 						<div>
 							<form id="changechannel"
 								onsubmit="event.preventDefault();window.location.href=window.location.href.split('?')[0]+'?type=u&amp;ch='+document.getElementById('ch').value;return false;">
-								<input id="ch" placeholder="输入你想去的频道"><button type="submit">go!</button>
+								<input id="ch" placeholder="输入你想去的聊天室"><button type="submit">go!</button>
 							</form>
 						</div>
 						<!-- <br /><br /> -->

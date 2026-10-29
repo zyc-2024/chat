@@ -43,8 +43,8 @@
 					overflow-y: auto;
 					text-align: center;
 				">
-				<h2>创建新频道</h2>
-				<input type="text" id="ch" placeholder="频道名称" />
+				<h2>创建新聊天室</h2>
+				<input type="text" id="ch" placeholder="聊天室名称" />
 				<button onclick="
 						javascript: window.location.href =
 							'create.html?type=u&ch=' +
@@ -52,14 +52,14 @@
 					">
 					确定
 				</button>
-				<h2>频道列表</h2>
+				<h2>公开聊天室列表</h2>
 				<ul id="channels" style="list-style: none; padding: 0; margin: 0">
 					¯\_(ツ)_/¯
 				</ul>
 			</div>
 			<div style="flex: 1; padding: 16px">
 				<!-- 右半边内容 -->
-				<h2>不公开的，适合自己用</h2>
+				<h2>有密码保护的聊天室，适合私密交流</h2>
 				<br />
 				<div id="id"></div>
 				<br />
@@ -76,7 +76,7 @@
 				<br />
 				<input type="text" id="iddd" placeholder="生成的id" />
 
-				<input type="text" id="keyyy" placeholder="你输入的凭证" />
+				<input type="text" id="keyyy" placeholder="此id对应的凭证" />
 				<button onclick="
 						javascript: window.location.href =
 							'core.html?type=r&id=' +
