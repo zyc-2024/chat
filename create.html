@@ -24,7 +24,7 @@
 				(getarg().type == "r" && !getarg().key) ||
 				(getarg().type == "u" && !getarg().ch)
 			) {
-				document.body.innerHTML = "Error! 你确定这不是你输错了？";
+				document.body.innerText = "Error! 你确定这不是你输错了？";
 			} else if (getarg().type == "u") {
 				$.ajax({
 					url: "https://gitee.com/api/v5/repos/zyc-2024/chat/raw/public/index.json",

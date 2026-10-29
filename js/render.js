@@ -38,7 +38,7 @@
 				ADD_TAGS: ["span"],
 				ADD_ATTR: ["class", "style"],
 			});
-
+			//这块真的要InnerHTML啊……过滤过的
 			document.getElementById("preview").innerHTML = clean;
 
 			hljs.highlightAll();

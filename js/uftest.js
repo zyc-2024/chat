@@ -27,14 +27,14 @@ function udf() {
 	let file = f.files[0];
 	if (file) {
 		// fmd5(file).then((md5) => {
-		s.innerHTML =
+		s.innerText =
 			"选择了：" +
 			file.name +
 			"<br>大小：" +
 			sc(file.size) /* + "<br>MD5：" + md5*/;
 		// });
 	} else {
-		s.innerHTML = "你选了个寂寞a";
+		s.innerText = "你选了个寂寞a";
 	}
 }
 function upf() {
@@ -78,17 +78,17 @@ function upf() {
 				if (xhr.readyState === 4) {
 					if (xhr.status === 201) {
 						const json = JSON.parse(xhr.responseText);
-						l.innerHTML =
+						l.innerText =
 							"上传成功！下载链接：<br><code>" +
 							json.browser_download_url +
 							"</code><br><br>" +
-							l.innerHTML;
+							l.innerText;
 					} else {
-						l.innerHTML =
+						l.innerText =
 							"<b>上传失败：</b><br><code>" +
 							xhr.responseText +
 							"</code><br><br>" +
-							l.innerHTML;
+							l.innerText;
 					}
 				}
 			};

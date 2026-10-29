@@ -143,6 +143,7 @@ function renderMessageHTML(msg) {
 function render(msg, mode = "append") {
 	const chat = document.getElementById("chat");
 	const html = renderMessageHTML(msg);
+	//这块真的要InnerHTML啊……过滤过的
 	if (mode === "prepend") {
 		chat.innerHTML = html + chat.innerHTML;
 	} else {
@@ -255,11 +256,11 @@ setTimeout(() => {
 		.then((response) => response.text())
 		.then((version) => {
 			const title = document.getElementById("titlee");
-			if (title) title.innerHTML = "Chat Website Ver" + version;
+			if (title) title.innerText = "Chat Website Ver" + version;
 		})
 		.catch(() => {
 			const title = document.getElementById("titlee");
-			if (title) title.innerHTML = "Chat Website Ver¯\\_(ツ)_/¯";
+			if (title) title.innerText = "Chat Website Ver¯\\_(ツ)_/¯";
 		});
 }, 500);
 

@@ -109,7 +109,7 @@ function upload(msg = null) {
 		behavior: "smooth",
 	});
 	document.getElementById("editor").value = "";
-	document.getElementById("preview").innerHTML = "";
+	document.getElementById("preview").innerText = "";
 }
 window.addEventListener("message", function (event) {
 	if (event.data == "reload") {
