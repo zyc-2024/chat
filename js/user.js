@@ -7,6 +7,7 @@ get(
 	(r, ...t) => {
 		profile = r;
 		$(".name").text(profile.user);
+		$("title").text(profile.user+"的个人主页")
 		$(".bg-image").css("background-image", "url('" + profile.pf_header + "')");
 		$(".pfp").attr("src", profile.avatar);
 		$(".info").text(profile.profile);
