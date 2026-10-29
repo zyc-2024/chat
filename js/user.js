@@ -1,4 +1,4 @@
-var uname = new URLSearchParams(window.location.search).get("u") || "";
+var uname = getarg().u || "";
 var path = "ronly/users/" + uname + ".json";
 var profile = null;
 __name__ = "not_main";
@@ -16,6 +16,6 @@ get(
 		}
 	},
 	() => {
-		$(".name").text("无法加载用户资料");
+		$(".name").text("HYW?没这个用户!");
 	},
 );

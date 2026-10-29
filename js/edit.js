@@ -1,78 +1,73 @@
-var editorUsername = getCookie("uname");
-var statusMessage = document.getElementById("status");
-var finishButton = document.getElementById("finish");
+var un = getCookie("uname");
+var finishButton = document.getElementById("ok_btn");
 
-function showStatus(message) {
-	statusMessage.textContent = message;
+function errtxt() {
+	document.getElementsByClassName("showresult")[0].style.display = "block";
 }
 
-function decryptProfile(record, session) {
+function decprofile(record, session) {
 	try {
 		return { profile: _decrypt(record, session), session: session };
 	} catch (error) {
 		if (/^[a-f0-9]{64}$/i.test(session)) {
 			throw error;
 		}
-		var hashedSession = CryptoJS.SHA256(session).toString(CryptoJS.enc.Hex);
-		return { profile: _decrypt(record, hashedSession), session: hashedSession };
+		var hs = CryptoJS.SHA256(session).toString(CryptoJS.enc.Hex);
+		return { profile: _decrypt(record, hs), session: hs };
 	}
 }
 
 function loadProfile() {
 	var session = getCookie("session");
-	if (!editorUsername || !session) {
-		showStatus("请先登录后再编辑个人资料。");
+	if (!un || !session) {
+		errtxt();
 		return;
 	}
 
-	var path = "users/" + editorUsername + ".json";
+	var path = "users/" + un + ".json";
 	get(
 		path,
 		function (record) {
 			try {
-				var decrypted = decryptProfile(record, session);
+				var decrypted = decprofile(record, session);
 				if (decrypted.session !== session) {
 					setCookie("session", decrypted.session);
 				}
-				document.getElementById("avatar").value = decrypted.profile.avatar || "";
-				document.getElementById("background").value = decrypted.profile.pf_header || "";
-				document.getElementById("custom-text").value = decrypted.profile.pf_text || "";
-				document.getElementById("profile-info").value = decrypted.profile.profile || "";
-				showStatus("");
+				document.getElementById("preview1").value = decrypted.profile.avatar || "";
+				document.getElementById("preview4").value = decrypted.profile.pf_header || "";
+				document.getElementById("editor3").value = decrypted.profile.pf_text || "";
+				document.getElementById("editor2").value = decrypted.profile.profile || "";
+				// errtxt("");
+
+				// render2();
+				// render3();
 				finishButton.disabled = false;
 			} catch (error) {
 				console.error("Unable to decrypt profile:", error);
-				showStatus("无法读取个人资料，请确认登录状态后重试。");
+				errtxt();
 			}
 		},
 		function () {
-			showStatus("读取个人资料失败，请稍后重试。");
+			errtxt();
 		},
 	);
-}
-
-function showSavingMessage(message) {
-	var heading = document.createElement("h1");
-	heading.className = "page-message";
-	heading.textContent = message;
-	document.body.replaceChildren(heading);
 }
 
 function saveProfile() {
 	var username = getCookie("uname");
 	var session = getCookie("session");
-	if (!username || !session || username !== editorUsername) {
-		showSavingMessage("登录状态已失效，请重新登录后再试。");
+	if (!username || !session || username !== un) {
+		errtxt();
 		return;
 	}
 
 	var changes = {
-		avatar: document.getElementById("avatar").value.trim(),
-		pf_header: document.getElementById("background").value.trim(),
-		pf_text: document.getElementById("custom-text").value,
-		profile: document.getElementById("profile-info").value,
+		avatar: document.getElementById("preview1").value.trim(),
+		pf_header: document.getElementById("preview4").value.trim(),
+		pf_text: document.getElementById("editor3").value,
+		profile: document.getElementById("editor2").value,
 	};
-	showSavingMessage("保存修改中，请稍后……");
+	errtxt();
 
 	var path = "users/" + username + ".json";
 	var publicPath = "ronly/" + path;
@@ -83,15 +78,15 @@ function saveProfile() {
 			var updatedProfile;
 			var encryptedProfile;
 			try {
-				decrypted = decryptProfile(record, session);
+				decrypted = decprofile(record, session);
 				updatedProfile = Object.assign({}, decrypted.profile, changes);
 				encryptedProfile = _encrypt(updatedProfile, decrypted.session);
 				if (decrypted.session !== session) {
 					setCookie("session", decrypted.session);
 				}
 			} catch (error) {
-				console.error("Unable to prepare profile update:", error);
-				showSavingMessage("无法解密个人资料，修改未保存。");
+				console.error(error);
+				errtxt();
 				return;
 			}
 
@@ -121,31 +116,31 @@ function saveProfile() {
 									window.location.href = "user.html?u=" + encodeURIComponent(username);
 								},
 								function (error) {
-									console.error("Unable to update public profile:", error);
-									showSavingMessage("私有资料已保存，但公开资料更新失败，请重新编辑后重试。");
+									console.error(error);
+									// errtxt();
 								},
 							);
 						},
 						function (error) {
-							console.error("Unable to save private profile:", error);
-							showSavingMessage("保存失败，请稍后重试。");
+							console.error(error);
+							errtxt();
 						},
 					);
 				},
 				function (error) {
-					console.error("Unable to read public profile:", error);
-					showSavingMessage("无法读取公开资料，修改未保存。");
+					console.error(error);
+					errtxt();
 				},
 			);
 		},
 		function (error) {
-			console.error("Unable to read private profile:", error);
-			showSavingMessage("无法读取个人资料，修改未保存。");
+			console.error(error);
+			errtxt();
 		},
 	);
 }
 
-document.getElementById("profile-form").addEventListener("submit", function (event) {
+document.getElementById("ok_btn").addEventListener("click", function (event) {
 	event.preventDefault();
 	saveProfile();
 });

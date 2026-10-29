@@ -48,7 +48,25 @@
 	font-size: x-large;
 	font-weight: bold;
 }
-
+.pv {
+	/* width: 40%; */
+	height: 90px;
+	font-size: 16px;
+	font-family: "Microsoft YaHei", sans-serif;
+	padding: 1rem;
+	border: 2px solid #ccc;
+	background-color: #fff;
+}
+textarea {
+	width: 40%;
+	height: 90px;
+}
+.pv {
+	width: 55%;
+	padding: 1rem;
+	border: 1px solid #ccc;
+	overflow: auto;
+}
 .buttonnn {
 	display: flex;
 	margin-bottom: 10px;
@@ -142,7 +160,7 @@ input {
 	border-color: #2763a8;
 	border-bottom-left-radius: 0;
 	border-top-right-radius: 0;
-	height: 24px;
+	height: 44px;
 	position: relative;
 	color: rgb(85, 85, 85);
 	background-color: rgb(255, 255, 255);
@@ -150,6 +168,10 @@ input {
 	border-width: 1px;
 	border-style: solid;
 	border-radius: 10px;
+}
+
+.pvi{
+	width: 80%;
 }
 
 .captcha {

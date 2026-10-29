@@ -136,7 +136,6 @@
 	}
 	(async () => {
 		for (const src of scripts) {
-			// 收集 promise，最后一次迭代时等待全部完成并触发事件
 			window.__scriptLoadPromises =
 				window.__scriptLoadPromises || [];
 			window.__scriptLoadPromises.push(
@@ -149,7 +148,6 @@
 				await Promise.all(
 					window.__scriptLoadPromises
 				);
-				// 所有脚本加载完毕，触发事件（或者在这里直接执行第104行的代码）
 				document.dispatchEvent(
 					new Event("allScriptsLoaded")
 				);

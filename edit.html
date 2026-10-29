@@ -13,16 +13,44 @@
         <div class="showresult">
             <div class="mask"></div>
             <div class="alert">
-                <div class="alerttext" id="result">your score is???</div>
+                <div class="alerttext" id="result">加载中……（若加载过长时间，则可能出现了错误）</div>
                 <div class="alert-actions">
-                    <button type="button" class="buttonnn redbutton right" onclick="javascript:redo()">重新答题</button>
-                    <button class="buttonnn graybutton left" type="button" onclick="javascript:dismiss()">返回修改</button>
+                    <!-- <button type="button" class="buttonnn redbutton right" onclick="javascript:redo()">重新答题</button> -->
+                    <button class="buttonnn redbutton right" type="button"
+                        onclick="javascript:document.getElementsByClassName('showresult')[0].style.display = 'none'">知道了</button>
                 </div>
             </div>
-        </div><!--山大的UI就是好-->
-        <div class="form">
-            <br><input type="button" class="buttonnn submitbutton" onclick="javascript:check()" value="确定">
         </div>
+
+        <div class="form">
+            <h1>头像（输入网址）</h1>
+            <input type="text" id="preview1" placeholder="请输入链接" class="pvi">
+            <h1>自我介绍</h1>
+            <div>
+                <div style="display: flex; height: 100px">
+                    <textarea id="editor2" class="pvi" placeholder="请输入自我介绍"></textarea>
+                </div>
+            </div>
+            <h1>侧边文字</h1>
+            <div>
+                <div style="display: flex; height: 100px">
+                    <textarea id="editor3" class="pvi" placeholder="请输入自我介绍"></textarea>
+                </div>
+            </div>
+            <h1>背景图片（输入网址）</h1>
+            <input type="text" id="preview4" class="pvi" placeholder="请输入链接">
+
+            <br><br>
+
+            <input id="ok_btn" type="button" class="buttonnn submitbutton" onclick="javascript:check()" value="确定">
+        </div>
+
+        <script src="lib/crypto-js.min.js"></script>
+        <script src="lib/jquery-3.6.0.min.js"></script>
+        <script src="lib/site.min.js"></script>
+        <script src="js/base64.min.js"></script>
+        <script src="js/api.js"></script>
+        <script src="js/edit.js"></script>
     </body>
 
 </html>
