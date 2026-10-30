@@ -295,8 +295,8 @@ setTimeout(() => {
 		if (__name__ == "__main__") {
 			//python.js
 			console.log(e);
-			if (!(window.location.pathname == "/login.html" || window.location.pathname == "/user.html" || window.location.pathname == "/register.html")) {
-				window.location.href = "/login.html";
+			if (!(window.location.pathname.includes("/login.html")|| window.location.pathname.includes( "/user.html" )|| window.location.pathname .includes("/register.html"))) {
+				window.location.href = "login.html";
 				// alert("nook");
 			}
 		}
