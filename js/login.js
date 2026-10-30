@@ -13,7 +13,7 @@ function login(username, password) {
 				setCookie("session", password);
 				setCookie("uname", username);
 				error.text("登录成功！正在跳转回主页……");
-				window.location.href = "..";
+				window.location.href = "index.html";
 				return userdata;
 			} catch {
 				error.text("用户名或密码错误");
