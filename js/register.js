@@ -74,7 +74,7 @@ function register(username, password, password2) {
 						setCookie("session", password);
 						setCookie("uname", username);
 						error.text("注册成功！正在跳转回主页……");
-						window.location.href = "..";
+						window.location.href = "index.html";
 					});
 				},
 				function () {
