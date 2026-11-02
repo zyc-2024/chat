@@ -41,7 +41,7 @@ function register(username, password, password2) {
 		reg_time: new Date().toISOString(),
 		pf_header: "https://zyc-2024.github.io/res/1.18.png",
 		avatar: "https://zyc-2024.github.io/res/nailong.png",
-		profile: "Hello everyone!\nMy name is" + username,
+		profile: "Hello everyone!\nMy name is " + username,
 		pf_text: "Nothing here to be viewed...",
 	};
 	var safeprofile = {

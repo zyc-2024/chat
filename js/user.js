@@ -10,13 +10,14 @@ get(
 		$("title").text(profile.user+"的个人主页")
 		$(".bg-image").css("background-image", "url('" + profile.pf_header + "')");
 		$(".pfp").attr("src", profile.avatar);
-		$(".info").text(profile.profile);
-		$(".customtext").text(profile.pf_text);
+		$(".info").html(window.renderMarkdown(profile.profile || ""));
+		$(".customtext").html(window.renderMarkdown(profile.pf_text || ""));
+		hljs.highlightAll();
 		if (getCookie("uname") === uname) {
 			$(".edit-button").prop("hidden", false);
 		}
 	},
 	() => {
-		$(".name").text("HYW?没这个用户!");
+		$(".name").text("没这个用户!");
 	},
 );
