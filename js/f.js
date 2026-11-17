@@ -13,8 +13,9 @@ function decryptPrivateData(record) {
 function getname() {
 	let n = getCookie("n");
 	if (!n) {
-		n = getCookie("uname");
-		setCookie("n", n);
+		// n = getCookie("uname");
+		// setCookie("n", n);
+		n = prompt("请输入你的名字") || "Anonymous";
 	}
 	return n;
 }
@@ -92,7 +93,7 @@ function upload(msg = null) {
 		if (!r.msg) r.msg = [];
 		r.msg[r.msg.length] = {
 			name: namee,
-			user: getCookie("uname"),
+			// user: getCookie("uname"),
 			time: gettime(),
 			ts: Date.now(),
 			content: c,
