@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<title>页面不存在 · zyc2024 的聊天网页</title>
+		<style>
+			body {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				min-height: 100vh;
+				margin: 0;
+				background: #eef2ef;
+				color: #33443a;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+			}
+			.card {
+				padding: 34px 44px;
+				border-radius: 16px;
+				background: #fff;
+				text-align: center;
+				box-shadow: 0 18px 55px rgba(0, 0, 0, 0.12);
+			}
+			h1 {
+				margin: 0;
+				color: #04783e;
+				font-size: 64px;
+			}
+			p {
+				color: #69736d;
+			}
+			a {
+				display: inline-block;
+				margin-top: 12px;
+				padding: 10px 18px;
+				border-radius: 8px;
+				background: #04783e;
+				color: #fff;
+				text-decoration: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<h1>404</h1>
+			<p>抱歉，您访问的页面不存在。</p>
+			<a id="home" href="./">返回首页</a>
+		</div>
+		<script>
+			document.getElementById("home").href =
+				window.location.pathname.replace(/[^/]*$/, "") + "#/";
+		</script>
+	</body>
+</html>
