@@ -1,8 +1,16 @@
 // 更新日志数据：最新版本在最前面。
 export const changelog = [
 	{
-		"version": "2.5.0 (Vue)",
-		"desc": "使用 Vue 3 + Vite 重写整个项目；重新加入登录页面，登录完全可选，不登录也能使用全部聊天功能"
+		"version": "3.0.0 beta 183 (183)",
+		"desc": "扩充更新日志：启用 3.0.0 beta 版本编号，括号内记录提交时的 commit 数；补充 Vue 重写以来的改动记录。以后每新增一个功能都会在这里增加一笔并单独提交。"
+	},
+	{
+		"version": "3.0.0 beta 174 (174)",
+		"desc": "配置 GitHub Pages 自动部署：新增 GitHub Actions 工作流，每次 push main 后自动安装依赖、运行数据层测试、构建 Vite 项目并发布 dist；Pages 从 gh-pages 分支部署切换为 GitHub Actions 部署。"
+	},
+	{
+		"version": "3.0.0 beta 173 (173)",
+		"desc": "[借助DeepSeek之力] 使用 Vue 3 + Vite + Vue Router 重写整个项目：迁移首页、公开/私密聊天室、创建频道、文件上传、Base64 上传、404、更新日志等页面；聊天不再使用 iframe，保留 Markdown、KaTeX、任务列表、表格与代码高亮；重新加入登录/注册页面，登录完全可选，不登录也能使用全部聊天功能；兼容原 Gitee 存储、频道索引、私密频道加密格式和旧入口链接。"
 	},
 	{
 		"version": "2.4.3 (164)",

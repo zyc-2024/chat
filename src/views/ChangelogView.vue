@@ -9,7 +9,7 @@ import "../styles/pages.css";
 			<div class="standalone-head">
 				<div>
 					<h1>更新日志</h1>
-					<p>从最初的聊天记录到 Vue 重写版，一共 {{ changelog.length }} 条记录。</p>
+					<!-- <p>从最初的聊天记录到 Vue 重写版，一共 {{ changelog.length }} 条记录。</p> -->
 				</div>
 				<router-link class="back-link" :to="{ name: 'home' }">
 					返回首页
