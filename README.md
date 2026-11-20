@@ -103,6 +103,3 @@ test-core.mjs       数据层离线测试
 - 保留了旧账号会话键 `chat_auth_v1`，旧登录状态可以直接继续使用。
 - 保留了旧频道时间格式、公开频道索引中的 URL 编码频道名、私密频道加密格式和文件路径。
 - `public/` 下保留了 `core.html`、`showmsg.html`、`create.html`、`uf.html`、`ufb64.html`、`login.html`、`register.html`、`logout.html` 等旧入口的跳转页，旧的分享链接仍会打开对应的 Vue 路由。
-
-
- 
