@@ -1,6 +1,10 @@
 // 更新日志数据：最新版本在最前面。
 export const changelog = [
 	{
+		"version": "3.0.0 beta 185 (185)",
+		"desc": "修复本地运行版打包：PyInstaller 使用 --specpath 时会把 web-dist 解析到 build 目录下导致构建失败；改为在仓库根目录生成 spec 并使用可解析的相对路径，重新验证 Windows exe 打包流程。"
+	},
+	{
 		"version": "3.0.0 beta 184 (184)",
 		"desc": "新增本地运行版：app.py 使用 Python 内置静态服务器，启动后自动打开浏览器；GitHub Actions 使用 PyInstaller 构建 Windows exe，并自动生成距上次发布的所有修改记录、完整 CHANGELOG、可执行文件和便携 zip，发布到 GitHub Releases；新增 build-app.bat 供本地构建。"
 	},

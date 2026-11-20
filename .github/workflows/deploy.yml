@@ -99,7 +99,7 @@ jobs:
       - name: Build local Windows app
         run: >
           pyinstaller --noconfirm --clean --onefile --name zyc-chat
-          --distpath build/app-dist --workpath build/app-work --specpath build
+          --distpath build/app-dist --workpath build/app-work
           --add-data "web-dist;dist" app.py
 
       - name: Read version

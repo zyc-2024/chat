@@ -30,7 +30,7 @@ echo [3/3] Building Windows executable with %PYTHON%...
 if errorlevel 1 goto :error
 
 %PYTHON% -m PyInstaller --noconfirm --clean --onefile --name zyc-chat ^
-    --distpath build\app-dist --workpath build\app-work --specpath build ^
+    --distpath build\app-dist --workpath build\app-work ^
     --add-data "dist;dist" app.py
 if errorlevel 1 goto :error
 
