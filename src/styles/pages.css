@@ -1,0 +1,417 @@
+.standalone-page {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 42px 20px;
+	background:
+		radial-gradient(circle at 10% 10%, rgba(7, 193, 96, 0.08), transparent 30%),
+		#eef2ef;
+}
+
+.standalone-card {
+	width: min(720px, 100%);
+	padding: 28px 30px 30px;
+	border: 1px solid #e5eae7;
+	border-radius: 16px;
+	background: #fff;
+	box-shadow: 0 18px 55px rgba(0, 0, 0, 0.11);
+}
+
+.standalone-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 18px;
+}
+
+.standalone-head h1 {
+	margin: 0;
+	color: #1d2b23;
+	font-size: 21px;
+	font-weight: 700;
+}
+
+.standalone-head p {
+	margin: 6px 0 0;
+	color: #69736d;
+	font-size: 13px;
+	line-height: 1.65;
+}
+
+.back-link {
+	white-space: nowrap;
+	color: #056633;
+	font-size: 13px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.back-link:hover {
+	text-decoration: underline;
+}
+
+/* ---------- Create channel ---------- */
+
+.create-progress {
+	margin: 24px 0 12px;
+}
+
+.progress-track {
+	height: 10px;
+	overflow: hidden;
+	border-radius: 99px;
+	background: #edf3ef;
+}
+
+.progress-fill {
+	height: 100%;
+	border-radius: inherit;
+	background: linear-gradient(90deg, #04783e, #36d986);
+	transition: width 0.3s ease;
+}
+
+.progress-label {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 8px;
+	color: #69736d;
+	font-size: 12px;
+}
+
+.create-steps {
+	margin: 20px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.create-steps li {
+	position: relative;
+	padding: 0 0 16px 26px;
+	color: #6d7a72;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.create-steps li::before {
+	position: absolute;
+	top: 2px;
+	left: 0;
+	display: grid;
+	place-items: center;
+	width: 16px;
+	height: 16px;
+	border: 1px solid #d5e2da;
+	border-radius: 50%;
+	background: #fff;
+	color: transparent;
+	font-size: 10px;
+	content: "✓";
+}
+
+.create-steps li.done {
+	color: #2d3b33;
+}
+
+.create-steps li.done::before {
+	border-color: #04783e;
+	background: #04783e;
+	color: #fff;
+}
+
+.create-result {
+	margin-top: 18px;
+	padding: 16px;
+	border: 1px solid #e7ece9;
+	border-radius: 11px;
+	background: #fafcfb;
+	color: #526158;
+	font-size: 13px;
+	line-height: 1.75;
+	overflow-wrap: anywhere;
+}
+
+.create-error {
+	margin-top: 18px;
+	padding: 16px;
+	border: 1px solid #f0d6d6;
+	border-radius: 11px;
+	background: #fff8f8;
+	color: #9d2f2f;
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.page-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 9px;
+	margin-top: 20px;
+}
+
+/* ---------- Upload ---------- */
+
+.upload-tabs {
+	display: flex;
+	gap: 7px;
+	margin-bottom: 18px;
+}
+
+.upload-tabs a {
+	padding: 7px 13px;
+	border: 1px solid #e1e7e3;
+	border-radius: 20px;
+	background: #fafcfa;
+	color: #6d7a72;
+	font-size: 12px;
+	text-decoration: none;
+}
+
+.upload-tabs a.active,
+.upload-tabs a.router-link-active {
+	border-color: #bfe6d0;
+	background: #effaf4;
+	color: #056633;
+}
+
+.file-drop {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 28px 18px;
+	border: 1.5px dashed #ccdbd2;
+	border-radius: 12px;
+	background: #fbfdfb;
+	color: #69736d;
+	font-size: 13px;
+	text-align: center;
+	cursor: pointer;
+	transition:
+		border-color 0.15s ease,
+		background 0.15s ease;
+}
+
+.file-drop:hover {
+	border-color: #04783e;
+	background: #f5fcf8;
+}
+
+.file-drop input {
+	display: none;
+}
+
+.file-drop strong {
+	color: #2f3d35;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.file-meta {
+	margin-top: 12px;
+	color: #69736d;
+	font-size: 12px;
+	line-height: 1.7;
+}
+
+.form-block {
+	margin-top: 16px;
+}
+
+.form-block label {
+	display: block;
+	margin-bottom: 7px;
+	color: #4f5e55;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.form-block textarea {
+	display: block;
+	width: 100%;
+	min-height: 150px;
+	padding: 11px 13px;
+	border: 1px solid #dfe5e1;
+	border-radius: 10px;
+	outline: none;
+	color: #2c3831;
+	font-family: "Fira Code", Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.6;
+	resize: vertical;
+}
+
+.form-block textarea:focus {
+	border-color: #04783e;
+	box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.11);
+}
+
+.upload-progress {
+	margin: 18px 0 0;
+}
+
+.progress-detail {
+	margin-top: 8px;
+	color: #69736d;
+	font-size: 12px;
+}
+
+.output-box {
+	margin-top: 18px;
+	padding: 14px 16px;
+	border: 1px solid #e5eae7;
+	border-radius: 10px;
+	background: #fafcfb;
+	color: #4f5e55;
+	font-size: 13px;
+	line-height: 1.7;
+	overflow-wrap: anywhere;
+}
+
+.output-box.success {
+	border-color: #c9ebd8;
+	background: #f3fcf7;
+}
+
+.output-box.error {
+	border-color: #f0d6d6;
+	background: #fff8f8;
+	color: #9d2f2f;
+}
+
+.output-link {
+	display: block;
+	margin: 8px 0;
+	padding: 9px 11px;
+	overflow-x: auto;
+	border-radius: 7px;
+	background: #fff;
+	color: #0b7fa8;
+	font-family: "Fira Code", Consolas, monospace;
+	font-size: 11px;
+	white-space: nowrap;
+}
+
+.copy-row {
+	display: flex;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+/* ---------- Changelog ---------- */
+
+.changelog-card {
+	width: min(900px, 100%);
+}
+
+.changelog-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.changelog-table th,
+.changelog-table td {
+	padding: 10px 12px;
+	border-bottom: 1px solid #edf0ee;
+	text-align: left;
+	vertical-align: top;
+}
+
+.changelog-table th {
+	background: #f8faf9;
+	color: #5c6b62;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.changelog-table td:first-child {
+	width: 155px;
+	color: #25352b;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.changelog-table td:last-child {
+	color: #5f6d64;
+	line-height: 1.65;
+}
+
+.changelog-table tr:hover td {
+	background: #fbfdfb;
+}
+
+.latest-tag {
+	margin-left: 6px;
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: rgba(7, 193, 96, 0.1);
+	color: #056633;
+	font-size: 10px;
+	font-weight: 500;
+}
+
+/* ---------- 404 ---------- */
+
+.not-found {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 24px;
+	background:
+		radial-gradient(circle at 50% 20%, rgba(7, 193, 96, 0.1), transparent 36%),
+		#eef2ef;
+}
+
+.not-found-card {
+	width: min(460px, 100%);
+	padding: 34px 30px;
+	border: 1px solid #e5eae7;
+	border-radius: 16px;
+	background: #fff;
+	text-align: center;
+	box-shadow: 0 18px 55px rgba(0, 0, 0, 0.11);
+}
+
+.not-found-code {
+	margin: 0;
+	color: #04783e;
+	font-size: 64px;
+	font-weight: 800;
+	line-height: 1;
+}
+
+.not-found-card p {
+	margin: 14px 0 22px;
+	color: #69736d;
+	font-size: 14px;
+	line-height: 1.7;
+}
+
+.not-found-actions {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+}
+
+@media (max-width: 620px) {
+	.standalone-page {
+		padding: 18px 12px;
+	}
+
+	.standalone-card {
+		padding: 22px 18px;
+	}
+
+	.standalone-head {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.changelog-table td:first-child {
+		width: 110px;
+	}
+}
