@@ -11,6 +11,7 @@ import { useRoute, useRouter } from "vue-router";
 import MessageCard from "../components/MessageCard.vue";
 import Modal from "../components/Modal.vue";
 import { readChannel, sendChannelMessage } from "../services/chat.js";
+import { auth } from "../services/auth.js";
 import { safeDecode, timeStamp } from "../lib/format.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { chatName, useIdentity } from "../lib/identity.js";
@@ -46,6 +47,11 @@ const channelSub = computed(() =>
 	isPrivate.value
 		? "私密频道 · 消息在浏览器内使用口令加解密"
 		: "公开频道 · 任何人都可以进入",
+);
+const userLink = computed(() =>
+	auth.session
+		? { name: "user", query: { u: auth.session.username } }
+		: { name: "login" },
 );
 
 const allMessages = ref([]);
@@ -201,6 +207,7 @@ async function send() {
 	try {
 		const message = {
 			name: chatName.value,
+			user: auth.session ? auth.session.username : "",
 			time: timeStamp(),
 			ts: Date.now(),
 			content: draft.value,
@@ -346,7 +353,13 @@ onBeforeUnmount(() => {
 					<div class="chat-sub">{{ channelSub }}</div>
 				</div>
 				<div class="chat-header-right">
-					<router-link class="chat-user" :to="{ name: 'login' }">
+					<router-link
+						class="chat-user"
+						:to="userLink"
+						:title="
+							auth.session ? '查看我的个人主页' : '登录 / 注册'
+						"
+					>
 						<span class="chat-user-dot"></span>
 						<span class="chat-user-name">{{ chatName }}</span>
 					</router-link>

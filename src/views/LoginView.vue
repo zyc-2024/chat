@@ -128,9 +128,21 @@ function continueAsGuest() {
 						</div>
 					</div>
 					<div class="account-actions">
-						<button type="button" class="ghost-button" @click="goBack">
-							返回
-						</button>
+						<router-link
+							class="ghost-button"
+							:to="{
+								name: 'user',
+								query: { u: auth.session.username },
+							}"
+						>
+							我的主页
+						</router-link>
+						<router-link
+							class="ghost-button"
+							:to="{ name: 'edit-profile' }"
+						>
+							编辑资料
+						</router-link>
 						<button type="button" class="danger-button" @click="doLogout">
 							退出登录
 						</button>

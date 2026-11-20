@@ -179,6 +179,39 @@ export function logout() {
 	deleteCookie("auth");
 }
 
+const PROFILE_FIELDS = ["avatar", "pf_header", "profile", "pf_text"];
+
+/**
+ * 更新当前登录账号的 profile 字段。
+ */
+export async function updateAccountProfile(username, updates) {
+	if (!auth.session || auth.session.username !== username) {
+		throw new Error("请先登录自己的账号");
+	}
+	const account = await readAccount(username);
+	if (!account) {
+		throw new Error("找不到这个账号");
+	}
+	const current =
+		account.data.profile && typeof account.data.profile === "object"
+			? account.data.profile
+			: {};
+	const profile = { ...current, username };
+	for (const field of PROFILE_FIELDS) {
+		if (updates[field] !== undefined) {
+			profile[field] = String(updates[field] ?? "");
+		}
+	}
+	// 兼容旧版账号里的 bio 字段
+	profile.bio = profile.profile || "";
+	account.data.profile = profile;
+	await putJson(account.path, account.data, "profile update " + username, account.sha);
+	return {
+		profile,
+		registeredAt: account.data.registeredAt || "",
+	};
+}
+
 export async function getProfile(username) {
 	const account = await readAccount(username);
 	if (!account || account.data.username !== username) return null;

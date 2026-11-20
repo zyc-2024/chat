@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import AuthBadge from "../components/AuthBadge.vue";
 import { fetchChannelIndex } from "../services/chat.js";
+import { auth } from "../services/auth.js";
 import { channelColor, channelInitial, safeDecode } from "../lib/format.js";
 import { chatName } from "../lib/identity.js";
 import { showToast } from "../lib/toast.js";
@@ -13,7 +14,7 @@ const channels = ref([]);
 const loading = ref(true);
 const error = ref("");
 const search = ref("");
-const version = ref("3.0.0 beta 185");
+const version = ref("3.0.0 beta 186");
 const createName = ref("");
 const privateKey = ref("");
 const joinId = ref("");
@@ -94,6 +95,14 @@ function focusCreate() {
 	createNameInput.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+function openAccount() {
+	if (auth.session) {
+		router.push({ name: "user", query: { u: auth.session.username } });
+	} else {
+		router.push({ name: "login" });
+	}
+}
+
 onMounted(() => {
 	loadChannels();
 	loadVersion();
@@ -108,7 +117,7 @@ onMounted(() => {
 					type="button"
 					class="home-avatar"
 					:title="'当前身份：' + chatName"
-					@click="router.push({ name: 'login' })"
+					@click="openAccount"
 				>
 					{{ avatarInitial }}
 				</button>
@@ -145,8 +154,8 @@ onMounted(() => {
 					<button
 						type="button"
 						class="rail-button"
-						title="登录 / 账号"
-						@click="router.push({ name: 'login' })"
+						:title="auth.session ? '我的主页' : '登录 / 账号'"
+						@click="openAccount"
 					>
 						<svg viewBox="0 0 24 24" aria-hidden="true">
 							<circle cx="12" cy="8" r="3.4" />
@@ -271,7 +280,18 @@ onMounted(() => {
 							登录是可选的：不登录也能创建频道、聊天和上传文件。
 							登录后会使用你的账号昵称，并在本机记住 7 天。
 						</span>
-						<router-link :to="{ name: 'login' }">去登录 →</router-link>
+						<router-link
+							:to="
+								auth.session
+									? {
+											name: 'user',
+											query: { u: auth.session.username },
+										}
+									: { name: 'login' }
+							"
+						>
+							{{ auth.session ? "我的主页 →" : "去登录 →" }}
+						</router-link>
 					</div>
 
 					<section class="home-card">

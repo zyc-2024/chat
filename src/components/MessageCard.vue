@@ -15,7 +15,15 @@ const time = computed(() => prettyTime(props.message.time));
 <template>
 	<article class="message-card">
 		<header class="message-head">
-			<span class="message-name">{{ name }}</span>
+			<router-link
+				v-if="message.user"
+				class="message-name message-name-link"
+				:to="{ name: 'user', query: { u: message.user } }"
+				:title="'查看 ' + message.user + ' 的个人主页'"
+			>
+				{{ name }}
+			</router-link>
+			<span v-else class="message-name">{{ name }}</span>
 			<time class="message-time">{{ time }}</time>
 		</header>
 		<div class="message-body markdown-body" v-html="html"></div>

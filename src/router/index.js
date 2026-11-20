@@ -40,6 +40,18 @@ const router = createRouter({
 			component: () => import("../views/UploadBase64View.vue"),
 		},
 		{
+			path: "/user",
+			name: "user",
+			meta: { title: "个人主页" },
+			component: () => import("../views/UserView.vue"),
+		},
+		{
+			path: "/edit",
+			name: "edit-profile",
+			meta: { title: "编辑个人资料" },
+			component: () => import("../views/EditProfileView.vue"),
+		},
+		{
 			path: "/changelog",
 			name: "changelog",
 			meta: { title: "更新日志" },

@@ -19,6 +19,12 @@
    - 保留原来的 Gitee API 存储方式、公开频道索引格式、私密频道 id/口令加密格式，因此能和旧数据互通。
    - 使用 hash 路由，静态托管（GitHub Pages / Gitee Pages）不需要额外的回退配置。
 
+3. **用 Vue 恢复个人主页**
+   - `/#/user?u=用户名` 展示头像、背景、Markdown 自我介绍和侧边文字。
+   - `/#/edit` 编辑个人资料，带实时预览；只有登录自己的账号后才能保存。
+   - 兼容原项目的 `ronly/users/<用户名>.json` 公开资料，并在保存时同步写回。
+   - 聊天消息中的作者名可以点击进入对应个人主页。
+
 ## 路由
 
 | 地址 | 功能 |
@@ -29,6 +35,8 @@
 | `/#/chat?type=r&id=频道id&key=凭证` | 私密频道聊天 |
 | `/#/create?type=u&ch=频道名` | 创建公开频道 |
 | `/#/create?type=r&key=凭证` | 创建私密频道 |
+| `/#/user?u=用户名` | 个人主页 |
+| `/#/edit` | 编辑个人资料（需要登录） |
 | `/#/upload` | 选择文件上传 |
 | `/#/upload/base64` | 粘贴 Base64 上传 |
 | `/#/changelog` | 更新日志 |
@@ -131,4 +139,5 @@ test-core.mjs       数据层离线测试
 
 - 保留了旧账号会话键 `chat_auth_v1`，旧登录状态可以直接继续使用。
 - 保留了旧频道时间格式、公开频道索引中的 URL 编码频道名、私密频道加密格式和文件路径。
+- 个人主页兼容原项目的 `ronly/users/<用户名>.json` 公开资料；旧用户可以直接在 Vue 个人主页中查看，登录同名账号后可以继续编辑。
 - `public/` 下保留了 `core.html`、`showmsg.html`、`create.html`、`uf.html`、`ufb64.html`、`login.html`、`register.html`、`logout.html` 等旧入口的跳转页，旧的分享链接仍会打开对应的 Vue 路由。

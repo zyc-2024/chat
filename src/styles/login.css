@@ -235,13 +235,15 @@
 
 .account-actions {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 10px;
 	margin-top: 18px;
 }
 
 .account-actions .ghost-button,
 .account-actions .danger-button {
-	flex: 1;
+	flex: 1 1 120px;
+	text-decoration: none;
 }
 
 @media (max-width: 520px) {

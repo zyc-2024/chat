@@ -18,9 +18,13 @@ function doLogout() {
 <template>
 	<div class="auth-badge">
 		<template v-if="auth.session">
-			<span class="auth-badge-name" :title="'账号：' + auth.session.username">
+			<router-link
+				class="auth-badge-name"
+				:to="{ name: 'user', query: { u: auth.session.username } }"
+				:title="'查看 ' + auth.session.username + ' 的个人主页'"
+			>
 				已登录：{{ authDisplayName }}
-			</span>
+			</router-link>
 			<button type="button" class="mini-button" @click="doLogout">退出</button>
 		</template>
 		<template v-else>

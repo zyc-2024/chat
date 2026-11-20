@@ -1,6 +1,10 @@
 // 更新日志数据：最新版本在最前面。
 export const changelog = [
 	{
+		"version": "3.0.0 beta 186 (186)",
+		"desc": "用 Vue 恢复原个人主页与编辑资料功能：新增 /user 和 /edit，展示头像、背景图、Markdown 自我介绍和侧边文字，支持实时预览与保存；兼容原 ronly/users 公开资料并同步写回，聊天消息作者名可点击进入个人主页，登录账号页和首页也加入个人主页入口。"
+	},
+	{
 		"version": "3.0.0 beta 185 (185)",
 		"desc": "修复本地运行版打包：PyInstaller 使用 --specpath 时会把 web-dist 解析到 build 目录下导致构建失败；改为在仓库根目录生成 spec 并使用可解析的相对路径，重新验证 Windows exe 打包流程。"
 	},

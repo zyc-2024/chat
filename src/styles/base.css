@@ -148,6 +148,17 @@ button:disabled,
 	white-space: nowrap;
 }
 
+a.auth-badge-name {
+	color: #526158;
+	text-decoration: none;
+}
+
+a.auth-badge-name:hover {
+	color: #056633;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
 .auth-badge-name.guest {
 	color: #69736d;
 }

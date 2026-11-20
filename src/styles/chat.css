@@ -218,6 +218,17 @@
 	white-space: nowrap;
 }
 
+.message-name-link {
+	color: #2d5f43;
+	text-decoration: none;
+}
+
+.message-name-link:hover {
+	color: #04783e;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
 .message-time {
 	flex: 0 0 auto;
 	color: #69736d;
