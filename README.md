@@ -57,17 +57,21 @@ pnpm test
 
 ## 部署
 
-GitHub Pages 使用 `gh-pages` 分支发布 `dist/` 的构建产物：
+GitHub Pages 使用 GitHub Actions 自动构建和发布：
 
 - 仓库：<https://github.com/zyc-2024/chat>
 - 页面：<https://www.zyc2024.com.cn/chat/>
+- 工作流：`.github/workflows/deploy.yml`
 
-更新流程：
+每次向 `main` 分支推送 commit 后，工作流会自动：
 
-```bash
-pnpm build
-# 将 dist/ 的内容提交到 gh-pages 分支后推送
-```
+1. 安装依赖
+2. 运行 `pnpm test`
+3. 运行 `pnpm build`
+4. 把 `dist/` 作为 Pages artifact 上传
+5. 部署到 GitHub Pages
+
+也可以在 Actions 页面手动触发 `Deploy to GitHub Pages`。
 
 `vite.config.js` 使用 `base: "./"` 和 hash 路由，因此部署在 `/chat/` 子路径下也能正常加载资源。
 
