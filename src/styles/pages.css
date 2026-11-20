@@ -303,7 +303,71 @@
 /* ---------- Changelog ---------- */
 
 .changelog-card {
-	width: min(900px, 100%);
+	width: min(980px, 100%);
+}
+
+.tag-filter {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 7px;
+	margin-bottom: 18px;
+}
+
+.tag-filter-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 30px;
+	padding: 0 11px;
+	border: 1px solid #dfe5e1;
+	border-radius: 20px;
+	background: #fafcfa;
+	color: #526158;
+	font-size: 12px;
+	transition:
+		border-color 0.15s ease,
+		background 0.15s ease,
+		color 0.15s ease;
+}
+
+.tag-filter-item:hover {
+	border-color: #c9d9d0;
+	background: #f2f8f4;
+}
+
+.tag-filter-item.active {
+	border-color: var(--tag-color, #04783e);
+	background: #f1fbf5;
+	color: var(--tag-color, #056633);
+}
+
+.tag-dot {
+	display: inline-block;
+	flex: 0 0 auto;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+}
+
+.tag-filter-count {
+	min-width: 17px;
+	padding: 1px 5px;
+	border-radius: 8px;
+	background: #eef2ef;
+	color: #69736d;
+	font-size: 10px;
+	line-height: 1.5;
+	text-align: center;
+}
+
+.tag-filter-item.active .tag-filter-count {
+	background: #fff;
+	color: inherit;
+}
+
+.changelog-table-wrap {
+	width: 100%;
+	overflow-x: auto;
 }
 
 .changelog-table {
@@ -334,9 +398,63 @@
 	white-space: nowrap;
 }
 
+.changelog-table td:nth-child(2) {
+	width: 210px;
+}
+
 .changelog-table td:last-child {
 	color: #5f6d64;
 	line-height: 1.65;
+}
+
+.changelog-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+	align-items: center;
+}
+
+.changelog-tag {
+	display: inline-flex;
+	align-items: center;
+	height: 22px;
+	padding: 0 7px;
+	border: 1px solid;
+	border-radius: 5px;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1;
+	white-space: nowrap;
+	transition:
+		opacity 0.15s ease,
+		transform 0.15s ease;
+}
+
+.changelog-tag:hover {
+	opacity: 0.78;
+	transform: translateY(-1px);
+}
+
+.tag-empty {
+	padding: 24px 12px;
+	color: #69736d;
+	font-size: 13px;
+	text-align: center;
+}
+
+.tag-help {
+	margin: 14px 0 0;
+	color: #69736d;
+	font-size: 11px;
+	line-height: 1.65;
+}
+
+.tag-help code {
+	padding: 1px 4px;
+	border-radius: 4px;
+	background: #f0f3f1;
+	color: #3f4d45;
+	font-size: 10px;
 }
 
 .changelog-table tr:hover td {

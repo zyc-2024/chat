@@ -63,6 +63,24 @@ pnpm test
 
 构建产物在 `dist/`，可以直接部署到任意静态托管。
 
+## Changelog 标签
+
+更新日志支持标签和按标签筛选，标签数据在 `src/data/changelog.js`：
+
+- `changelogTags` 定义内置标签的 `id`、`label`、`color`、`background`。
+- 条目里的 `tags` 可以写标签 id，例如 `["ai", "beta"]`。
+- 也可以直接写自定义标签对象，例如：
+
+```js
+{
+  label: "自定义标签",
+  color: "#c2410c",
+  background: "#fff1e7",
+}
+```
+
+更新日志页面的标签图例、颜色和筛选会自动读取这些配置。后续新增记录会沿用当前 `changelogTags` 和条目 `tags` 的写法。
+
 ## 部署
 
 GitHub Pages 使用 GitHub Actions 自动构建和发布：
