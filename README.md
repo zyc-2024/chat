@@ -68,12 +68,38 @@ GitHub Pages 使用 GitHub Actions 自动构建和发布：
 1. 安装依赖
 2. 运行 `pnpm test`
 3. 运行 `pnpm build`
-4. 把 `dist/` 作为 Pages artifact 上传
-5. 部署到 GitHub Pages
+4. 把 `dist/` 作为 Pages artifact 上传并部署到 GitHub Pages
+5. 在 Windows runner 上用 PyInstaller 打包本地运行版 `zyc-chat.exe`
+6. 生成距上次发布的所有修改记录和完整 `CHANGELOG.md`
+7. 发布 GitHub Release，附带 `.exe`、便携 zip 和更新记录
 
-也可以在 Actions 页面手动触发 `Deploy to GitHub Pages`。
+也可以在 Actions 页面手动触发 `Build, deploy and release`。
 
 `vite.config.js` 使用 `base: "./"` 和 hash 路由，因此部署在 `/chat/` 子路径下也能正常加载资源。
+
+## 本地运行版
+
+先构建前端，再启动本地服务：
+
+```bash
+pnpm build
+python app.py
+```
+
+程序会在 `127.0.0.1` 上启动一个本地静态服务器并自动打开浏览器。也可以用 `app.py` 打包 Windows exe：
+
+```bash
+build-app.bat
+```
+
+或直接下载 GitHub Releases 里的 `zyc-chat-<版本>.exe` / `zyc-chat-<版本>-local-win64.zip`。发行包内包含：
+
+- `zyc-chat-<版本>.exe`：双击运行的本地应用
+- `CHANGELOG.md`：完整更新日志
+- `CHANGELOG-SINCE-LAST-RELEASE.md`：距上次发布的所有修改记录
+- `README.txt`：使用说明
+
+本地运行版仍然通过浏览器访问 Gitee 上的聊天数据，所以需要联网。
 
 ## 目录结构
 
@@ -87,6 +113,9 @@ src/
   styles/           全局与页面样式
   views/            页面级组件
 public/             图标、版本号、旧入口跳转页、robots.txt、第三方许可证
+app.py              本地运行版静态服务器 / PyInstaller 入口
+build-app.bat       本地构建 Windows exe
+scripts/            发布说明与完整 CHANGELOG 生成脚本
 test-core.mjs       数据层离线测试
 ```
 

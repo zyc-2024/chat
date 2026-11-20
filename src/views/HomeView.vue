@@ -13,7 +13,7 @@ const channels = ref([]);
 const loading = ref(true);
 const error = ref("");
 const search = ref("");
-const version = ref("3.0.0 beta 183");
+const version = ref("3.0.0 beta 184");
 const createName = ref("");
 const privateKey = ref("");
 const joinId = ref("");
@@ -242,6 +242,13 @@ onMounted(() => {
 						>
 						·
 						<router-link :to="{ name: 'changelog' }">Changelog</router-link>
+						·
+						<a
+							href="https://github.com/zyc-2024/chat/releases/latest"
+							target="_blank"
+							rel="noreferrer"
+							>本地版下载</a
+						>
 						·
 						<a href="licenses.html" target="_blank" rel="noreferrer"
 							>Licenses</a

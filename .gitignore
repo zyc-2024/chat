@@ -3,3 +3,9 @@ dist/
 .vite/
 *.local
 .DS_Store
+web-dist/
+build/
+release/
+CHANGELOG.md
+release-notes.md
+*.spec
