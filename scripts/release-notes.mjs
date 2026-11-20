@@ -1,44 +1,35 @@
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 import { changelog } from "../src/data/changelog.js";
+import { currentAppVersion } from "../src/lib/appVersion.js";
 
-const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
-const version = packageJson.version;
-const currentBeta = Number((version.match(/-beta\.(\d+)/) || [])[1] || 0);
+const version = currentAppVersion();
+const currentBuild = version.build;
 const lastTag = (process.argv[2] || "").trim();
-
-if (!currentBeta) {
-	console.error(`无法从版本号解析 beta 编号：${version}`);
-	process.exit(1);
-}
-
-const lastBeta = lastTag
-	? Number((lastTag.match(/beta\.(\d+)/i) || [])[1] || 0)
+const lastBuild = lastTag
+	? Number((lastTag.match(/(\d+)\s*$/) || [])[1] || 0)
 	: 164;
 
 function buildNumberOf(entry) {
 	const text = String(entry.version || "");
 	const commit = text.match(/\((\d+)\)/);
-	if (commit) return Number(commit[1]);
-	const beta = text.match(/3\.0\.0 beta (\d+)/);
-	return beta ? Number(beta[1]) : 0;
+	return commit ? Number(commit[1]) : 0;
 }
 
 let entries = changelog.filter((entry) => {
 	const number = buildNumberOf(entry);
-	return number > lastBeta && number <= currentBeta;
+	return number > lastBuild && number <= currentBuild;
 });
 
 if (!entries.length) {
-	const currentEntry = changelog.find(
-		(entry) => buildNumberOf(entry) === currentBeta,
-	);
+	const currentEntry =
+		changelog.find((entry) => buildNumberOf(entry) === currentBuild) ||
+		changelog[0];
 	if (currentEntry) entries = [currentEntry];
 }
 
-const label = `3.0.0 beta ${currentBeta} (${currentBeta})`;
 const lines = [
-	`# ${label}`,
+	`# ${version.display}`,
 	"",
 	lastTag
 		? `距上次发布 \`${lastTag}\` 以来的所有修改：`
@@ -46,12 +37,8 @@ const lines = [
 	"",
 ];
 
-if (entries.length) {
-	for (const entry of entries) {
-		lines.push(`- **${entry.version}** — ${entry.desc}`);
-	}
-} else {
-	lines.push("- 本次提交没有新的版本记录。");
+for (const entry of entries) {
+	lines.push(`- **${entry.version}** — ${entry.desc}`);
 }
 
 if (lastTag) {

@@ -38,8 +38,13 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.2 (189)",
+		tags: ["ai"],
+		desc: "版本号改为读取 Changelog 首条记录，并自动为首条记录添加 latest 标签",
+	},
+	{
 		version: "3.2.1 (187)",
-		tags: ["ai", "latest"],
+		tags: ["ai"],
 		desc: "Changelog 新增标签系统",
 	},
 	{
@@ -249,122 +254,122 @@ export const changelog = [
 	},
 	{
 		version: "1.8.4 (47)",
-		tags: ["hotfix", "legacy"],
+		tags: ["hotfix", "旧版"],
 		desc: "试图修复数学公式显示问题",
 	},
 	{
 		version: "1.8.4 (45)",
-		tags: ["hotfix", "legacy"],
+		tags: ["hotfix", "旧版"],
 		desc: "加了个fallback",
 	},
 	{
 		version: "1.8.3 (43)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "加了个进度条之类的",
 	},
 	{
 		version: "1.8.3 (41)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "上传文件界面更友好了",
 	},
 	{
 		version: "1.8.2 (40)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "更改了文件来源（会快一点）",
 	},
 	{
 		version: "1.8.1 (38)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "把上传文件的UI加了进来",
 	},
 	{
 		version: "1.8.0 (37)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "添加了上传文件的功能！！！",
 	},
 	{
 		version: "1.7.1 (36)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "回退了1.6.2的改动",
 	},
 	{
 		version: "1.7.1 (34)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "让界面更简陋了（",
 	},
 	{
 		version: "1.6.2 (32)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "用“#”替换了“?”",
 	},
 	{
 		version: "1.6.1 (30)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "增加了自动更新",
 	},
 	{
 		version: "1.5.3 (28)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "离线版寿终正寝（喜",
 	},
 	{
 		version: "1.5.1 (25)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "用了洛谷的Markdown，真好用！",
 	},
 	{
 		version: "1.4.8 (23)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "把原来的文件链接过来了awa",
 	},
 	{
 		version: "1.4.8 (22)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "把模板套了上去awa",
 	},
 	{
 		version: "1.4.5 (20)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "把更改频道扔到控制栏了",
 	},
 	{
 		version: "1.4.4 (19)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "增加了聊天数据的安全性",
 	},
 	{
 		version: "1.4.4 (18)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "修复了数据怎么也存不上去的bug",
 	},
 	{
 		version: "1.4.3 (17)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "名字有效期延长至2147483647秒",
 	},
 	{
 		version: "1.4.2 (15)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "稳定版，支持HTML说话",
 	},
 	{
 		version: "1.4.0 (12)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "加入了频道，详见main",
 	},
 	{
 		version: "1.3.3 (9)",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "优化UI，去掉了两个框",
 	},
 	{
 		version: "1.3.3 (8)",
-		tags: ["hotfix", "legacy"],
+		tags: ["hotfix", "旧版"],
 		desc: "修复了bug",
 	},
 	{
 		version: "Early build 1~7",
-		tags: ["legacy"],
+		tags: ["旧版"],
 		desc: "加入了初步发送/存储消息的功能",
 	},
 ];

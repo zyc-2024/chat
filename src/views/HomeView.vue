@@ -5,6 +5,7 @@ import AuthBadge from "../components/AuthBadge.vue";
 import { fetchChannelIndex } from "../services/chat.js";
 import { auth } from "../services/auth.js";
 import { channelColor, channelInitial, safeDecode } from "../lib/format.js";
+import { currentAppVersion } from "../lib/appVersion.js";
 import { chatName } from "../lib/identity.js";
 import { showToast } from "../lib/toast.js";
 import "../styles/home.css";
@@ -14,7 +15,7 @@ const channels = ref([]);
 const loading = ref(true);
 const error = ref("");
 const search = ref("");
-const version = ref("3.0.0 beta 187");
+const version = currentAppVersion().display;
 const createName = ref("");
 const privateKey = ref("");
 const joinId = ref("");
@@ -44,18 +45,6 @@ async function loadChannels() {
 		error.value = e && e.message ? e.message : String(e);
 	} finally {
 		loading.value = false;
-	}
-}
-
-async function loadVersion() {
-	try {
-		const response = await fetch("version.txt", { cache: "no-store" });
-		if (response.ok) {
-			const text = (await response.text()).trim();
-			if (text) version.value = text;
-		}
-	} catch (e) {
-		// 版本号只是装饰，失败时保留默认值
 	}
 }
 
@@ -105,7 +94,6 @@ function openAccount() {
 
 onMounted(() => {
 	loadChannels();
-	loadVersion();
 });
 </script>
 

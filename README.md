@@ -81,12 +81,32 @@ pnpm test
 
 更新日志页面的标签图例、颜色和筛选会自动读取这些配置。后续新增记录会沿用当前 `changelogTags` 和条目 `tags` 的写法。
 
+第一条记录会自动获得 `latest` 标签，不需要在条目里手动写；标签文字和颜色来自 `changelogTags` 中 `label` 或 `id` 包含 `latest` / `最新` 的定义。
+
+## 版本号
+
+应用版本的唯一来源是 `src/data/changelog.js` 第一条记录的 `version`：
+
+- 首页版本号直接读取这条记录
+- `pnpm build` 会自动运行 `scripts/sync-version.mjs`，把同一个版本写入 `public/version.txt`
+- GitHub Release 的名称和 tag 也由它生成
+- 本地运行版 exe / zip 的文件名同样使用它生成的版本号
+
+格式示例：
+
+```text
+3.2.2 (189)          -> Release tag: v3.2.2-189
+3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
+```
+
+`package.json` 里的 `version` 只作为项目元数据，不参与应用版本计算。
+
 ## 部署
 
 GitHub Pages 使用 GitHub Actions 自动构建和发布：
 
 - 仓库：<https://github.com/zyc-2024/chat>
-- 页面：<https://www.zyc2024.com.cn/chat/>
+- 页面：<https://chat.zyc2024.com.cn/>
 - 工作流：`.github/workflows/deploy.yml`
 
 每次向 `main` 分支推送 commit 后，工作流会自动：
@@ -141,7 +161,7 @@ src/
 public/             图标、版本号、旧入口跳转页、robots.txt、第三方许可证
 app.py              本地运行版静态服务器 / PyInstaller 入口
 build-app.bat       本地构建 Windows exe
-scripts/            发布说明与完整 CHANGELOG 生成脚本
+scripts/            版本读取、version.txt 同步、发布说明与完整 CHANGELOG 生成脚本
 test-core.mjs       数据层离线测试
 ```
 

@@ -5,6 +5,17 @@ import "../styles/pages.css";
 
 const activeTag = ref("");
 
+const latestFallback = {
+	id: "latest",
+	label: "latest",
+	color: "#23db66",
+	background: "#f0f3f1",
+};
+const latestDefinition =
+	changelogTags.find((tag) =>
+		/latest|最新/i.test(`${tag.id || ""} ${tag.label || ""}`),
+	) || latestFallback;
+
 function resolveTag(tag) {
 	if (typeof tag === "string") {
 		const found = changelogTags.find((item) => item.id === tag);
@@ -20,8 +31,19 @@ function resolveTag(tag) {
 	return { ...tag, key: tag.id || tag.label };
 }
 
+function isFirstEntry(entry) {
+	return changelog[0] === entry;
+}
+
 function tagsOf(entry) {
-	return (entry.tags || []).map(resolveTag).filter(Boolean);
+	const tags = (entry.tags || []).map(resolveTag).filter(Boolean);
+	if (isFirstEntry(entry)) {
+		const latest = resolveTag(latestDefinition);
+		if (latest && !tags.some((tag) => tag.key === latest.key)) {
+			tags.unshift(latest);
+		}
+	}
+	return tags;
 }
 
 const allTags = computed(() => {
@@ -30,6 +52,8 @@ const allTags = computed(() => {
 		const resolved = resolveTag(tag);
 		if (resolved) map.set(resolved.key, resolved);
 	}
+	const latest = resolveTag(latestDefinition);
+	if (latest) map.set(latest.key, latest);
 	for (const entry of changelog) {
 		for (const tag of tagsOf(entry)) {
 			if (!map.has(tag.key)) map.set(tag.key, tag);
@@ -58,10 +82,6 @@ const filteredChangelog = computed(() =>
 
 function toggleTag(key) {
 	activeTag.value = activeTag.value === key ? "" : key;
-}
-
-function isLatest(entry) {
-	return changelog[0] === entry;
 }
 
 function tagStyle(tag) {
@@ -135,12 +155,7 @@ function tagStyle(tag) {
 							v-for="item in filteredChangelog"
 							:key="item.version"
 						>
-							<td>
-								{{ item.version }}
-								<span v-if="isLatest(item)" class="latest-tag">
-									最新
-								</span>
-							</td>
+							<td>{{ item.version }}</td>
 							<td class="changelog-tags">
 								<button
 									v-for="tag in tagsOf(item)"
