@@ -103,6 +103,9 @@ async function readAccount(username) {
 }
 
 export async function login(username, password) {
+	if (/^Guest_/i.test(username)) {
+		throw new Error("Guest_ 开头的用户名保留给自动游客身份");
+	}
 	const account = await readAccount(username);
 	if (!account || account.data.username !== username) {
 		throw new Error("用户不存在或密码错误");
@@ -119,6 +122,9 @@ export async function login(username, password) {
 export async function register(username, password) {
 	if (!/^[\w\u4e00-\u9fa5.-]{1,32}$/.test(username)) {
 		throw new Error("用户名只能包含中英文、数字和 _-.，长度 1-32");
+	}
+	if (/^Guest_/i.test(username)) {
+		throw new Error("Guest_ 开头的用户名保留给自动游客身份");
 	}
 	if (!password || password.length < 6) {
 		throw new Error("密码至少需要 6 位");

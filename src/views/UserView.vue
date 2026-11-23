@@ -73,6 +73,12 @@ async function load() {
 		loading.value = false;
 		return;
 	}
+	if (/^Guest_/i.test(username.value)) {
+		error.value = "游客身份没有个人主页。登录真实账号后才能使用个人主页。";
+		document.title = "游客没有个人主页 · zyc2024 的聊天网页";
+		loading.value = false;
+		return;
+	}
 	try {
 		const data = await loadProfile(username.value);
 		if (!data) {

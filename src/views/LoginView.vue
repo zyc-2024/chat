@@ -152,7 +152,8 @@ function continueAsGuest() {
 
 			<template v-else>
 				<p class="login-tip">
-					不登录也可以使用全部聊天功能。登录后会使用你的账号昵称发消息，并在本机记住 7 天。
+					不登录也可以使用全部聊天功能。未登录时会自动分配与设备信息绑定的游客用户名
+					Guest_&lt;HASH&gt;；登录后会使用你的账号昵称发消息，并在本机记住 7 天。
 				</p>
 
 				<div class="login-tabs">

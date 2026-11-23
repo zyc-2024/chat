@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.3 (190)",
+		tags: ["ai"],
+		desc: "未登录用户自动分配与设备信息绑定的 Guest_<HASH> 游客用户名并自动登录；游客没有个人主页，登录后才能修改昵称。",
+	},
+	{
 		version: "3.2.2 (189)",
 		tags: ["ai"],
 		desc: "版本号改为读取 Changelog 首条记录，并自动为首条记录添加 latest 标签",

@@ -10,13 +10,17 @@ const props = defineProps({
 const html = computed(() => renderMarkdown(props.message.content || ""));
 const name = computed(() => props.message.name || "Anonymous");
 const time = computed(() => prettyTime(props.message.time));
+const hasProfileLink = computed(() => {
+	const user = String(props.message.user || "");
+	return !!user && !/^Guest_/i.test(user);
+});
 </script>
 
 <template>
 	<article class="message-card">
 		<header class="message-head">
 			<router-link
-				v-if="message.user"
+				v-if="hasProfileLink"
 				class="message-name message-name-link"
 				:to="{ name: 'user', query: { u: message.user } }"
 				:title="'查看 ' + message.user + ' 的个人主页'"

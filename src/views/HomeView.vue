@@ -265,8 +265,9 @@ onMounted(() => {
 				<div class="detail-body">
 					<div class="notice-bar">
 						<span>
-							登录是可选的：不登录也能创建频道、聊天和上传文件。
-							登录后会使用你的账号昵称，并在本机记住 7 天。
+							登录是可选的：未登录会自动分配与设备信息绑定的游客用户名
+							Guest_&lt;HASH&gt;，无需登录也能创建频道、聊天和上传文件；
+							登录后会使用账号昵称，并在本机记住 7 天。
 						</span>
 						<router-link
 							:to="

@@ -1,6 +1,12 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { auth, authDisplayName, logout } from "../services/auth.js";
+import {
+	auth,
+	authDisplayName,
+	logout,
+	setCookie,
+} from "../services/auth.js";
+import { guestUsername } from "../lib/identity.js";
 import { showToast } from "../lib/toast.js";
 
 const router = useRouter();
@@ -11,7 +17,8 @@ function goLogin() {
 
 function doLogout() {
 	logout();
-	showToast("已退出登录，现在是游客模式", "success");
+	setCookie("n", guestUsername.value);
+	showToast("已退出账号，已自动切换为游客身份", "success");
 }
 </script>
 
@@ -28,9 +35,14 @@ function doLogout() {
 			<button type="button" class="mini-button" @click="doLogout">退出</button>
 		</template>
 		<template v-else>
-			<span class="auth-badge-name guest">游客模式（无需登录）</span>
+			<span
+				class="auth-badge-name guest"
+				title="游客用户名由设备信息自动生成，没有对应的个人主页"
+			>
+				自动登录：{{ guestUsername }}
+			</span>
 			<button type="button" class="mini-button primary" @click="goLogin">
-				登录
+				账号登录
 			</button>
 		</template>
 	</div>

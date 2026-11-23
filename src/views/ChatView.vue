@@ -245,6 +245,14 @@ function restartTimer() {
 }
 
 function openRename() {
+	if (!auth.session) {
+		showToast(
+			"游客用户名由设备自动生成，登录后才能修改昵称",
+			"info",
+			3500,
+		);
+		return;
+	}
 	renameValue.value = chatName.value;
 	renameOpen.value = true;
 }
