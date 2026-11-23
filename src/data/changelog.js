@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.17 (208)",
+		tags: ["ai", "hotfix"],
+		desc: "聊天页“一键到底”按钮改为常驻显示，不再只在远离底部时出现；消息列表底部增加了按钮占位空间，避免最后一条消息被悬浮按钮挡住。",
+	},
+	{
 		version: "3.2.16 (207)",
 		tags: ["ai", "hotfix"],
 		desc: "内部逻辑调整，不涉及界面变化。",

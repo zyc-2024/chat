@@ -79,7 +79,6 @@ const editorEl = ref(null);
 const switchTarget = ref("");
 const channelStatus = ref(null);
 const quoting = ref(null);
-const showJumpBottom = ref(false);
 const moreActionsOpen = ref(false);
 const messageMenu = ref({
 	open: false,
@@ -164,7 +163,6 @@ function updateScrollState() {
 	const el = scrollEl.value;
 	if (!el) return;
 	const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
-	showJumpBottom.value = distance > 240;
 	if (distance < 90) newCount.value = 0;
 }
 
@@ -174,7 +172,6 @@ function scrollToBottom(behavior = "auto") {
 		if (!el) return;
 		el.scrollTo({ top: el.scrollHeight, behavior });
 		newCount.value = 0;
-		showJumpBottom.value = false;
 	});
 }
 
@@ -626,7 +623,6 @@ watch(
 		newCount.value = 0;
 		draft.value = "";
 		quoting.value = null;
-		showJumpBottom.value = false;
 		moreActionsOpen.value = false;
 		closeMessageMenu();
 		loadError.value = "";
@@ -752,7 +748,7 @@ onBeforeUnmount(() => {
 				</main>
 
 				<button
-					v-if="showJumpBottom"
+					v-if="loaded && !loadError"
 					type="button"
 					class="chat-jump-bottom"
 					title="回到最新消息"

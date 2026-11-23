@@ -127,7 +127,7 @@
 	flex: 1;
 	min-height: 0;
 	overflow-y: auto;
-	padding: 20px 24px 8px;
+	padding: 20px 24px 58px;
 	background:
 		radial-gradient(
 			circle at 100% 0,
@@ -716,7 +716,7 @@
 	}
 
 	.chat-scroll {
-		padding: 12px 10px 6px;
+		padding: 12px 10px 58px;
 	}
 
 	.chat-load-more {
