@@ -1,7 +1,8 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import AuthBadge from "../components/AuthBadge.vue";
+import Modal from "../components/Modal.vue";
 import {
 	fetchChannelIndex,
 	fetchPublicChannelSummaries,
@@ -31,6 +32,10 @@ const privateKey = ref("");
 const joinId = ref("");
 const joinKey = ref("");
 const createNameInput = ref(null);
+const createDialogOpen = ref(false);
+const createDialogName = ref("");
+const createDialogError = ref("");
+const createDialogInput = ref(null);
 const avatarUrl = ref("");
 const avatarFailed = ref(false);
 
@@ -118,9 +123,26 @@ function joinPrivateChannel() {
 	router.push({ name: "chat", query: { type: "r", id, key: joinKey.value } });
 }
 
-function focusCreate() {
-	createNameInput.value?.focus();
-	createNameInput.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+function openCreateDialog() {
+	createDialogName.value = createName.value.trim();
+	createDialogError.value = "";
+	createDialogOpen.value = true;
+	nextTick(() => {
+		createDialogInput.value?.focus();
+		createDialogInput.value?.select();
+	});
+}
+
+function submitCreateDialog() {
+	const name = createDialogName.value.trim();
+	if (!name) {
+		createDialogError.value = "请输入频道名称";
+		nextTick(() => createDialogInput.value?.focus());
+		return;
+	}
+	createDialogOpen.value = false;
+	createName.value = name;
+	router.push({ name: "create", query: { type: "u", ch: name } });
 }
 
 async function loadAvatar() {
@@ -187,7 +209,7 @@ onMounted(() => {
 						type="button"
 						class="rail-button"
 						title="新建频道"
-						@click="focusCreate"
+						@click="openCreateDialog"
 					>
 						<svg viewBox="0 0 24 24" aria-hidden="true">
 							<path d="M12 5v14M5 12h14" />
@@ -421,5 +443,41 @@ onMounted(() => {
 				</div>
 			</main>
 		</div>
+
+		<Modal
+			:open="createDialogOpen"
+			title="新建公开频道"
+			@close="createDialogOpen = false"
+		>
+			<form class="home-create-form" @submit.prevent="submitCreateDialog">
+				<div class="home-create-field">
+					<label for="quick-create-name">频道名称</label>
+					<input
+						id="quick-create-name"
+						ref="createDialogInput"
+						v-model="createDialogName"
+						type="text"
+						maxlength="32"
+						placeholder="输入频道名称"
+						@input="createDialogError = ''"
+					/>
+				</div>
+				<div v-if="createDialogError" class="home-create-error">
+					{{ createDialogError }}
+				</div>
+				<div class="home-create-actions">
+					<button
+						type="button"
+						class="ghost-button"
+						@click="createDialogOpen = false"
+					>
+						取消
+					</button>
+					<button type="submit" class="primary-button">
+						创建并进入
+					</button>
+				</div>
+			</form>
+		</Modal>
 	</div>
 </template>
