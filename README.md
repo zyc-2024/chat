@@ -89,6 +89,12 @@
    - 旧文件迁移脚本：`node scripts/gitee-file-repos.mjs migrate`。
    - 仓库初始化脚本可重复执行：`node scripts/gitee-file-repos.mjs setup`。
 
+13. **中英文 i18n 与 AI 翻译标注**
+   - 全站页面、操作提示、弹窗、右键菜单和服务错误支持简体中文与英文。
+   - 语言选择保存在本机，切换时会同步页面标题和 `<html lang>`。
+   - 英文界面为 AI 翻译；语言切换器会显示 `AI translation` 标记，更新日志页也会说明历史描述保留原始中文。
+   - 用户消息、频道名、个人资料等用户内容不会被自动翻译。
+
 ## 路由
 
 | 地址 | 功能 |
@@ -160,7 +166,7 @@ pnpm test
 格式示例：
 
 ```text
-3.2.18 (209)         -> Release tag: v3.2.18-209
+3.2.19 (213)         -> Release tag: v3.2.19-213
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 
