@@ -1,6 +1,8 @@
 <script setup>
 import { computed, ref } from "vue";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import { changelog, changelogTags } from "../data/changelog.js";
+import { locale, t } from "../i18n/index.js";
 import "../styles/pages.css";
 
 const activeTag = ref("");
@@ -101,15 +103,20 @@ function tagStyle(tag) {
 		<div class="standalone-card changelog-card">
 			<div class="standalone-head">
 				<div>
-					<h1>更新日志</h1>
-					<!-- <p>从最初的聊天记录到 Vue 重写版，一共 {{ changelog.length }} 条记录。</p> -->
+					<h1>{{ t("更新日志") }}</h1>
 				</div>
-				<router-link class="back-link" :to="{ name: 'home' }">
-					返回首页
-				</router-link>
+				<div class="standalone-head-actions">
+					<LanguageSwitcher />
+					<router-link class="back-link" :to="{ name: 'home' }">
+						{{ t("返回首页") }}
+					</router-link>
+				</div>
 			</div>
 
-			<div class="tag-filter" aria-label="按标签筛选更新记录">
+			<div
+				class="tag-filter"
+				:aria-label="t('按标签筛选更新记录')"
+			>
 				<button
 					type="button"
 					class="tag-filter-item"
@@ -117,7 +124,7 @@ function tagStyle(tag) {
 					:aria-pressed="activeTag === ''"
 					@click="activeTag = ''"
 				>
-					全部
+					{{ t("全部") }}
 					<span class="tag-filter-count">{{ changelog.length }}</span>
 				</button>
 				<button
@@ -134,7 +141,7 @@ function tagStyle(tag) {
 						class="tag-dot"
 						:style="{ background: tag.color || '#69736d' }"
 					></span>
-					{{ tag.label }}
+					{{ t(tag.label) }}
 					<span class="tag-filter-count">
 						{{ tagCounts[tag.key] || 0 }}
 					</span>
@@ -145,9 +152,9 @@ function tagStyle(tag) {
 				<table class="changelog-table">
 					<thead>
 						<tr>
-							<th>版本号</th>
-							<th>标签</th>
-							<th>描述</th>
+							<th>{{ t("版本号") }}</th>
+							<th>{{ t("标签") }}</th>
+							<th>{{ t("描述") }}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -163,10 +170,14 @@ function tagStyle(tag) {
 									type="button"
 									class="changelog-tag"
 									:style="tagStyle(tag)"
-									:title="'筛选标签：' + tag.label"
+									:title="
+										t('筛选标签：{label}', {
+											label: t(tag.label),
+										})
+									"
 									@click="toggleTag(tag.key)"
 								>
-									{{ tag.label }}
+									{{ t(tag.label) }}
 								</button>
 							</td>
 							<td>{{ item.desc }}</td>
@@ -176,12 +187,18 @@ function tagStyle(tag) {
 			</div>
 
 			<div v-if="!filteredChangelog.length" class="tag-empty">
-				没有匹配这个标签的更新记录。
+				{{ t("没有匹配这个标签的更新记录。") }}
 			</div>
 
 			<p class="tag-help">
-				点击标签可以筛选。标签的文字、颜色和背景色可以在
-				<code>src/data/changelog.js</code> 中自定义。
+				{{
+					t(
+						"点击标签可以筛选。标签的文字、颜色和背景色可以在 src/data/changelog.js 中自定义。",
+					)
+				}}
+			</p>
+			<p v-if="locale === 'en'" class="tag-help ai-translation-note">
+				{{ t("英文界面和标签由 AI 翻译，历史更新描述保留原始中文。") }}
 			</p>
 		</div>
 	</div>

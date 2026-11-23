@@ -1,7 +1,9 @@
 <script setup>
 import { computed, ref } from "vue";
 import SparkMD5 from "spark-md5";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import { GITEE_TOKEN, fileRepoApi } from "../services/gitee.js";
+import { t } from "../i18n/index.js";
 import { formatBytes } from "../lib/format.js";
 import { copyText } from "../lib/clipboard.js";
 import { showToast } from "../lib/toast.js";
@@ -45,7 +47,8 @@ function readAsArrayBuffer(selected) {
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
 		reader.onload = () => resolve(reader.result);
-		reader.onerror = () => reject(reader.error || new Error("读取文件失败"));
+		reader.onerror = () =>
+			reject(reader.error || new Error(t("读取文件失败")));
 		reader.readAsArrayBuffer(selected);
 	});
 }
@@ -66,8 +69,8 @@ function uploadRequest(url, body) {
 				)}`;
 			}
 		};
-		xhr.onerror = () => reject(new Error("网络错误，上传失败"));
-		xhr.onabort = () => reject(new Error("上传已取消"));
+		xhr.onerror = () => reject(new Error(t("网络错误，上传失败")));
+		xhr.onabort = () => reject(new Error(t("上传已取消")));
 		xhr.onload = () => {
 			let data = null;
 			try {
@@ -85,21 +88,21 @@ async function upload() {
 	if (busy.value) return;
 	const selected = file.value;
 	if (!selected) {
-		showToast("请先选择文件", "error");
+		showToast(t("请先选择文件"), "error");
 		return;
 	}
 	if (selected.size >= 104857600) {
-		showToast("文件不能超过 100MB", "error");
+		showToast(t("文件不能超过 100MB"), "error");
 		return;
 	}
 	busy.value = true;
 	output.value = null;
 	error.value = "";
 	progress.value = 0;
-	progressText.value = "读取中……";
+	progressText.value = t("读取中……");
 	try {
 		const buffer = await readAsArrayBuffer(selected);
-		progressText.value = "计算 MD5 并编码……";
+		progressText.value = t("计算 MD5 并编码……");
 		const md5 = SparkMD5.ArrayBuffer.hash(buffer);
 		const base64 = arrayBufferToBase64(buffer);
 		const repoApi = fileRepoApi(md5);
@@ -122,24 +125,25 @@ async function upload() {
 			(message.includes("已存在") || message.includes("already exists"));
 		if ((response.status >= 200 && response.status < 300) || exists) {
 			progress.value = 100;
-			progressText.value = "上传完成";
+			progressText.value = t("上传完成");
 			output.value = {
 				ok: true,
-				note: exists ? "文件名已存在，仍然可以使用下面的链接。" : "上传成功！",
+				note: exists
+					? t("文件名已存在，仍然可以使用下面的链接。")
+					: t("上传成功！"),
 				markdown,
 				rawUrl,
 			};
-			showToast("上传成功", "success");
+			showToast(t("上传成功"), "success");
 		} else {
 			throw new Error(
-				`上传失败（${response.status}）${
-					message ? "：" + message : response.text.slice(0, 200)
-				}`,
+				t("上传失败（{status}）", { status: response.status }) +
+					(message ? `: ${message}` : `: ${response.text.slice(0, 200)}`),
 			);
 		}
 	} catch (e) {
 		error.value = e && e.message ? e.message : String(e);
-		progressText.value = "上传失败";
+		progressText.value = t("上传失败");
 		showToast(error.value, "error", 4000);
 	} finally {
 		busy.value = false;
@@ -148,7 +152,10 @@ async function upload() {
 
 async function copy(value, label) {
 	const ok = await copyText(value);
-	showToast(ok ? `${label}已复制` : "复制失败，请手动选择", ok ? "success" : "error");
+	showToast(
+		ok ? t("{label}已复制", { label }) : t("复制失败，请手动选择"),
+		ok ? "success" : "error",
+	);
 }
 </script>
 
@@ -157,31 +164,42 @@ async function copy(value, label) {
 		<div class="standalone-card">
 			<div class="standalone-head">
 				<div>
-					<h1>上传文件</h1>
+					<h1>{{ t("上传文件") }}</h1>
 					<p>
-						文件会以 base64 形式保存到 Gitee 分片仓库（按 MD5 前两位选择 256 个仓库之一），上传后生成可直接引用的链接。
+						{{
+							t(
+								"文件会以 base64 形式保存到 Gitee 分片仓库（按 MD5 前两位选择 256 个仓库之一），上传后生成可直接引用的链接。",
+							)
+						}}
 					</p>
 				</div>
-				<router-link class="back-link" :to="{ name: 'home' }">
-					返回首页
-				</router-link>
+				<div class="standalone-head-actions">
+					<LanguageSwitcher />
+					<router-link class="back-link" :to="{ name: 'home' }">
+						{{ t("返回首页") }}
+					</router-link>
+				</div>
 			</div>
 
 			<div class="upload-tabs">
-				<router-link :to="{ name: 'upload' }">选择文件</router-link>
+				<router-link :to="{ name: 'upload' }">
+					{{ t("选择文件") }}
+				</router-link>
 				<router-link :to="{ name: 'upload-base64' }">
-					粘贴 Base64
+					{{ t("粘贴 Base64") }}
 				</router-link>
 			</div>
 
 			<label class="file-drop">
 				<input type="file" @change="chooseFile" />
-				<strong>{{ file ? file.name : "点击选择文件" }}</strong>
+				<strong>{{ file ? file.name : t("点击选择文件") }}</strong>
 				<span v-if="file">{{ formatBytes(file.size) }}</span>
-				<span v-else>单个文件不超过 100MB</span>
+				<span v-else>{{ t("单个文件不超过 100MB") }}</span>
 			</label>
 
-			<div v-if="fileInfo" class="file-meta">已选择：{{ fileInfo }}</div>
+			<div v-if="fileInfo" class="file-meta">
+				{{ t("已选择：{info}", { info: fileInfo }) }}
+			</div>
 
 			<div class="page-actions">
 				<button
@@ -190,7 +208,7 @@ async function copy(value, label) {
 					:disabled="busy || !file"
 					@click="upload"
 				>
-					{{ busy ? "上传中……" : "开始上传" }}
+					{{ busy ? t("上传中……") : t("开始上传") }}
 				</button>
 			</div>
 
@@ -217,28 +235,34 @@ async function copy(value, label) {
 					rel="noreferrer"
 					>{{ output.rawUrl }}</a
 				>
-				<div>复制下面的 Markdown 到聊天框即可引用：</div>
+				<div>
+					{{ t("复制下面的 Markdown 到聊天框即可引用：") }}
+				</div>
 				<code class="output-link">{{ output.markdown }}</code>
 				<div class="copy-row">
 					<button
 						type="button"
 						class="mini-button"
-						@click="copy(output.markdown, 'Markdown')"
+						@click="copy(output.markdown, t('复制 Markdown'))"
 					>
-						复制 Markdown
+						{{ t("复制 Markdown") }}
 					</button>
 					<button
 						type="button"
 						class="mini-button"
-						@click="copy(output.rawUrl, '链接')"
+						@click="copy(output.rawUrl, t('复制链接'))"
 					>
-						复制链接
+						{{ t("复制链接") }}
 					</button>
 				</div>
 			</div>
 
 			<div class="file-meta">
-				提示：上传使用原项目的公开 Gitee API 令牌。请不要上传包含隐私信息的文件。
+				{{
+					t(
+						"提示：上传使用原项目的公开 Gitee API 令牌。请不要上传包含隐私信息的文件。",
+					)
+				}}
 			</div>
 		</div>
 	</div>

@@ -1,5 +1,6 @@
 import { computed, ref } from "vue";
 import CryptoJS from "crypto-js";
+import { t } from "../i18n/index.js";
 import { auth, setCookie, setDisplayName } from "../services/auth.js";
 
 const GUEST_NAME_KEY = "chat_guest_username_v2";
@@ -109,7 +110,7 @@ export function currentIdentity() {
 export function useIdentity() {
 	async function rename(name) {
 		if (!auth.session) {
-			throw new Error("游客用户名由设备自动生成，登录后才能修改昵称");
+			throw new Error(t("游客用户名由设备自动生成，登录后才能修改昵称"));
 		}
 		const next = String(name || "").trim();
 		if (!next) return false;

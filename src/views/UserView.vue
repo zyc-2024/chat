@@ -1,8 +1,10 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import { auth } from "../services/auth.js";
 import { loadProfile } from "../services/profile.js";
+import { locale, t } from "../i18n/index.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import "../styles/profile.css";
 
@@ -40,8 +42,8 @@ const backgroundStyle = computed(() => {
 const metaText = computed(() => {
 	if (!profile.value) return "";
 	const joined = formatDate(profile.value.reg_time);
-	const parts = [`个人主页 · @${username.value}`];
-	if (joined) parts.push(`加入于 ${joined}`);
+	const parts = [t("个人主页 · @{username}", { username: username.value })];
+	if (joined) parts.push(t("加入于 {date}", { date: joined }));
 	return parts.join(" · ");
 });
 
@@ -49,11 +51,14 @@ function formatDate(value) {
 	if (!value) return "";
 	const date = new Date(value);
 	if (Number.isNaN(date.getTime())) return String(value);
-	return date.toLocaleDateString("zh-CN", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
+	return date.toLocaleDateString(
+		locale.value === "en" ? "en-US" : "zh-CN",
+		{
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+		},
+	);
 }
 
 async function load() {
@@ -69,25 +74,27 @@ async function load() {
 			});
 			return;
 		}
-		error.value = "未指定用户。";
+		error.value = t("未指定用户。");
 		loading.value = false;
 		return;
 	}
 	if (/^Guest_/i.test(username.value)) {
-		error.value = "游客身份没有个人主页。登录真实账号后才能使用个人主页。";
-		document.title = "游客没有个人主页 · zyc2024 的聊天网页";
+		error.value = t("游客身份没有个人主页。登录真实账号后才能使用个人主页。");
+		document.title = t("游客没有个人主页 · zyc2024 的聊天网页");
 		loading.value = false;
 		return;
 	}
 	try {
 		const data = await loadProfile(username.value);
 		if (!data) {
-			error.value = "没这个用户！";
-			document.title = "用户不存在 · zyc2024 的聊天网页";
+			error.value = t("没有找到这个用户。");
+			document.title = t("用户不存在 · zyc2024 的聊天网页");
 			return;
 		}
 		profile.value = data;
-		document.title = `${data.user} 的个人主页 · zyc2024 的聊天网页`;
+		document.title = t("{name} 的个人主页 · zyc2024 的聊天网页", {
+			name: data.user,
+		});
 	} catch (e) {
 		error.value = e && e.message ? e.message : String(e);
 	} finally {
@@ -112,7 +119,9 @@ onMounted(load);
 			</aside>
 
 			<section class="profile-card">
-				<div v-if="loading" class="profile-loading">个人主页加载中……</div>
+				<div v-if="loading" class="profile-loading">
+					{{ t("个人主页加载中……") }}
+				</div>
 
 				<div v-else-if="profile" class="profile-content">
 					<div class="profile-top">
@@ -120,7 +129,7 @@ onMounted(load);
 							v-if="!avatarFailed"
 							class="profile-avatar"
 							:src="profile.avatar"
-							:alt="profile.user + ' 的头像'"
+							:alt="t('{name} 的头像', { name: profile.user })"
 							@error="avatarFailed = true"
 						/>
 						<div v-else class="profile-avatar profile-avatar-fallback">
@@ -141,7 +150,7 @@ onMounted(load);
 									d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"
 								></path>
 							</svg>
-							编辑资料
+							{{ t("编辑资料") }}
 						</router-link>
 					</div>
 
@@ -153,12 +162,12 @@ onMounted(load);
 						v-html="bioHtml"
 					></div>
 					<div v-else class="profile-empty">
-						这个人很懒，还没有写自我介绍。
+						{{ t("这个人很懒，还没有写自我介绍。") }}
 					</div>
 
 					<div class="profile-actions">
 						<router-link class="ghost-button" :to="{ name: 'home' }">
-							返回首页
+							{{ t("返回首页") }}
 						</router-link>
 						<router-link
 							v-if="auth.session"
@@ -168,31 +177,33 @@ onMounted(load);
 								query: { u: auth.session.username },
 							}"
 						>
-							我的主页
+							{{ t("我的主页") }}
 						</router-link>
 						<router-link
 							v-if="!auth.session"
 							class="primary-button"
 							:to="{ name: 'login' }"
 						>
-							登录
+							{{ t("登录") }}
 						</router-link>
+						<LanguageSwitcher />
 					</div>
 				</div>
 
 				<div v-else class="profile-error">
-					<strong>无法打开个人主页</strong>
-					<p>{{ error || "没这个用户！" }}</p>
+					<strong>{{ t("无法打开个人主页") }}</strong>
+					<p>{{ error || t("没有找到这个用户。") }}</p>
 					<div class="profile-actions">
 						<router-link class="primary-button" :to="{ name: 'home' }">
-							返回首页
+							{{ t("返回首页") }}
 						</router-link>
 						<router-link
 							class="ghost-button"
 							:to="{ name: 'login' }"
 						>
-							登录
+							{{ t("登录") }}
 						</router-link>
+						<LanguageSwitcher />
 					</div>
 				</div>
 			</section>

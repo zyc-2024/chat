@@ -1,5 +1,6 @@
 <script setup>
 import { onBeforeUnmount, watch } from "vue";
+import { t } from "../i18n/index.js";
 
 const props = defineProps({
 	open: { type: Boolean, default: false },
@@ -37,7 +38,12 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 				<div class="modal-card" :style="{ width }">
 					<header class="modal-head">
 						<h2>{{ title }}</h2>
-						<button type="button" class="modal-close" aria-label="关闭" @click="close">
+						<button
+							type="button"
+							class="modal-close"
+							:aria-label="t('关闭')"
+							@click="close"
+						>
 							×
 						</button>
 					</header>

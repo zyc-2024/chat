@@ -1,5 +1,6 @@
 import { reactive, computed } from "vue";
 import CryptoJS from "crypto-js";
+import { t } from "../i18n/index.js";
 import { getJson, postJson, putJson } from "./gitee.js";
 
 const SALT = "zyc2024-chat-auth-v1";
@@ -123,14 +124,14 @@ async function readAccount(username) {
 
 export async function login(username, password) {
 	if (/^Guest_/i.test(username)) {
-		throw new Error("Guest_ 开头的用户名保留给自动游客身份");
+		throw new Error(t("Guest_ 开头的用户名保留给自动游客身份"));
 	}
 	const account = await readAccount(username);
 	if (!account || account.data.username !== username) {
-		throw new Error("用户不存在或密码错误");
+		throw new Error(t("用户不存在或密码错误"));
 	}
 	if (account.data.password !== passwordHash(username, password)) {
-		throw new Error("用户不存在或密码错误");
+		throw new Error(t("用户不存在或密码错误"));
 	}
 	const displayName =
 		(account.data.settings && account.data.settings.lastName) || username;
@@ -140,17 +141,17 @@ export async function login(username, password) {
 
 export async function register(username, password) {
 	if (!/^[\w\u4e00-\u9fa5.-]{1,32}$/.test(username)) {
-		throw new Error("用户名只能包含中英文、数字和 _-.，长度 1-32");
+		throw new Error(t("用户名只能包含中英文、数字和 _-.，长度 1-32"));
 	}
 	if (/^Guest_/i.test(username)) {
-		throw new Error("Guest_ 开头的用户名保留给自动游客身份");
+		throw new Error(t("Guest_ 开头的用户名保留给自动游客身份"));
 	}
 	if (!password || password.length < 6) {
-		throw new Error("密码至少需要 6 位");
+		throw new Error(t("密码至少需要 6 位"));
 	}
 	const existing = await readAccount(username);
 	if (existing) {
-		throw new Error("该用户名已被注册");
+		throw new Error(t("该用户名已被注册"));
 	}
 	const now = new Date().toISOString();
 	const data = {
@@ -222,11 +223,11 @@ const PROFILE_FIELDS = ["avatar", "pf_header", "profile", "pf_text"];
  */
 export async function updateAccountProfile(username, updates) {
 	if (!auth.session || auth.session.username !== username) {
-		throw new Error("请先登录自己的账号");
+		throw new Error(t("请先登录自己的账号"));
 	}
 	const account = await readAccount(username);
 	if (!account) {
-		throw new Error("找不到这个账号");
+		throw new Error(t("找不到这个账号"));
 	}
 	const current =
 		account.data.profile && typeof account.data.profile === "object"

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import { auth, authDisplayName } from "../services/auth.js";
 import {
 	DEFAULT_AVATAR,
@@ -9,6 +10,7 @@ import {
 	loadProfile,
 	saveProfile,
 } from "../services/profile.js";
+import { t } from "../i18n/index.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { showToast } from "../lib/toast.js";
 import "../styles/profile.css";
@@ -30,10 +32,10 @@ const form = reactive({
 
 const username = computed(() => (auth.session ? auth.session.username : ""));
 const bioPreview = computed(() =>
-	renderMarkdown(form.profile || "还没有填写自我介绍。"),
+	renderMarkdown(form.profile || t("还没有填写自我介绍。")),
 );
 const sidePreview = computed(() =>
-	renderMarkdown(form.pf_text || "还没有填写侧边文字。"),
+	renderMarkdown(form.pf_text || t("还没有填写侧边文字。")),
 );
 const avatarInitial = computed(() => {
 	const name = authDisplayName.value || username.value || "?";
@@ -81,10 +83,12 @@ async function save() {
 	try {
 		const result = await saveProfile(auth.session.username, form);
 		if (result.publicSynced) {
-			showToast("个人资料已保存", "success");
+			showToast(t("个人资料已保存"), "success");
 		} else {
 			showToast(
-				"账号资料已保存，但公开主页同步失败，稍后会显示账号里的资料",
+				t(
+					"账号资料已保存，但公开主页同步失败，稍后会显示账号里的资料",
+				),
 				"info",
 				4000,
 			);
@@ -113,25 +117,32 @@ onMounted(load);
 		<div class="standalone-card">
 			<div class="standalone-head">
 				<div>
-					<h1>编辑个人资料</h1>
-					<p>编辑头像、背景、自我介绍和侧边文字。</p>
+					<h1>{{ t("编辑个人资料") }}</h1>
+					<p>{{ t("编辑头像、背景、自我介绍和侧边文字。") }}</p>
 				</div>
-				<router-link class="back-link" :to="{ name: 'home' }">
-					返回首页
-				</router-link>
+				<div class="standalone-head-actions">
+					<LanguageSwitcher />
+					<router-link class="back-link" :to="{ name: 'home' }">
+						{{ t("返回首页") }}
+					</router-link>
+				</div>
 			</div>
 			<div class="edit-error">
-				编辑个人资料需要登录账号。登录是可选的，不影响聊天和其他功能。
+				{{
+					t(
+						"编辑个人资料需要登录账号。登录是可选的，不影响聊天和其他功能。",
+					)
+				}}
 			</div>
 			<div class="page-actions">
 				<router-link
 					class="primary-button"
 					:to="{ name: 'login', query: { redirect: route.fullPath } }"
 				>
-					去登录
+					{{ t("去登录") }}
 				</router-link>
 				<router-link class="ghost-button" :to="{ name: 'home' }">
-					返回首页
+					{{ t("返回首页") }}
 				</router-link>
 			</div>
 		</div>
@@ -142,17 +153,27 @@ onMounted(load);
 		<main class="edit-profile-shell">
 			<div class="edit-profile-head">
 				<div>
-					<h1>编辑个人资料</h1>
+					<h1>{{ t("编辑个人资料") }}</h1>
 					<p>
-						当前账号：{{ auth.session.username }}。保存后会更新账号资料，并同步原项目的公开个人主页文件。
+						{{
+							t(
+								"当前账号：{username}。保存后会更新账号资料，并同步原项目的公开个人主页文件。",
+								{ username: auth.session.username },
+							)
+						}}
 					</p>
 				</div>
-				<router-link class="back-link" :to="profileLink">
-					查看主页
-				</router-link>
+				<div class="standalone-head-actions">
+					<LanguageSwitcher />
+					<router-link class="back-link" :to="profileLink">
+						{{ t("查看主页") }}
+					</router-link>
+				</div>
 			</div>
 
-			<div v-if="loading" class="profile-loading">资料加载中……</div>
+			<div v-if="loading" class="profile-loading">
+				{{ t("资料加载中……") }}
+			</div>
 
 			<form
 				v-else
@@ -161,7 +182,7 @@ onMounted(load);
 			>
 				<div class="edit-form">
 					<div class="edit-field">
-						<label for="profile-avatar">头像图片网址</label>
+						<label for="profile-avatar">{{ t("头像图片网址") }}</label>
 						<input
 							id="profile-avatar"
 							v-model="form.avatar"
@@ -169,12 +190,12 @@ onMounted(load);
 							placeholder="https://..."
 						/>
 						<div class="edit-field-hint">
-							留空会使用默认头像。
+							{{ t("留空会使用默认头像。") }}
 						</div>
 					</div>
 
 					<div class="edit-field">
-						<label for="profile-header">背景图片网址</label>
+						<label for="profile-header">{{ t("背景图片网址") }}</label>
 						<input
 							id="profile-header"
 							v-model="form.pf_header"
@@ -182,29 +203,29 @@ onMounted(load);
 							placeholder="https://..."
 						/>
 						<div class="edit-field-hint">
-							显示在个人主页背景，留空会使用默认背景。
+							{{ t("显示在个人主页背景，留空会使用默认背景。") }}
 						</div>
 					</div>
 
 					<div class="edit-field">
 						<label for="profile-bio">
-							自我介绍（支持 Markdown / LaTeX）
+							{{ t("自我介绍（支持 Markdown / LaTeX）") }}
 						</label>
 						<textarea
 							id="profile-bio"
 							v-model="form.profile"
-							placeholder="介绍一下自己吧"
+							:placeholder="t('介绍一下自己吧')"
 						></textarea>
 					</div>
 
 					<div class="edit-field">
 						<label for="profile-side">
-							侧边文字（支持 Markdown / LaTeX）
+							{{ t("侧边文字（支持 Markdown / LaTeX）") }}
 						</label>
 						<textarea
 							id="profile-side"
 							v-model="form.pf_text"
-							placeholder="显示在个人主页左侧的文字"
+							:placeholder="t('显示在个人主页左侧的文字')"
 						></textarea>
 					</div>
 
@@ -216,16 +237,16 @@ onMounted(load);
 							class="primary-button"
 							:disabled="busy"
 						>
-							{{ busy ? "保存中……" : "保存资料" }}
+							{{ busy ? t("保存中……") : t("保存资料") }}
 						</button>
 						<router-link class="ghost-button" :to="profileLink">
-							取消
+							{{ t("取消") }}
 						</router-link>
 					</div>
 				</div>
 
 				<aside class="edit-preview">
-					<div class="edit-preview-label">实时预览</div>
+					<div class="edit-preview-label">{{ t("实时预览") }}</div>
 					<div class="edit-preview-card">
 						<div class="edit-preview-avatar-row">
 							<div class="edit-preview-avatar">

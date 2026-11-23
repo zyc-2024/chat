@@ -8,6 +8,7 @@ import {
 	saveJson,
 } from "./gitee.js";
 import { decryptData, encryptData } from "../lib/crypto.js";
+import { t } from "../i18n/index.js";
 import { safeDecode, timeStamp } from "../lib/format.js";
 
 const INDEX_PATH = "public/index.json";
@@ -31,7 +32,7 @@ export function privateStatusPath(id) {
 
 function statusPath({ type, ch, id }) {
 	if (type === "r") {
-		if (!id) throw new Error("私密频道缺少 id");
+		if (!id) throw new Error(t("私密频道缺少 id"));
 		return privateStatusPath(id);
 	}
 	return publicStatusPath(String(ch || "main"));
@@ -39,7 +40,7 @@ function statusPath({ type, ch, id }) {
 
 function normalizeOwner(owner, fallbackName = "") {
 	const name = String((owner && owner.name) || fallbackName || "").trim();
-	if (!name) throw new Error("缺少频道创建者信息");
+	if (!name) throw new Error(t("缺少频道创建者信息"));
 	return {
 		name,
 		type: owner && owner.type === "user" ? "user" : "guest",
@@ -62,7 +63,7 @@ function buildStatus(owner) {
 }
 
 function channelDeletedError() {
-	const error = new Error("频道已被创建者删除");
+	const error = new Error(t("频道已被创建者删除"));
 	error.code = "CHANNEL_DELETED";
 	return error;
 }
@@ -149,7 +150,7 @@ async function ensureStatusFile(path, owner, key = null) {
 		try {
 			data = key ? decryptData(existing.data, key) : existing.data;
 		} catch (e) {
-			throw new Error("频道状态解密失败，可能是频道凭证错误");
+			throw new Error(t("频道状态解密失败，可能是频道凭证错误"));
 		}
 		if (data && data.deleted) throw channelDeletedError();
 		return { path, sha: existing.sha, data };
@@ -169,7 +170,7 @@ export async function getChannelStatus(options) {
 	try {
 		data = options.type === "r" ? decryptData(file.data, options.key) : file.data;
 	} catch (e) {
-		throw new Error("频道状态解密失败，可能是频道凭证错误");
+		throw new Error(t("频道状态解密失败，可能是频道凭证错误"));
 	}
 	return { path, sha: file.sha, data };
 }
@@ -253,7 +254,7 @@ export async function deleteChannel(options, owner) {
 					? decryptData(file.data, options.key)
 					: file.data;
 		} catch (e) {
-			throw new Error("频道状态解密失败，可能是频道凭证错误");
+			throw new Error(t("频道状态解密失败，可能是频道凭证错误"));
 		}
 	} else if (normalized.admin) {
 		data = {
@@ -264,7 +265,7 @@ export async function deleteChannel(options, owner) {
 			deletedAt: null,
 		};
 	} else {
-		throw new Error("频道没有创建者标记，无法删除");
+		throw new Error(t("频道没有创建者标记，无法删除"));
 	}
 	if (
 		!normalized.admin &&
@@ -272,7 +273,7 @@ export async function deleteChannel(options, owner) {
 			data.owner !== normalized.name ||
 			(data.ownerType && data.ownerType !== normalized.type))
 	) {
-		throw new Error("只能删除自己创建的频道");
+		throw new Error(t("只能删除自己创建的频道"));
 	}
 	if (data.deleted) return data;
 	const next = {
@@ -309,7 +310,7 @@ export async function createPublicChannel(
 	owner = null,
 ) {
 	const name = String(channelName || "").trim();
-	if (!name) throw new Error("频道名称不能为空");
+	if (!name) throw new Error(t("频道名称不能为空"));
 	const normalizedOwner = normalizeOwner(owner, author);
 	const encoded = encodeURIComponent(name);
 	const statusFile = await getJson(publicStatusPath(name));
@@ -383,14 +384,14 @@ export async function createPrivateChannel(
 	owner = null,
 ) {
 	const password = String(key || "");
-	if (!password) throw new Error("凭证不能为空");
+	if (!password) throw new Error(t("凭证不能为空"));
 	const normalizedOwner = normalizeOwner(owner, author);
 
 	onProgress(10, "读取频道 id");
 	const file = await getFile(ID_PATH);
-	if (!file) throw new Error("无法读取频道 id 文件");
+	if (!file) throw new Error(t("无法读取频道 id 文件"));
 	const current = parseInt(file.content, 10);
-	if (!Number.isFinite(current)) throw new Error("频道 id 文件内容无效");
+	if (!Number.isFinite(current)) throw new Error(t("频道 id 文件内容无效"));
 	const id = current + 1;
 
 	onProgress(35, "分配频道 id");
@@ -438,7 +439,7 @@ export async function createPrivateChannel(
 	};
 	const path = privateMessagePath(id, password);
 	const existing = await getFile(path);
-	if (existing) throw new Error("频道 id 冲突，请重试");
+	if (existing) throw new Error(t("频道 id 冲突，请重试"));
 	await postJson(path, encryptData(initial, password), {
 		message: `initial private[${id}]+[${SparkMD5.hash(password)}]`,
 	});
@@ -454,7 +455,7 @@ export async function createPrivateChannel(
 
 function channelPath({ type, ch, id, key }) {
 	if (type === "r") {
-		if (!id || !key) throw new Error("私密频道缺少 id 或凭证");
+		if (!id || !key) throw new Error(t("私密频道缺少 id 或凭证"));
 		return privateMessagePath(id, key);
 	}
 	const name = String(ch || "main");
@@ -477,7 +478,7 @@ export async function readChannel(options) {
 	const path = channelPath(options);
 	const file = await getJson(path);
 	if (!file) {
-		throw new Error("聊天记录不存在，可能是频道 id 或频道名有误");
+		throw new Error(t("聊天记录不存在，可能是频道 id 或频道名有误"));
 	}
 	const data = unpack(file.data, options.type, options.key);
 	const messages = normalizeMessages(data && data.msg);
@@ -504,7 +505,7 @@ export async function sendChannelMessage(options, message) {
 	while (attempt < 2) {
 		try {
 			const file = await getJson(path);
-			if (!file) throw new Error("聊天记录不存在");
+			if (!file) throw new Error(t("聊天记录不存在"));
 			const data = unpack(file.data, options.type, options.key);
 			const messages = normalizeMessages(data.msg);
 			const outgoing = normalizeMessage(
@@ -557,13 +558,13 @@ export async function recallChannelMessage(options, messageIndex, owner) {
 	while (attempt < 2) {
 		try {
 			const file = await getJson(path);
-			if (!file) throw new Error("聊天记录不存在");
+			if (!file) throw new Error(t("聊天记录不存在"));
 			const data = unpack(file.data, options.type, options.key);
 			const messages = normalizeMessages(data.msg);
 			const target = messages[messageIndex];
-			if (!target) throw new Error("消息不存在");
+			if (!target) throw new Error(t("消息不存在"));
 			if (!normalized.admin && target.user !== normalized.name) {
-				throw new Error("只能撤回自己发送的消息");
+				throw new Error(t("只能撤回自己发送的消息"));
 			}
 			if (target.recalled) return messages;
 			messages[messageIndex] = {

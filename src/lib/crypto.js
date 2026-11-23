@@ -1,4 +1,5 @@
 import CryptoJS from "crypto-js";
+import { t } from "../i18n/index.js";
 
 const VERSION = 1;
 
@@ -28,7 +29,7 @@ export function decryptData(record, password, version = VERSION) {
 		!record.iv ||
 		!record.data
 	) {
-		throw new Error("加密数据格式不受支持或已损坏");
+		throw new Error(t("加密数据格式不受支持或已损坏"));
 	}
 	const salt = CryptoJS.enc.Hex.parse(record.salt);
 	const iv = CryptoJS.enc.Hex.parse(record.iv);
@@ -41,7 +42,7 @@ export function decryptData(record, password, version = VERSION) {
 		iv,
 	}).toString(CryptoJS.enc.Utf8);
 	if (!plaintext) {
-		throw new Error("无法解密，可能是凭证错误");
+		throw new Error(t("无法解密，可能是凭证错误"));
 	}
 	return JSON.parse(plaintext);
 }

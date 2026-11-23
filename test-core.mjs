@@ -19,6 +19,7 @@ import {
 	rewriteLegacyFileUrls,
 } from "./src/services/gitee.js";
 import { isAdminUsername } from "./src/services/auth.js";
+import { setLocale, t } from "./src/i18n/index.js";
 
 assert.equal(
 	fileShard("42e874ae9692483e15ef9c9d0b6a5f8e"),
@@ -51,6 +52,13 @@ assert.equal(isAdminUsername("ChattingSuperAdmin"), true);
 assert.equal(isAdminUsername("ChattingSuperAdmin "), false);
 assert.equal(isAdminUsername("zyc2024"), false);
 assert.equal(isAdminUsername(""), false);
+
+setLocale("en");
+assert.equal(t("返回首页"), "Back to home");
+assert.equal(t("{count} 条消息", { count: 2 }), "2 messages");
+assert.equal(t("未知的提示"), "未知的提示");
+setLocale("zh-CN");
+assert.equal(t("返回首页"), "返回首页");
 
 const files = new Map();
 let shaCounter = 0;

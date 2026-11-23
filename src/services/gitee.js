@@ -5,6 +5,8 @@
  * zyc-2024/chat 仓库里。GitHub Pages / 静态托管无法运行服务端代码，
  * 所以这是原项目既有的设计。
  */
+import { t } from "../i18n/index.js";
+
 export const GITEE_API = "https://gitee.com/api/v5/repos/zyc-2024/chat";
 export const GITEE_TOKEN = "19f7b43872c256d52d1bc71cbd2d0ffa";
 export const FILE_REPO_OWNER = "zyc-2024";
@@ -15,7 +17,7 @@ export const FILE_REPO_COUNT = 256;
 export function fileShard(hash) {
 	const normalized = String(hash || "").trim().toLowerCase();
 	if (!/^[0-9a-f]{32}$/.test(normalized)) {
-		throw new Error("文件 hash 必须是 32 位 MD5");
+		throw new Error(t("文件 hash 必须是 32 位 MD5"));
 	}
 	return normalized.slice(0, 2);
 }
@@ -103,7 +105,10 @@ export async function getFile(path) {
 	if (response.status === 404) return null;
 	if (!response.ok) {
 		const message = await readError(response);
-		throw new Error(`读取文件失败（${response.status}）${message ? `：${message}` : ""}`);
+		throw new Error(
+			t("读取文件失败（{status}）", { status: response.status }) +
+				(message ? `: ${message}` : ""),
+		);
 	}
 	const data = await response.json();
 	if (Array.isArray(data) || !data || typeof data.content !== "string") {
@@ -119,7 +124,7 @@ export async function getJson(path) {
 	try {
 		return { data: JSON.parse(file.content), sha: file.sha };
 	} catch (e) {
-		throw new Error(`文件 ${path} 不是有效的 JSON`);
+		throw new Error(t("文件 {path} 不是有效的 JSON", { path }));
 	}
 }
 
@@ -141,7 +146,10 @@ export async function putFile(path, content, { message, sha }) {
 	);
 	if (!response.ok) {
 		const detail = await readError(response);
-		throw new Error(`保存文件失败（${response.status}）${detail ? `：${detail}` : ""}`);
+		throw new Error(
+			t("保存文件失败（{status}）", { status: response.status }) +
+				(detail ? `: ${detail}` : ""),
+		);
 	}
 	return response.json();
 }
@@ -162,7 +170,10 @@ export async function postFile(path, content, { message } = {}) {
 	);
 	if (!response.ok) {
 		const detail = await readError(response);
-		throw new Error(`创建文件失败（${response.status}）${detail ? `：${detail}` : ""}`);
+		throw new Error(
+			t("创建文件失败（{status}）", { status: response.status }) +
+				(detail ? `: ${detail}` : ""),
+		);
 	}
 	return response.json();
 }

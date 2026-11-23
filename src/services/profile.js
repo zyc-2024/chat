@@ -1,3 +1,4 @@
+import { t } from "../i18n/index.js";
 import {
 	getJson,
 	rewriteLegacyFileUrl,
@@ -98,7 +99,9 @@ export async function loadProfile(username) {
 
 	if (publicError && accountError) {
 		throw new Error(
-			`读取个人资料失败：${publicError.message || publicError}`,
+			t("读取个人资料失败：{message}", {
+				message: publicError.message || publicError,
+			}),
 		);
 	}
 	return null;
@@ -109,9 +112,9 @@ export async function loadProfile(username) {
  */
 export async function saveProfile(username, fields) {
 	const name = String(username || "").trim();
-	if (!name) throw new Error("缺少用户名");
+	if (!name) throw new Error(t("缺少用户名"));
 	if (/^Guest_/i.test(name)) {
-		throw new Error("游客身份没有个人主页");
+		throw new Error(t("游客身份没有个人主页"));
 	}
 	const updates = {
 		avatar: String(fields.avatar ?? "").trim(),

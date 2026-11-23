@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from "vue";
 import SparkMD5 from "spark-md5";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import { GITEE_TOKEN, fileRepoApi } from "../services/gitee.js";
+import { t } from "../i18n/index.js";
 import { formatBytes } from "../lib/format.js";
 import { copyText } from "../lib/clipboard.js";
 import { showToast } from "../lib/toast.js";
@@ -30,7 +32,7 @@ function uploadRaw(repoApi, path, body) {
 				)}`;
 			}
 		};
-		xhr.onerror = () => reject(new Error("网络错误，上传失败"));
+		xhr.onerror = () => reject(new Error(t("网络错误，上传失败")));
 		xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText });
 		xhr.send(JSON.stringify(body));
 	});
@@ -40,7 +42,7 @@ async function upload() {
 	if (busy.value) return;
 	const raw = content.value.trim();
 	if (!raw) {
-		showToast("请先粘贴 Base64 内容", "error");
+		showToast(t("请先粘贴 Base64 内容"), "error");
 		return;
 	}
 	busy.value = true;
@@ -61,17 +63,18 @@ async function upload() {
 		});
 		if (response.status >= 200 && response.status < 300) {
 			progress.value = 100;
-			progressText.value = "上传完成";
+			progressText.value = t("上传完成");
 			output.value = { rawUrl };
-			showToast("上传成功", "success");
+			showToast(t("上传成功"), "success");
 		} else {
 			throw new Error(
-				`上传失败（${response.status}）：${response.text.slice(0, 240)}`,
+				t("上传失败（{status}）", { status: response.status }) +
+					`: ${response.text.slice(0, 240)}`,
 			);
 		}
 	} catch (e) {
 		error.value = e && e.message ? e.message : String(e);
-		progressText.value = "上传失败";
+		progressText.value = t("上传失败");
 		showToast(error.value, "error", 4000);
 	} finally {
 		busy.value = false;
@@ -80,7 +83,10 @@ async function upload() {
 
 async function copy(value) {
 	const ok = await copyText(value);
-	showToast(ok ? "链接已复制" : "复制失败，请手动选择", ok ? "success" : "error");
+	showToast(
+		ok ? t("链接已复制") : t("复制失败，请手动选择"),
+		ok ? "success" : "error",
+	);
 }
 </script>
 
@@ -89,29 +95,38 @@ async function copy(value) {
 		<div class="standalone-card">
 			<div class="standalone-head">
 				<div>
-					<h1>粘贴 Base64 上传</h1>
+					<h1>{{ t("粘贴 Base64 上传") }}</h1>
 					<p>
-						把一段 Base64 文本按内容 MD5 前两位上传到对应的 Gitee 分片仓库并生成链接。
+						{{
+							t(
+								"把一段 Base64 文本按内容 MD5 前两位上传到对应的 Gitee 分片仓库并生成链接。",
+							)
+						}}
 					</p>
 				</div>
-				<router-link class="back-link" :to="{ name: 'home' }">
-					返回首页
-				</router-link>
+				<div class="standalone-head-actions">
+					<LanguageSwitcher />
+					<router-link class="back-link" :to="{ name: 'home' }">
+						{{ t("返回首页") }}
+					</router-link>
+				</div>
 			</div>
 
 			<div class="upload-tabs">
-				<router-link :to="{ name: 'upload' }">选择文件</router-link>
+				<router-link :to="{ name: 'upload' }">
+					{{ t("选择文件") }}
+				</router-link>
 				<router-link :to="{ name: 'upload-base64' }">
-					粘贴 Base64
+					{{ t("粘贴 Base64") }}
 				</router-link>
 			</div>
 
 			<div class="form-block">
-				<label for="base64-input">Base64 内容</label>
+				<label for="base64-input">{{ t("Base64 内容") }}</label>
 				<textarea
 					id="base64-input"
 					v-model="content"
-					placeholder="在这里粘贴 Base64 内容"
+					:placeholder="t('在这里粘贴 Base64 内容')"
 				></textarea>
 			</div>
 
@@ -122,7 +137,7 @@ async function copy(value) {
 					:disabled="busy || !content.trim()"
 					@click="upload"
 				>
-					{{ busy ? "上传中……" : "开始上传" }}
+					{{ busy ? t("上传中……") : t("开始上传") }}
 				</button>
 			</div>
 
@@ -141,7 +156,7 @@ async function copy(value) {
 			<div v-if="error" class="output-box error">{{ error }}</div>
 
 			<div v-if="output" class="output-box success">
-				<div>上传成功！链接：</div>
+				<div>{{ t("上传成功！链接：") }}</div>
 				<a
 					class="output-link"
 					:href="output.rawUrl"
@@ -155,13 +170,17 @@ async function copy(value) {
 						class="mini-button"
 						@click="copy(output.rawUrl)"
 					>
-						复制链接
+						{{ t("复制链接") }}
 					</button>
 				</div>
 			</div>
 
 			<div class="file-meta">
-				提示：Base64 内容会按 MD5 前两位保存到 256 个分片仓库之一，请不要上传隐私或敏感信息。
+				{{
+					t(
+						"提示：Base64 内容会按 MD5 前两位保存到 256 个分片仓库之一，请不要上传隐私或敏感信息。",
+					)
+				}}
 			</div>
 		</div>
 	</div>
