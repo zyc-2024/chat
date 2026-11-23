@@ -44,6 +44,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.9.0 (225)",
+		tags: ["ai"],
+		desc: "本地 app 更新检测完成：启动后自动检查 GitHub Releases，发现更高构建号时显示当前/最新版本和下载入口，稍后会记住该版本；网页版保持不显示更新提示。",
+	},
+	{
 		version: "3.9.0 beta 1 (224)",
 		tags: ["ai", "beta"],
 		desc: "为本地 app 加入更新检测：启动后读取 GitHub Releases，若存在更高构建号则显示更新卡片，提供 exe 下载和 Release 说明；选择稍后会记住该版本，网页版不显示提示。",

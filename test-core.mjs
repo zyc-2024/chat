@@ -95,13 +95,10 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(
-	findNowEntry(changelog).version,
-	"3.9.0 beta 1 (224)",
-);
+assert.equal(findNowEntry(changelog).version, "3.9.0 (225)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.8.1 (223)",
+	"3.9.0 (225)",
 );
 
 const releaseA = parseReleaseVersion({
