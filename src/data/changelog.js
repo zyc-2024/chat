@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.6.0 (217)",
+		tags: ["ai"],
+		desc: "个性设置与主题商店完成：支持颜色、背景图片、内置预设、本机保存、账号同步和公开主题商店上传/应用；主题会应用到全站主要页面，并继续支持中英文与 AI 翻译标注。",
+	},
+	{
 		version: "3.6.0 beta 2 (216)",
 		tags: ["ai", "beta"],
 		desc: "加入公开主题商店：可以浏览、应用其他用户上传的免费主题，也可以从个性设置把当前主题命名后上传；主题数据保存在 Gitee 的 themes/index.json。",
