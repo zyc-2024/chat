@@ -117,4 +117,26 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 .modal-leave-to {
 	opacity: 0;
 }
+
+@media (max-width: 520px) {
+	.modal-mask {
+		align-items: flex-end;
+		padding: 8px;
+	}
+
+	.modal-card {
+		width: 100% !important;
+		max-height: 88vh;
+		max-height: 88dvh;
+		border-radius: 14px 14px 10px 10px;
+	}
+
+	.modal-head {
+		padding: 15px 16px 10px;
+	}
+
+	.modal-body {
+		padding: 16px;
+	}
+}
 </style>

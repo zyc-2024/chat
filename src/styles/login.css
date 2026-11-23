@@ -251,6 +251,10 @@
 		padding: 14px;
 	}
 
+	.field input {
+		font-size: 16px;
+	}
+
 	.login-card {
 		padding: 24px 20px 20px;
 		border-radius: 15px;

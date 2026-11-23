@@ -78,6 +78,7 @@ const switchTarget = ref("");
 const channelStatus = ref(null);
 const quoting = ref(null);
 const showJumpBottom = ref(false);
+const moreActionsOpen = ref(false);
 
 const renameOpen = ref(false);
 const renameValue = ref("");
@@ -546,6 +547,7 @@ watch(
 		draft.value = "";
 		quoting.value = null;
 		showJumpBottom.value = false;
+		moreActionsOpen.value = false;
 		loadError.value = "";
 		refreshError.value = "";
 		sendError.value = "";
@@ -728,26 +730,54 @@ onBeforeUnmount(() => {
 					>
 						{{ sending ? "发送中…" : "发送" }}
 					</button>
-					<button type="button" class="ghost-button" @click="refreshNow">
-						刷新
-					</button>
-					<button type="button" class="ghost-button" @click="openRename">
-						改名
-					</button>
-					<button type="button" class="ghost-button" @click="goUpload">
-						上传文件
-					</button>
-					<button type="button" class="ghost-button" @click="openInterval">
-						刷新间隔
-					</button>
 					<button
-						v-if="canDelete"
 						type="button"
-						class="danger-button"
-						@click="openDelete"
+						class="ghost-button composer-more-toggle"
+						@click="moreActionsOpen = !moreActionsOpen"
 					>
-						删除频道
+						{{ moreActionsOpen ? "收起" : "更多" }}
 					</button>
+					<div
+						class="composer-more"
+						:class="{ open: moreActionsOpen }"
+					>
+						<button
+							type="button"
+							class="ghost-button"
+							@click="refreshNow"
+						>
+							刷新
+						</button>
+						<button
+							type="button"
+							class="ghost-button"
+							@click="openRename"
+						>
+							改名
+						</button>
+						<button
+							type="button"
+							class="ghost-button"
+							@click="goUpload"
+						>
+							上传文件
+						</button>
+						<button
+							type="button"
+							class="ghost-button"
+							@click="openInterval"
+						>
+							刷新间隔
+						</button>
+						<button
+							v-if="canDelete"
+							type="button"
+							class="danger-button"
+							@click="openDelete"
+						>
+							删除频道
+						</button>
+					</div>
 					<span class="composer-status">{{ statusText }}</span>
 				</div>
 

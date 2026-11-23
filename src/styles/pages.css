@@ -517,11 +517,14 @@
 
 @media (max-width: 620px) {
 	.standalone-page {
-		padding: 18px 12px;
+		min-height: 100vh;
+		min-height: 100dvh;
+		padding: 14px 10px;
 	}
 
 	.standalone-card {
-		padding: 22px 18px;
+		padding: 20px 15px;
+		border-radius: 13px;
 	}
 
 	.standalone-head {
@@ -529,7 +532,97 @@
 		gap: 8px;
 	}
 
+	.upload-tabs {
+		flex-wrap: wrap;
+	}
+
+	.file-drop {
+		padding: 22px 14px;
+	}
+
+	.form-block textarea {
+		min-height: 130px;
+		font-size: 16px;
+	}
+
+	.copy-row {
+		flex-wrap: wrap;
+	}
+
+	.copy-row button {
+		flex: 1 1 100%;
+	}
+
+	.tag-filter {
+		gap: 6px;
+	}
+
+	.changelog-table-wrap {
+		overflow: visible;
+	}
+
+	.changelog-table,
+	.changelog-table tbody,
+	.changelog-table tr,
+	.changelog-table td {
+		display: block;
+		width: 100%;
+	}
+
+	.changelog-table thead {
+		display: none;
+	}
+
+	.changelog-table tr {
+		margin-bottom: 11px;
+		padding: 11px 12px;
+		border: 1px solid #e8ece9;
+		border-radius: 10px;
+		background: #fff;
+	}
+
+	.changelog-table tr:hover td {
+		background: transparent;
+	}
+
+	.changelog-table td,
+	.changelog-table td:first-child,
+	.changelog-table td:nth-child(2) {
+		width: auto;
+		padding: 0;
+		border: 0;
+	}
+
 	.changelog-table td:first-child {
-		width: 110px;
+		margin-bottom: 6px;
+		font-size: 13px;
+	}
+
+	.changelog-table td:nth-child(2) {
+		margin-bottom: 6px;
+	}
+
+	.changelog-table td:last-child {
+		font-size: 12px;
+	}
+
+	.not-found-card {
+		padding: 28px 20px;
+	}
+
+	.not-found-actions {
+		flex-wrap: wrap;
+	}
+}
+
+@media (max-width: 420px) {
+	.standalone-head h1 {
+		font-size: 19px;
+	}
+
+	.tag-filter-item {
+		height: 28px;
+		padding: 0 9px;
+		font-size: 11px;
 	}
 }
