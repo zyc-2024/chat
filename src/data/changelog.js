@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.15 (206)",
+		tags: ["ai", "hotfix"],
+		desc: "修复分片上传文件迁移脚本：Gitee 对不存在的文件可能返回空数组而不是 404，现在会正确识别为缺失并写入目标分片仓库，再删除旧文件。",
+	},
+	{
 		version: "3.2.14 (205)",
 		tags: ["ai"],
 		desc: "上传文件分片存储完成：选择文件和 Base64 上传按内容 MD5 前两位写入 256 个 chat-files-xx 仓库；旧主仓库 f/ 文件迁移后删除，历史链接由前端自动改写，迁移和初始化脚本已加入仓库。",

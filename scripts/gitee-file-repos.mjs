@@ -187,9 +187,14 @@ async function deleteFile(repo, path, sha, message) {
 async function migrateFile(hash, entry) {
 	const targetRepo = fileRepoFullName(hash);
 	const source = await getContents(DATA_REPO, entry.path);
+	if (Array.isArray(source)) {
+		throw new Error(`${entry.path} 不是文件`);
+	}
 	const content = cleanBase64(source.content);
 	if (!content) throw new Error(`${entry.path} 内容为空`);
-	const target = await getContentsMaybe(targetRepo, entry.path);
+	let target = await getContentsMaybe(targetRepo, entry.path);
+	// Gitee 对不存在的文件有时返回空数组，而不是 404。
+	if (Array.isArray(target)) target = null;
 	if (target) {
 		if (cleanBase64(target.content) !== content) {
 			throw new Error(`${targetRepo}/${entry.path} 已存在且内容不同`);
