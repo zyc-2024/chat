@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.14 beta 4 (204)",
+		tags: ["ai", "beta"],
+		desc: "兼容迁移后的旧上传链接：消息、个人资料 Markdown、头像和背景中的旧主仓库 raw 链接会自动改写为对应 chat-files-xx 分片仓库；右键复制消息时也会复制改写后的链接。",
+	},
+	{
 		version: "3.2.14 beta 3 (203)",
 		tags: ["ai", "beta"],
 		desc: "Base64 上传改为按内容 MD5 前两位选择分片仓库；上传路径包含内容 hash 和时间戳，生成的 raw 链接指向 chat-files-xx。",

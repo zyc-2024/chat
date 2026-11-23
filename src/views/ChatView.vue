@@ -17,6 +17,7 @@ import {
 	sendChannelMessage,
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
+import { rewriteLegacyFileUrls } from "../services/gitee.js";
 import { copyText } from "../lib/clipboard.js";
 import { prettyTime, safeDecode, timeStamp } from "../lib/format.js";
 import { renderMarkdown } from "../lib/markdown.js";
@@ -266,7 +267,9 @@ function runMessageMenu(key) {
 }
 
 async function copyMessage(message) {
-	const ok = await copyText(message.content || "");
+	const ok = await copyText(
+		rewriteLegacyFileUrls(message.content || ""),
+	);
 	showToast(
 		ok ? "消息已复制" : "复制失败，请手动选择",
 		ok ? "success" : "error",

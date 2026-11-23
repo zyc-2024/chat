@@ -1,4 +1,8 @@
-import { getJson, saveJson } from "./gitee.js";
+import {
+	getJson,
+	rewriteLegacyFileUrl,
+	saveJson,
+} from "./gitee.js";
 import { getProfile, updateAccountProfile } from "./auth.js";
 
 export const DEFAULT_AVATAR = "https://zyc-2024.github.io/res/nailong.png";
@@ -25,10 +29,14 @@ function normalizeProfile(username, raw, fallback = {}) {
 	return {
 		user: text(source.user || source.username, username),
 		reg_time: text(source.reg_time || fallback.reg_time, ""),
-		avatar: text(source.avatar, fallback.avatar || DEFAULT_AVATAR) || DEFAULT_AVATAR,
+		avatar:
+			rewriteLegacyFileUrl(
+				text(source.avatar, fallback.avatar || DEFAULT_AVATAR),
+			) || DEFAULT_AVATAR,
 		pf_header:
-			text(source.pf_header, fallback.pf_header || DEFAULT_HEADER) ||
-			DEFAULT_HEADER,
+			rewriteLegacyFileUrl(
+				text(source.pf_header, fallback.pf_header || DEFAULT_HEADER),
+			) || DEFAULT_HEADER,
 		profile: profileText,
 		pf_text:
 			text(source.pf_text, fallback.pf_text || DEFAULT_SIDE_TEXT) ||

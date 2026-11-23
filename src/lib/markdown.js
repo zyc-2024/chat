@@ -4,6 +4,7 @@ import multimdTable from "markdown-it-multimd-table";
 import katex from "katex";
 import DOMPurify from "dompurify";
 import hljs from "highlight.js";
+import { rewriteLegacyFileUrls } from "../services/gitee.js";
 
 function highlightCode(code, language) {
 	if (language && hljs.getLanguage(language)) {
@@ -55,7 +56,9 @@ export function preRenderTex(source) {
 
 /** 将 Markdown 转成已经过 DOMPurify 清洗的 HTML。 */
 export function renderMarkdown(source) {
-	const dirty = md.render(preRenderTex(source));
+	const dirty = md.render(
+		preRenderTex(rewriteLegacyFileUrls(source)),
+	);
 	return DOMPurify.sanitize(dirty, {
 		ADD_TAGS: ["span"],
 		ADD_ATTR: ["class", "style"],
