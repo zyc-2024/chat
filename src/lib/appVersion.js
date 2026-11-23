@@ -43,3 +43,14 @@ export function parseVersionLabel(label) {
 export function currentAppVersion() {
 	return parseVersionLabel(changelog[0]?.version || "0.0.0");
 }
+
+/** 本地 app 通过 127.0.0.1 / localhost 提供静态页面。 */
+export function isLocalAppRuntime() {
+	if (typeof window === "undefined") return false;
+	const { protocol, hostname } = window.location;
+	return (
+		protocol === "file:" ||
+		hostname === "127.0.0.1" ||
+		hostname === "localhost"
+	);
+}

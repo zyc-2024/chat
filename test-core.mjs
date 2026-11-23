@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
+import { changelog } from "./src/data/changelog.js";
 import {
 	createPrivateChannel,
 	createPublicChannel,
@@ -20,6 +21,11 @@ import {
 	rewriteLegacyFileUrls,
 } from "./src/services/gitee.js";
 import { isAdminUsername } from "./src/services/auth.js";
+import {
+	findLatestStableEntry,
+	findNowEntry,
+	isBetaVersion,
+} from "./src/lib/changelogMeta.js";
 import {
 	addFriend,
 	friendConversationPath,
@@ -72,6 +78,23 @@ assert.equal(t("{count} 条消息", { count: 2 }), "2 messages");
 assert.equal(t("未知的提示"), "未知的提示");
 setLocale("zh-CN");
 assert.equal(t("返回首页"), "返回首页");
+
+const sampleVersions = [
+	{ version: "3.9.0 beta 1 (223)" },
+	{ version: "3.8.0 (222)" },
+	{ version: "3.7.0 beta 1 (219)" },
+];
+assert.equal(isBetaVersion("3.9.0 beta 1 (223)"), true);
+assert.equal(findNowEntry(sampleVersions).version, "3.9.0 beta 1 (223)");
+assert.equal(
+	findLatestStableEntry(sampleVersions).version,
+	"3.8.0 (222)",
+);
+assert.equal(findNowEntry(changelog).version, "3.8.1 (223)");
+assert.equal(
+	findLatestStableEntry(changelog).version,
+	"3.8.1 (223)",
+);
 
 const files = new Map();
 let shaCounter = 0;

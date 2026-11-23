@@ -34,9 +34,20 @@ export const changelogTags = [
 		color: "#23db66",
 		background: "#f0f3f1",
 	},
+	{
+		id: "now",
+		label: "now",
+		color: "#0b8ec2",
+		background: "#eaf7fd",
+	},
 ];
 
 export const changelog = [
+	{
+		version: "3.8.1 (223)",
+		tags: ["ai", "hotfix"],
+		desc: "调整更新日志标签：latest 固定指向最新一个非 beta 版本；新增 now 标签，网页版标记当前最新版，本地 app 标记当前正在使用的内置版本，并补充对应提示。",
+	},
 	{
 		version: "3.8.0 (222)",
 		tags: ["ai"],

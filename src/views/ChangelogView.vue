@@ -2,6 +2,11 @@
 import { computed, ref } from "vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import { changelog, changelogTags } from "../data/changelog.js";
+import { isLocalAppRuntime } from "../lib/appVersion.js";
+import {
+	findLatestStableEntry,
+	findNowEntry,
+} from "../lib/changelogMeta.js";
 import { locale, t } from "../i18n/index.js";
 import "../styles/pages.css";
 
@@ -17,6 +22,28 @@ const latestDefinition =
 	changelogTags.find((tag) =>
 		/latest|最新/i.test(`${tag.id || ""} ${tag.label || ""}`),
 	) || latestFallback;
+const nowFallback = {
+	id: "now",
+	label: "now",
+	color: "#0b8ec2",
+	background: "#eaf7fd",
+};
+const nowDefinition =
+	changelogTags.find(
+		(tag) => String(tag.id || "").toLowerCase() === "now",
+	) || nowFallback;
+
+const latestEntry = findLatestStableEntry(changelog);
+const nowEntry = findNowEntry(changelog);
+const appRuntime = isLocalAppRuntime();
+const latestHint = t("最新一个非 beta 版本");
+const nowHint = appRuntime
+	? t("当前正在使用的 app 版本")
+	: t("网页当前最新版本");
+
+function withHint(tag, hint) {
+	return tag ? { ...tag, hint } : null;
+}
 
 function resolveTag(tag) {
 	if (typeof tag === "string") {
@@ -33,16 +60,18 @@ function resolveTag(tag) {
 	return { ...tag, key: tag.id || tag.label };
 }
 
-function isFirstEntry(entry) {
-	return changelog[0] === entry;
-}
-
 function tagsOf(entry) {
 	const tags = (entry.tags || []).map(resolveTag).filter(Boolean);
-	if (isFirstEntry(entry)) {
-		const latest = resolveTag(latestDefinition);
+	if (entry === latestEntry) {
+		const latest = withHint(resolveTag(latestDefinition), latestHint);
 		if (latest && !tags.some((tag) => tag.key === latest.key)) {
 			tags.unshift(latest);
+		}
+	}
+	if (entry === nowEntry) {
+		const now = withHint(resolveTag(nowDefinition), nowHint);
+		if (now && !tags.some((tag) => tag.key === now.key)) {
+			tags.unshift(now);
 		}
 	}
 	return tags;
@@ -56,6 +85,8 @@ const allTags = computed(() => {
 	}
 	const latest = resolveTag(latestDefinition);
 	if (latest) map.set(latest.key, latest);
+	const now = resolveTag(nowDefinition);
+	if (now) map.set(now.key, now);
 	for (const entry of changelog) {
 		for (const tag of tagsOf(entry)) {
 			if (!map.has(tag.key)) map.set(tag.key, tag);
@@ -173,7 +204,8 @@ function tagStyle(tag) {
 									:title="
 										t('筛选标签：{label}', {
 											label: t(tag.label),
-										})
+										}) +
+										(tag.hint ? ' · ' + tag.hint : '')
 									"
 									@click="toggleTag(tag.key)"
 								>

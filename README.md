@@ -171,7 +171,8 @@ pnpm test
 
 - `changelogTags` 定义内置标签的 `id`、`label`、`color`、`background`。
 - 条目里的 `tags` 可以写标签 id，例如 `["ai", "beta"]`。
-- 第一条记录的 `latest` 标签由页面自动添加，颜色和文字取自 `changelogTags` 中匹配 `latest` / `最新` 的定义。
+- `latest` 标签由页面自动添加到最新一个非 beta 版本，颜色和文字取自 `changelogTags` 中匹配 `latest` / `最新` 的定义。
+- `now` 标签由页面自动添加到第一条记录：网页版表示当前部署的最新版，本地 app 表示当前正在使用的内置版本。
 - 也可以直接写自定义标签对象，例如：
 
 ```js
@@ -196,7 +197,7 @@ pnpm test
 格式示例：
 
 ```text
-3.8.0 (222)          -> Release tag: v3.8.0-222
+3.8.1 (223)          -> Release tag: v3.8.1-223
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 

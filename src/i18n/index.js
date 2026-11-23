@@ -331,6 +331,9 @@ const english = {
 	"应用主题": "Apply theme",
 	"主题已应用并保存到本地":
 		"Theme applied and saved locally.",
+	"最新一个非 beta 版本": "Latest non-beta version",
+	"当前正在使用的 app 版本": "Currently running app version",
+	"网页当前最新版本": "Latest web version",
 	"拍一拍": "Nudge",
 	"设置别人拍你时显示的后缀，例如“的小脑袋”，预览：{example}":
 		"Set the suffix shown when someone nudges you, for example “'s little head”. Preview: {example}",
