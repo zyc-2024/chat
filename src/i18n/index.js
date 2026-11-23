@@ -334,6 +334,12 @@ const english = {
 	"最新一个非 beta 版本": "Latest non-beta version",
 	"当前正在使用的 app 版本": "Currently running app version",
 	"网页当前最新版本": "Latest web version",
+	"发现新版本 {version}": "New version available: {version}",
+	"当前版本：{version}": "Current version: {version}",
+	"下载更新": "Download update",
+	"查看更新说明": "View release notes",
+	"稍后": "Later",
+	"检查更新失败（{status}）": "Update check failed ({status})",
 	"拍一拍": "Nudge",
 	"设置别人拍你时显示的后缀，例如“的小脑袋”，预览：{example}":
 		"Set the suffix shown when someone nudges you, for example “'s little head”. Preview: {example}",

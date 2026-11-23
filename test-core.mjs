@@ -22,6 +22,11 @@ import {
 } from "./src/services/gitee.js";
 import { isAdminUsername } from "./src/services/auth.js";
 import {
+	latestReleaseFrom,
+	parseReleaseVersion,
+	updateAvailable,
+} from "./src/services/appUpdate.js";
+import {
 	findLatestStableEntry,
 	findNowEntry,
 	isBetaVersion,
@@ -90,11 +95,44 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.8.1 (223)");
+assert.equal(
+	findNowEntry(changelog).version,
+	"3.9.0 beta 1 (224)",
+);
 assert.equal(
 	findLatestStableEntry(changelog).version,
 	"3.8.1 (223)",
 );
+
+const releaseA = parseReleaseVersion({
+	name: "3.9.0 beta 1 (224)",
+	tag_name: "v3.9.0-beta.1",
+	html_url: "https://example.com/beta",
+	assets: [
+		{
+			name: "zyc-chat-3.9.0-beta.1.exe",
+			browser_download_url: "https://example.com/beta.exe",
+		},
+	],
+});
+const releaseB = parseReleaseVersion({
+	name: "3.8.2 (225)",
+	tag_name: "v3.8.2-225",
+	html_url: "https://example.com/stable",
+	assets: [],
+});
+assert.equal(releaseA.build, 224);
+assert.equal(releaseA.beta, true);
+assert.equal(releaseA.downloadUrl, "https://example.com/beta.exe");
+assert.equal(
+	latestReleaseFrom([
+		{ name: "3.9.0 beta 1 (224)", tag_name: "v3.9.0-beta.1" },
+		{ name: "3.8.2 (225)", tag_name: "v3.8.2-225" },
+	]).build,
+	225,
+);
+assert.equal(updateAvailable(223, releaseB), true);
+assert.equal(updateAvailable(225, releaseB), false);
 
 const files = new Map();
 let shaCounter = 0;

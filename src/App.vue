@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, watch } from "vue";
 import ToastHost from "./components/ToastHost.vue";
+import UpdateNotice from "./components/UpdateNotice.vue";
 import { refreshAdmin } from "./services/auth.js";
 import { applyTheme, currentTheme } from "./services/theme.js";
 
@@ -14,5 +15,6 @@ watch(currentTheme, (theme) => applyTheme(theme));
 
 <template>
 	<router-view />
+	<UpdateNotice />
 	<ToastHost />
 </template>
