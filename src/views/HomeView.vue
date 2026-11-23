@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import AuthBadge from "../components/AuthBadge.vue";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import Modal from "../components/Modal.vue";
 import {
 	fetchChannelIndex,
@@ -16,6 +17,7 @@ import {
 	safeDecode,
 } from "../lib/format.js";
 import { currentAppVersion } from "../lib/appVersion.js";
+import { t } from "../i18n/index.js";
 import { chatName } from "../lib/identity.js";
 import { showToast } from "../lib/toast.js";
 import "../styles/home.css";
@@ -90,16 +92,18 @@ function shortTime(value) {
 
 function channelPreview(rawName) {
 	const summary = summaries.value.get(rawName);
-	if (!summary) return "公开频道 · 点击进入";
+	if (!summary) return t("公开频道 · 点击进入");
 	const count = Number(summary.messageCount) || 0;
 	const lastTime = shortTime(summary.lastMessageTime);
-	return `${count} 条消息${lastTime ? " · 最后 " + lastTime : " · 暂无发言"}`;
+	return lastTime
+		? t("{count} 条消息 · 最近 {time}", { count, time: lastTime })
+		: t("{count} 条消息 · 暂无发言", { count });
 }
 
 function createPublicChannel() {
 	const name = createName.value.trim();
 	if (!name) {
-		showToast("请先输入频道名称", "error");
+		showToast(t("请输入频道名称"), "error");
 		createNameInput.value?.focus();
 		return;
 	}
@@ -108,7 +112,7 @@ function createPublicChannel() {
 
 function createPrivateChannel() {
 	if (!privateKey.value) {
-		showToast("请先设置一段凭证字符串", "error");
+		showToast(t("请先设置一段凭证字符串"), "error");
 		return;
 	}
 	router.push({ name: "create", query: { type: "r", key: privateKey.value } });
@@ -117,7 +121,7 @@ function createPrivateChannel() {
 function joinPrivateChannel() {
 	const id = joinId.value.trim();
 	if (!id || !joinKey.value) {
-		showToast("请填写频道 id 和凭证", "error");
+		showToast(t("请填写频道 id 和凭证"), "error");
 		return;
 	}
 	router.push({ name: "chat", query: { type: "r", id, key: joinKey.value } });
@@ -136,7 +140,7 @@ function openCreateDialog() {
 function submitCreateDialog() {
 	const name = createDialogName.value.trim();
 	if (!name) {
-		createDialogError.value = "请输入频道名称";
+		createDialogError.value = t("请输入频道名称");
 		nextTick(() => createDialogInput.value?.focus());
 		return;
 	}
@@ -185,7 +189,7 @@ onMounted(() => {
 				<button
 					type="button"
 					class="home-avatar"
-					:title="'当前身份：' + chatName"
+					:title="t('当前身份：{name}', { name: chatName })"
 					@click="openAccount"
 				>
 					<img
@@ -198,7 +202,7 @@ onMounted(() => {
 					<span v-else>{{ avatarInitial }}</span>
 				</button>
 				<nav class="home-rail-nav">
-					<button type="button" class="rail-button active" title="频道">
+					<button type="button" class="rail-button active" :title="t('频道')">
 						<svg viewBox="0 0 24 24" aria-hidden="true">
 							<path
 								d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3 8.9 8.9 0 0 1-3.6-.7L4 21l1.6-4.2A8.1 8.1 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"
@@ -208,7 +212,7 @@ onMounted(() => {
 					<button
 						type="button"
 						class="rail-button"
-						title="新建频道"
+						:title="t('新建频道')"
 						@click="openCreateDialog"
 					>
 						<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -218,7 +222,7 @@ onMounted(() => {
 					<button
 						type="button"
 						class="rail-button"
-						title="上传文件"
+						:title="t('上传文件')"
 						@click="router.push({ name: 'upload' })"
 					>
 						<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -230,7 +234,7 @@ onMounted(() => {
 					<button
 						type="button"
 						class="rail-button"
-						:title="auth.session ? '我的主页' : '登录 / 账号'"
+						:title="auth.session ? t('我的主页') : t('登录 / 账号')"
 						@click="openAccount"
 					>
 						<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -240,13 +244,13 @@ onMounted(() => {
 					</button>
 				</nav>
 				<div class="rail-spacer"></div>
-				<div class="rail-dot" title="在线"></div>
+				<div class="rail-dot" :title="t('在线')"></div>
 			</aside>
 
 			<section class="home-sidebar">
 				<div class="sidebar-head">
 					<h1 class="sidebar-title">
-						zyc2024 的聊天网页 <small>Ver{{ version }}</small>
+						{{ t("zyc2024 的聊天网页") }} <small>Ver{{ version }}</small>
 					</h1>
 					<div class="search-wrap">
 						<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -256,7 +260,7 @@ onMounted(() => {
 						<input
 							v-model="search"
 							type="search"
-							placeholder="搜索频道"
+							:placeholder="t('搜索频道')"
 							autocomplete="off"
 						/>
 					</div>
@@ -264,8 +268,14 @@ onMounted(() => {
 
 				<div class="sidebar-list">
 					<div class="list-head">
-						<span>公开频道</span>
-						<span>{{ loading ? "…" : filteredChannels.length + " 个" }}</span>
+						<span>{{ t("公开频道") }}</span>
+						<span>{{
+							loading
+								? "…"
+								: t("{count} 个", {
+										count: filteredChannels.length,
+									})
+						}}</span>
 					</div>
 
 					<ul v-if="filteredChannels.length" class="channel-list">
@@ -291,26 +301,27 @@ onMounted(() => {
 										{{ channelPreview(channel) }}
 									</span>
 								</span>
-								<span class="channel-meta">公开</span>
+								<span class="channel-meta">{{ t("公开") }}</span>
 							</a>
 						</li>
 					</ul>
 
 					<div v-else-if="loading" class="empty-channels">
-						频道列表加载中……
+						{{ t("正在加载频道…") }}
 					</div>
 					<div v-else-if="error" class="channel-error">
-						频道列表加载失败<br />{{ error }}
+						{{ t("频道列表加载失败") }}<br />{{ error }}
 						<button type="button" class="mini-button" @click="loadChannels">
-							重试
+							{{ t("重试") }}
 						</button>
 					</div>
 					<div v-else class="empty-channels">
-						暂无频道，创建一个吧
+						{{ t("暂无频道，创建一个吧") }}
 					</div>
 				</div>
 
 				<div class="sidebar-foot">
+					<LanguageSwitcher />
 					<AuthBadge />
 					<div class="copyright">
 						&copy; zyc-2024, 2025~2026 ·
@@ -328,13 +339,15 @@ onMounted(() => {
 							>Gitee</a
 						>
 						·
-						<router-link :to="{ name: 'changelog' }">Changelog</router-link>
+						<router-link :to="{ name: 'changelog' }">
+							{{ t("更新日志") }}
+						</router-link>
 						·
 						<a
 							href="https://github.com/zyc-2024/chat/releases/latest"
 							target="_blank"
 							rel="noreferrer"
-							>本地版下载</a
+							>{{ t("本地版下载") }}</a
 						>
 						·
 						<a href="licenses.html" target="_blank" rel="noreferrer"
@@ -346,18 +359,20 @@ onMounted(() => {
 
 			<main class="home-detail">
 				<div class="detail-head">
-					<div class="detail-title">频道广场</div>
+					<div class="detail-title">{{ t("频道广场") }}</div>
 					<div class="detail-sub">
-						加入一个公开频道，或创建自己的私有频道
+						{{ t("加入一个公开频道，或创建自己的私有频道") }}
 					</div>
 				</div>
 
 				<div class="detail-body">
 					<div v-if="!auth.session" class="notice-bar">
 						<span>
-							登录是可选的：未登录会自动分配与设备信息绑定的游客用户名
-							Guest_&lt;HASH&gt;，无需登录也能创建频道、聊天和上传文件；
-							登录后会使用账号昵称，并在本机记住 7 天。
+							{{
+								t(
+									"无需登录也能创建频道、聊天和上传文件，系统会自动分配设备游客名 Guest_<HASH>。登录后将使用账号昵称，并在本机记住 7 天。",
+								)
+							}}
 						</span>
 						<router-link
 							:to="
@@ -369,17 +384,17 @@ onMounted(() => {
 									: { name: 'login' }
 							"
 						>
-							{{ auth.session ? "我的主页 →" : "去登录 →" }}
+							{{ auth.session ? t("我的主页 →") : t("去登录 →") }}
 						</router-link>
 					</div>
 
 					<section class="home-card">
 						<div class="card-title">
-							创建公开频道
-							<span class="badge">公开</span>
+							{{ t("创建公开频道") }}
+							<span class="badge">{{ t("公开") }}</span>
 						</div>
 						<p class="card-desc">
-							公开频道会显示在左侧列表里，所有人都可以进入。
+							{{ t("公开频道会显示在左侧列表里，所有人都可以进入。") }}
 						</p>
 						<form class="card-form" @submit.prevent="createPublicChannel">
 							<input
@@ -387,39 +402,43 @@ onMounted(() => {
 								v-model="createName"
 								type="text"
 								maxlength="32"
-								placeholder="输入频道名称"
+								:placeholder="t('输入频道名称')"
 								required
 							/>
-							<button type="submit">创建并进入</button>
+							<button type="submit">{{ t("创建并进入") }}</button>
 						</form>
 					</section>
 
 					<section class="home-card">
 						<div class="card-title">
-							创建私有频道
-							<span class="badge blue">私密</span>
+							{{ t("创建私有频道") }}
+							<span class="badge blue">{{ t("私密") }}</span>
 						</div>
 						<p class="card-desc">
-							私有频道不会出现在列表中，消息会用凭证加密，进入时需要 id 和凭证。
+							{{
+								t(
+									"私有频道不会出现在列表中，消息会用凭证加密，进入时需要 id 和凭证。",
+								)
+							}}
 						</p>
 						<form class="card-form" @submit.prevent="createPrivateChannel">
 							<input
 								v-model="privateKey"
 								type="password"
-								placeholder="设置一段凭证字符串"
+								:placeholder="t('设置一段凭证字符串')"
 								required
 							/>
-							<button class="btn-blue" type="submit">创建</button>
+							<button class="btn-blue" type="submit">{{ t("创建") }}</button>
 						</form>
 					</section>
 
 					<section class="home-card">
 						<div class="card-title">
-							进入私有频道
-							<span class="badge gray">需要 id</span>
+							{{ t("进入私有频道") }}
+							<span class="badge gray">{{ t("需要 id") }}</span>
 						</div>
 						<p class="card-desc">
-							输入创建时保存的频道 id 和凭证即可进入。
+							{{ t("输入创建时保存的频道 id 和凭证即可进入。") }}
 						</p>
 						<form
 							class="card-form stacked"
@@ -428,16 +447,16 @@ onMounted(() => {
 							<input
 								v-model="joinId"
 								type="text"
-								placeholder="频道 id"
+								:placeholder="t('频道 id')"
 								required
 							/>
 							<input
 								v-model="joinKey"
 								type="password"
-								placeholder="频道凭证"
+								:placeholder="t('频道凭证')"
 								required
 							/>
-							<button class="btn-blue" type="submit">进入</button>
+							<button class="btn-blue" type="submit">{{ t("进入") }}</button>
 						</form>
 					</section>
 				</div>
@@ -446,19 +465,19 @@ onMounted(() => {
 
 		<Modal
 			:open="createDialogOpen"
-			title="新建公开频道"
+			:title="t('新建公开频道')"
 			@close="createDialogOpen = false"
 		>
 			<form class="home-create-form" @submit.prevent="submitCreateDialog">
 				<div class="home-create-field">
-					<label for="quick-create-name">频道名称</label>
+					<label for="quick-create-name">{{ t("频道名称") }}</label>
 					<input
 						id="quick-create-name"
 						ref="createDialogInput"
 						v-model="createDialogName"
 						type="text"
 						maxlength="32"
-						placeholder="输入频道名称"
+						:placeholder="t('输入频道名称')"
 						@input="createDialogError = ''"
 					/>
 				</div>
@@ -471,10 +490,10 @@ onMounted(() => {
 						class="ghost-button"
 						@click="createDialogOpen = false"
 					>
-						取消
+						{{ t("取消") }}
 					</button>
 					<button type="submit" class="primary-button">
-						创建并进入
+						{{ t("创建并进入") }}
 					</button>
 				</div>
 			</form>

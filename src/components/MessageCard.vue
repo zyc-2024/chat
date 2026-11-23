@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { renderMarkdown } from "../lib/markdown.js";
+import { t } from "../i18n/index.js";
 import { prettyTime } from "../lib/format.js";
 
 const props = defineProps({
@@ -11,7 +12,7 @@ const props = defineProps({
 defineEmits(["reedit", "jump-quote", "menu"]);
 
 const html = computed(() => renderMarkdown(props.message.content || ""));
-const name = computed(() => props.message.name || "Anonymous");
+const name = computed(() => props.message.name || t("匿名"));
 const time = computed(() => prettyTime(props.message.time));
 const hasProfileLink = computed(() => {
 	const user = String(props.message.user || "");
@@ -20,12 +21,12 @@ const hasProfileLink = computed(() => {
 const quoteText = computed(() => {
 	const quoted = props.quoted;
 	if (!quoted) return "";
-	if (quoted.missing) return "引用的消息不在当前记录中";
-	if (quoted.recalled) return "该消息已被撤回";
+	if (quoted.missing) return t("引用的消息不在当前记录中");
+	if (quoted.recalled) return t("该消息已被撤回");
 	const text = String(quoted.content || "")
 		.replace(/\s+/g, " ")
 		.trim();
-	if (!text) return "[空消息]";
+	if (!text) return t("[空消息]");
 	return text.length > 80 ? `${text.slice(0, 80)}…` : text;
 });
 </script>
@@ -37,7 +38,7 @@ const quoteText = computed(() => {
 				v-if="hasProfileLink"
 				class="message-name message-name-link"
 				:to="{ name: 'user', query: { u: message.user } }"
-				:title="'查看 ' + message.user + ' 的个人主页'"
+				:title="t('查看 {user} 的个人主页', { user: message.user })"
 			>
 				{{ name }}
 			</router-link>
@@ -48,8 +49,8 @@ const quoteText = computed(() => {
 					v-if="!message.recalled"
 					type="button"
 					class="message-menu-button"
-					title="复制、引用或撤回"
-					aria-label="消息操作"
+					:title="t('复制、引用或撤回')"
+					:aria-label="t('消息操作')"
 					@click.stop="$emit('menu', $event)"
 				>
 					⋯
@@ -58,14 +59,14 @@ const quoteText = computed(() => {
 		</header>
 		<div class="message-body">
 			<div v-if="message.recalled" class="message-recalled">
-				<span>该消息已被撤回</span>
+				<span>{{ t("该消息已被撤回") }}</span>
 				<button
 					v-if="canReedit"
 					type="button"
 					class="message-reedit"
 					@click="$emit('reedit')"
 				>
-					重新编辑
+					{{ t("重新编辑") }}
 				</button>
 			</div>
 			<template v-else>
@@ -73,11 +74,11 @@ const quoteText = computed(() => {
 					v-if="quoted"
 					type="button"
 					class="message-quote"
-					title="跳到被引用的消息"
+					:title="t('跳到被引用的消息')"
 					@click="$emit('jump-quote', quoted.hash)"
 				>
 					<span class="message-quote-name">
-						{{ quoted.name || "Anonymous" }}
+						{{ quoted.name || t("匿名") }}
 					</span>
 					<span class="message-quote-text">{{ quoteText }}</span>
 				</button>

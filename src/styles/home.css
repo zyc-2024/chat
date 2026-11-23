@@ -295,6 +295,10 @@
 	background: #f7f7f7;
 }
 
+.sidebar-foot .language-switcher {
+	margin-bottom: 8px;
+}
+
 .copyright {
 	margin-top: 8px;
 	color: #5f6a63;

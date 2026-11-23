@@ -8,6 +8,7 @@ import {
 	watch,
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import MessageCard from "../components/MessageCard.vue";
 import Modal from "../components/Modal.vue";
 import {
@@ -19,6 +20,7 @@ import {
 import { auth } from "../services/auth.js";
 import { rewriteLegacyFileUrls } from "../services/gitee.js";
 import { copyText } from "../lib/clipboard.js";
+import { t } from "../i18n/index.js";
 import { prettyTime, safeDecode, timeStamp } from "../lib/format.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { chatName, currentIdentity, useIdentity } from "../lib/identity.js";
@@ -52,8 +54,8 @@ const channelName = computed(() =>
 );
 const channelSub = computed(() =>
 	isPrivate.value
-		? "私密频道 · 消息在浏览器内使用口令加解密"
-		: "公开频道 · 任何人都可以进入",
+		? t("私密频道 · 消息在浏览器内使用口令加解密")
+		: t("公开频道 · 任何人都可以进入"),
 );
 const userLink = computed(() =>
 	auth.session
@@ -238,11 +240,14 @@ const chatStats = computed(() => {
 	};
 });
 const statusText = computed(() => {
-	if (loading.value) return "正在加载聊天记录…";
-	if (refreshing.value) return "正在刷新…";
+	if (loading.value) return t("正在加载聊天记录…");
+	if (refreshing.value) return t("正在刷新…");
 	if (sendError.value) return sendError.value;
 	if (refreshError.value) return refreshError.value;
-	return `每 ${refreshSeconds.value} 秒自动刷新 · 当前身份：${chatName.value}`;
+	return t("每 {seconds} 秒自动刷新 · 当前身份：{name}", {
+		seconds: refreshSeconds.value,
+		name: chatName.value,
+	});
 });
 
 function atBottom() {
@@ -279,7 +284,7 @@ function snippet(text, max = 90) {
 	const flat = String(text || "")
 		.replace(/\s+/g, " ")
 		.trim();
-	if (!flat) return "[空消息]";
+	if (!flat) return t("[空消息]");
 	return flat.length > max ? `${flat.slice(0, max)}…` : flat;
 }
 
@@ -289,7 +294,7 @@ function resolveQuote(message) {
 	const target = messageByHash.value.get(quote.hash);
 	return {
 		hash: quote.hash,
-		name: (target && target.name) || quote.name || "Anonymous",
+		name: (target && target.name) || quote.name || t("匿名"),
 		content: target ? target.content || "" : "",
 		recalled: !!(target && target.recalled),
 		missing: !target,
@@ -300,7 +305,7 @@ function startQuote(message) {
 	if (!message || message.recalled) return;
 	quoting.value = {
 		hash: message.hash,
-		name: message.name || "Anonymous",
+		name: message.name || t("匿名"),
 		content: message.content || "",
 	};
 	nextTick(() => editorEl.value?.focus());
@@ -321,11 +326,11 @@ function openMessageMenu(event, index) {
 		return;
 	}
 	const items = [
-		{ key: "copy", label: "复制" },
-		{ key: "quote", label: "引用" },
+		{ key: "copy", label: t("复制") },
+		{ key: "quote", label: t("引用") },
 	];
 	if (canRecallMessage(message)) {
-		items.push({ key: "recall", label: "撤回", danger: true });
+		items.push({ key: "recall", label: t("撤回"), danger: true });
 	}
 	const width = 156;
 	const height = items.length * 36 + 12;
@@ -360,7 +365,7 @@ async function copyMessage(message) {
 		rewriteLegacyFileUrls(message.content || ""),
 	);
 	showToast(
-		ok ? "消息已复制" : "复制失败，请手动选择",
+		ok ? t("消息已复制") : t("复制失败，请手动选择"),
 		ok ? "success" : "error",
 	);
 }
@@ -382,7 +387,7 @@ async function jumpToMessage(hash) {
 		(message) => message.hash === hash,
 	);
 	if (index < 0) {
-		showToast("找不到被引用的消息", "error");
+		showToast(t("找不到被引用的消息"), "error");
 		return;
 	}
 	if (index < visibleStart.value) {
@@ -394,7 +399,7 @@ async function jumpToMessage(hash) {
 		container &&
 		container.querySelector(`[data-message-hash="${hash}"]`);
 	if (!target) {
-		showToast("找不到被引用的消息", "error");
+		showToast(t("找不到被引用的消息"), "error");
 		return;
 	}
 	target.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -414,7 +419,9 @@ async function load() {
 	refreshError.value = "";
 	try {
 		if (isPrivate.value && (!options.value.id || !options.value.key)) {
-			throw new Error("私密频道缺少 id 或凭证，请从首页重新进入");
+			throw new Error(
+				t("私密频道缺少 id 或凭证，请从首页重新进入"),
+			);
 		}
 		const result = await readChannel(options.value);
 		channelStatus.value = result.status || null;
@@ -474,7 +481,7 @@ async function refresh(silent = true) {
 			if (!silent) showToast(e.message, "error");
 			return false;
 		}
-		refreshError.value = "自动刷新失败，稍后会重试";
+		refreshError.value = t("自动刷新失败，稍后会重试");
 		if (!silent) {
 			showToast(e && e.message ? e.message : String(e), "error");
 		}
@@ -486,7 +493,7 @@ async function refresh(silent = true) {
 
 async function refreshNow() {
 	const ok = await refresh(false);
-	if (ok) showToast("已刷新", "success");
+	if (ok) showToast(t("已刷新"), "success");
 }
 
 async function loadOlder() {
@@ -507,7 +514,7 @@ async function loadOlder() {
 async function send() {
 	if (sending.value) return;
 	if (!draft.value.trim()) {
-		showToast("消息不能为空", "error");
+		showToast(t("消息不能为空"), "error");
 		return;
 	}
 	sending.value = true;
@@ -521,7 +528,7 @@ async function send() {
 			quote: quoting.value
 				? {
 						hash: quoting.value.hash,
-						name: quoting.value.name || "Anonymous",
+						name: quoting.value.name || t("匿名"),
 					}
 				: null,
 			recalled: false,
@@ -572,7 +579,7 @@ function restartTimer() {
 function openRename() {
 	if (!auth.session) {
 		showToast(
-			"游客用户名由设备自动生成，登录后才能修改昵称",
+			t("游客用户名由设备自动生成，登录后才能修改昵称"),
 			"info",
 			3500,
 		);
@@ -585,7 +592,7 @@ function openRename() {
 async function submitRename() {
 	const value = renameValue.value.trim();
 	if (!value) {
-		showToast("昵称不能为空", "error");
+		showToast(t("昵称不能为空"), "error");
 		return;
 	}
 	renameBusy.value = true;
@@ -593,7 +600,9 @@ async function submitRename() {
 		const synced = await rename(value);
 		renameOpen.value = false;
 		showToast(
-			synced ? "昵称已更新" : "昵称已在本地更新（云端同步失败）",
+			synced
+				? t("昵称已更新")
+				: t("昵称已在本地更新（云端同步失败）"),
 			synced ? "success" : "info",
 		);
 	} catch (e) {
@@ -611,13 +620,18 @@ function openInterval() {
 function submitInterval() {
 	const value = Number(intervalValue.value);
 	if (!Number.isFinite(value) || value < 1 || value > 3600) {
-		showToast("请输入 1-3600 之间的秒数", "error");
+		showToast(t("请输入 1-3600 之间的秒数"), "error");
 		return;
 	}
 	refreshSeconds.value = Math.floor(value);
 	intervalOpen.value = false;
 	restartTimer();
-	showToast(`刷新间隔已改为 ${refreshSeconds.value} 秒`, "success");
+	showToast(
+		t("刷新间隔已改为 {seconds} 秒", {
+			seconds: refreshSeconds.value,
+		}),
+		"success",
+	);
 }
 
 function canRecallMessage(message) {
@@ -636,7 +650,7 @@ async function recallMessageAt(index) {
 			identity.value,
 		);
 		allMessages.value = messages;
-		showToast("消息已撤回", "success");
+		showToast(t("消息已撤回"), "success");
 	} catch (e) {
 		if (e && e.code === "CHANNEL_DELETED") {
 			loaded.value = false;
@@ -661,7 +675,7 @@ function reeditMessage(message) {
 	} else {
 		quoting.value = null;
 	}
-	showToast("已放回消息框，可修改后重新发送", "info");
+	showToast(t("已放回消息框，可修改后重新发送"), "info");
 	nextTick(() => editorEl.value?.focus());
 }
 
@@ -678,7 +692,7 @@ async function confirmDelete() {
 	try {
 		await deleteChannel(options.value, identity.value);
 		deleteOpen.value = false;
-		showToast("频道已删除", "success");
+		showToast(t("频道已删除"), "success");
 		router.push({ name: "home" });
 	} catch (e) {
 		deleteError.value = e && e.message ? e.message : String(e);
@@ -690,7 +704,7 @@ async function confirmDelete() {
 function switchChannel() {
 	const value = switchTarget.value.trim();
 	if (!value) {
-		showToast("请输入频道名称", "error");
+		showToast(t("请输入频道名称"), "error");
 		return;
 	}
 	switchTarget.value = "";
@@ -757,7 +771,7 @@ onBeforeUnmount(() => {
 				<button
 					type="button"
 					class="chat-back"
-					title="回到主页"
+					:title="t('回到主页')"
 					@click="router.push({ name: 'home' })"
 				>
 					<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -767,19 +781,21 @@ onBeforeUnmount(() => {
 				<div class="chat-title-wrap">
 					<h1 class="chat-title">{{ channelName }}</h1>
 					<div class="chat-sub">
-						{{ channelSub }} · {{ chatStats.count }} 条消息<span
+						{{ channelSub }} ·
+						{{ t("{count} 条消息", { count: chatStats.count }) }}<span
 							v-if="chatStats.lastTime"
 						>
-							· 最后发言 {{ chatStats.lastTime }}</span
+							· {{ t("最后发言 {time}", { time: chatStats.lastTime }) }}</span
 						>
 					</div>
 				</div>
 				<div class="chat-header-right">
+					<LanguageSwitcher compact />
 					<router-link
 						class="chat-user"
 						:to="userLink"
 						:title="
-							auth.session ? '查看我的个人主页' : '登录 / 注册'
+							auth.session ? t('查看我的个人主页') : t('登录 / 注册')
 						"
 					>
 						<span class="chat-user-dot"></span>
@@ -791,22 +807,24 @@ onBeforeUnmount(() => {
 			<div class="chat-main">
 				<main ref="scrollEl" class="chat-scroll" @scroll="onScroll">
 				<div v-if="loading" class="chat-empty">
-					聊天记录加载中……<br />如果加载时间过长，则可能是页面不存在
+					{{ t("正在加载聊天记录…") }}<br />{{
+						t("如果加载时间过长，则可能是页面不存在")
+					}}
 				</div>
 
 				<div v-else-if="loadError" class="chat-error">
-					<strong>无法打开这个频道</strong>
+					<strong>{{ t("无法打开这个频道") }}</strong>
 					{{ loadError }}
 					<div class="chat-error-actions">
 						<button type="button" class="ghost-button" @click="load">
-							重试
+							{{ t("重试") }}
 						</button>
 						<button
 							type="button"
 							class="primary-button"
 							@click="router.push({ name: 'home' })"
 						>
-							返回首页
+							{{ t("返回首页") }}
 						</button>
 					</div>
 				</div>
@@ -818,11 +836,15 @@ onBeforeUnmount(() => {
 							:disabled="loadingOlder"
 							@click="loadOlder"
 						>
-							{{ loadingOlder ? "加载中……" : "加载更早的消息" }}
+							{{
+								loadingOlder
+									? t("加载中……")
+									: t("加载更早的消息")
+							}}
 						</button>
 					</div>
 					<div v-if="!visibleMessages.length" class="chat-empty">
-						还没有消息，发第一条吧。
+						{{ t("还没有消息，发第一条吧。") }}
 					</div>
 					<MessageCard
 						v-for="(message, index) in visibleMessages"
@@ -844,10 +866,10 @@ onBeforeUnmount(() => {
 					v-if="loaded && !loadError"
 					type="button"
 					class="chat-jump-bottom"
-					title="回到最新消息"
+					:title="t('回到最新消息')"
 					@click="scrollToBottom('smooth')"
 				>
-					一键到底 ↓
+					{{ t("一键到底 ↓") }}
 				</button>
 				<button
 					v-if="newCount > 0"
@@ -855,7 +877,7 @@ onBeforeUnmount(() => {
 					class="chat-new-messages"
 					@click="scrollToBottom('smooth')"
 				>
-					有 {{ newCount }} 条新消息 ↓
+					{{ t("有 {count} 条新消息 ↓", { count: newCount }) }}
 				</button>
 			</div>
 
@@ -867,7 +889,11 @@ onBeforeUnmount(() => {
 				<div v-if="quoting" class="composer-quote">
 					<div class="composer-quote-info">
 						<span class="composer-quote-label">
-							引用 {{ quoting.name || "Anonymous" }}
+							{{
+								t("引用 {name}", {
+									name: quoting.name || t("匿名"),
+								})
+							}}
 						</span>
 						<span class="composer-quote-text">
 							{{ snippet(quoting.content) }}
@@ -876,8 +902,8 @@ onBeforeUnmount(() => {
 					<button
 						type="button"
 						class="composer-quote-cancel"
-						title="取消引用"
-						aria-label="取消引用"
+						:title="t('取消引用')"
+						:aria-label="t('取消引用')"
 						@click="quoting = null"
 					>
 						×
@@ -889,7 +915,11 @@ onBeforeUnmount(() => {
 							ref="editorEl"
 							v-model="draft"
 							:style="{ height: editorHeight + 'px' }"
-							placeholder="输入消息，按 Shift+Enter 发送；支持 Markdown 与 LaTeX"
+							:placeholder="
+								t(
+									'输入消息，按 Shift+Enter 发送；支持 Markdown 与 LaTeX',
+								)
+							"
 							@keydown="onKeydown"
 						></textarea>
 					</div>
@@ -898,7 +928,7 @@ onBeforeUnmount(() => {
 						:style="{ height: editorHeight + 'px' }"
 					>
 						<div v-if="!draft.trim()" class="empty-preview">
-							Markdown / LaTeX 预览
+							{{ t("Markdown / LaTeX 预览") }}
 						</div>
 						<div
 							v-else
@@ -912,8 +942,8 @@ onBeforeUnmount(() => {
 					class="composer-resize-handle"
 					role="separator"
 					aria-orientation="horizontal"
-					aria-label="拖动调整输入框高度"
-					title="拖动调整输入框高度，双击恢复默认"
+					:aria-label="t('拖动调整输入框高度')"
+					:title="t('拖动调整输入框高度，双击恢复默认')"
 					@pointerdown="startEditorResize"
 					@dblclick="resetEditorHeight"
 				></div>
@@ -925,14 +955,14 @@ onBeforeUnmount(() => {
 						:disabled="sending"
 						@click="send"
 					>
-						{{ sending ? "发送中…" : "发送" }}
+						{{ sending ? t("发送中…") : t("发送") }}
 					</button>
 					<button
 						type="button"
 						class="ghost-button composer-more-toggle"
 						@click="moreActionsOpen = !moreActionsOpen"
 					>
-						{{ moreActionsOpen ? "收起" : "更多" }}
+						{{ moreActionsOpen ? t("收起") : t("更多") }}
 					</button>
 					<div
 						class="composer-more"
@@ -943,28 +973,28 @@ onBeforeUnmount(() => {
 							class="ghost-button"
 							@click="refreshNow"
 						>
-							刷新
+							{{ t("刷新") }}
 						</button>
 						<button
 							type="button"
 							class="ghost-button"
 							@click="openRename"
 						>
-							改名
+							{{ t("改名") }}
 						</button>
 						<button
 							type="button"
 							class="ghost-button"
 							@click="goUpload"
 						>
-							上传文件
+							{{ t("上传文件") }}
 						</button>
 						<button
 							type="button"
 							class="ghost-button"
 							@click="openInterval"
 						>
-							刷新间隔
+							{{ t("刷新间隔") }}
 						</button>
 						<button
 							v-if="canDelete"
@@ -972,7 +1002,7 @@ onBeforeUnmount(() => {
 							class="danger-button"
 							@click="openDelete"
 						>
-							删除频道
+							{{ t("删除频道") }}
 						</button>
 					</div>
 					<span class="composer-status">{{ statusText }}</span>
@@ -985,9 +1015,9 @@ onBeforeUnmount(() => {
 				>
 					<input
 						v-model="switchTarget"
-						placeholder="输入你想去的聊天室"
+						:placeholder="t('输入你想去的聊天室')"
 					/>
-					<button type="submit">前往</button>
+					<button type="submit">{{ t("前往") }}</button>
 				</form>
 			</div>
 		</div>
@@ -1017,17 +1047,17 @@ onBeforeUnmount(() => {
 
 		<Modal
 			:open="renameOpen"
-			title="修改聊天昵称"
+			:title="t('修改聊天昵称')"
 			@close="renameOpen = false"
 		>
 			<form @submit.prevent="submitRename">
 				<div class="modal-field">
-					<label for="rename-input">新的昵称</label>
+					<label for="rename-input">{{ t("新的昵称") }}</label>
 					<input
 						id="rename-input"
 						v-model="renameValue"
 						maxlength="32"
-						placeholder="输入新的昵称"
+						:placeholder="t('输入新的昵称')"
 					/>
 				</div>
 				<div class="modal-actions">
@@ -1036,14 +1066,14 @@ onBeforeUnmount(() => {
 						class="ghost-button"
 						@click="renameOpen = false"
 					>
-						取消
+						{{ t("取消") }}
 					</button>
 					<button
 						type="submit"
 						class="primary-button"
 						:disabled="renameBusy"
 					>
-						{{ renameBusy ? "保存中…" : "保存" }}
+						{{ renameBusy ? t("保存中……") : t("保存") }}
 					</button>
 				</div>
 			</form>
@@ -1051,12 +1081,14 @@ onBeforeUnmount(() => {
 
 		<Modal
 			:open="intervalOpen"
-			title="修改自动刷新间隔"
+			:title="t('修改自动刷新间隔')"
 			@close="intervalOpen = false"
 		>
 			<form @submit.prevent="submitInterval">
 				<div class="modal-field">
-					<label for="interval-input">刷新间隔（秒，1-3600）</label>
+					<label for="interval-input">{{
+						t("刷新间隔（秒，1-3600）")
+					}}</label>
 					<input
 						id="interval-input"
 						v-model.number="intervalValue"
@@ -1071,20 +1103,26 @@ onBeforeUnmount(() => {
 						class="ghost-button"
 						@click="intervalOpen = false"
 					>
-						取消
+						{{ t("取消") }}
 					</button>
-					<button type="submit" class="primary-button">保存</button>
+					<button type="submit" class="primary-button">
+						{{ t("保存") }}
+					</button>
 				</div>
 			</form>
 		</Modal>
 
 		<Modal
 			:open="deleteOpen"
-			title="删除频道"
+			:title="t('删除频道')"
 			@close="deleteOpen = false"
 		>
 			<p class="chat-delete-note">
-				删除后会写入 deleted 标记，频道会从首页隐藏。只有创建者可以操作。
+				{{
+					t(
+						"删除后会写入 deleted 标记，频道会从首页隐藏。只有创建者可以操作。",
+					)
+				}}
 			</p>
 			<div v-if="deleteError" class="chat-delete-error">
 				{{ deleteError }}
@@ -1095,7 +1133,7 @@ onBeforeUnmount(() => {
 					class="ghost-button"
 					@click="deleteOpen = false"
 				>
-					取消
+					{{ t("取消") }}
 				</button>
 				<button
 					type="button"
@@ -1103,7 +1141,7 @@ onBeforeUnmount(() => {
 					:disabled="deleteBusy"
 					@click="confirmDelete"
 				>
-					{{ deleteBusy ? "删除中…" : "确认删除" }}
+					{{ deleteBusy ? t("删除中…") : t("确认删除") }}
 				</button>
 			</div>
 		</Modal>
