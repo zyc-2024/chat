@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.14 beta 1 (201)",
+		tags: ["ai", "beta"],
+		desc: "开始把上传文件迁移到 256 个 Gitee 分片仓库：新增按 32 位 MD5 前两位选择仓库的工具函数、仓库初始化与旧文件迁移脚本，并加入旧上传链接改写和映射测试。",
+	},
+	{
 		version: "3.2.13 (200)",
 		tags: ["ai", "hotfix"],
 		desc: "侧边栏“+”按钮改为弹出“新建公开频道”弹窗：输入频道名称后点击创建并进入，空名称会在弹窗内提示；首页原有的创建频道卡片继续保留。",

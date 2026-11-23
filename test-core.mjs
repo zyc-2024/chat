@@ -10,7 +10,42 @@ import {
 	recallChannelMessage,
 	sendChannelMessage,
 } from "./src/services/chat.js";
-import { decodeBase64 } from "./src/services/gitee.js";
+import {
+	decodeBase64,
+	fileRepoApi,
+	fileRepoFullName,
+	fileShard,
+	rewriteLegacyFileUrl,
+	rewriteLegacyFileUrls,
+} from "./src/services/gitee.js";
+
+assert.equal(
+	fileShard("42e874ae9692483e15ef9c9d0b6a5f8e"),
+	"42",
+);
+assert.equal(
+	fileRepoFullName("42e874ae9692483e15ef9c9d0b6a5f8e"),
+	"zyc-2024/chat-files-42",
+);
+assert.equal(
+	fileRepoApi("ABCDEF0123456789ABCDEF0123456789"),
+	"https://gitee.com/api/v5/repos/zyc-2024/chat-files-ab",
+);
+assert.throws(() => fileShard("not-a-hash"), /32 位 MD5/);
+const legacyFileUrl =
+	"https://gitee.com/api/v5/repos/zyc-2024/chat/raw/f%2F42e874ae9692483e15ef9c9d0b6a5f8e%2FIMG_6854.jpeg?access_token=abc";
+assert.equal(
+	rewriteLegacyFileUrl(legacyFileUrl),
+	"https://gitee.com/api/v5/repos/zyc-2024/chat-files-42/raw/f%2F42e874ae9692483e15ef9c9d0b6a5f8e%2FIMG_6854.jpeg?access_token=abc",
+);
+assert.equal(
+	rewriteLegacyFileUrls(`a ${legacyFileUrl} b`),
+	`a https://gitee.com/api/v5/repos/zyc-2024/chat-files-42/raw/f%2F42e874ae9692483e15ef9c9d0b6a5f8e%2FIMG_6854.jpeg?access_token=abc b`,
+);
+assert.equal(
+	rewriteLegacyFileUrl("https://example.com/file.png"),
+	"https://example.com/file.png",
+);
 
 const files = new Map();
 let shaCounter = 0;

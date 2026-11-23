@@ -7,6 +7,52 @@
  */
 export const GITEE_API = "https://gitee.com/api/v5/repos/zyc-2024/chat";
 export const GITEE_TOKEN = "19f7b43872c256d52d1bc71cbd2d0ffa";
+export const FILE_REPO_OWNER = "zyc-2024";
+export const FILE_REPO_PREFIX = "chat-files-";
+export const FILE_REPO_COUNT = 256;
+
+/** 取 32 位 MD5 的前两位，作为 256 个文件仓库的编号。 */
+export function fileShard(hash) {
+	const normalized = String(hash || "").trim().toLowerCase();
+	if (!/^[0-9a-f]{32}$/.test(normalized)) {
+		throw new Error("文件 hash 必须是 32 位 MD5");
+	}
+	return normalized.slice(0, 2);
+}
+
+/** 文件仓库名，例如 chat-files-42。 */
+export function fileRepoName(hash) {
+	return `${FILE_REPO_PREFIX}${fileShard(hash)}`;
+}
+
+/** 文件仓库完整名称，例如 zyc-2024/chat-files-42。 */
+export function fileRepoFullName(hash) {
+	return `${FILE_REPO_OWNER}/${fileRepoName(hash)}`;
+}
+
+/** 文件仓库的 Gitee API 根地址。 */
+export function fileRepoApi(hash) {
+	return `https://gitee.com/api/v5/repos/${fileRepoFullName(hash)}`;
+}
+
+const LEGACY_FILE_RAW_RE =
+	/https:\/\/(?:gitee\.com\/api\/v5\/repos\/zyc-2024\/chat|gitee\.com\/zyc-2024\/chat)\/raw\/f(?:%2F|\/)([0-9a-f]{32})/gi;
+
+/**
+ * 把旧主仓库里的上传文件链接改写到对应的分片仓库。
+ * 迁移旧文件后，聊天记录里的历史链接仍然可以继续打开。
+ */
+export function rewriteLegacyFileUrls(text) {
+	return String(text || "").replace(
+		LEGACY_FILE_RAW_RE,
+		(match, hash) =>
+			`https://gitee.com/api/v5/repos/${fileRepoFullName(hash)}/raw/f%2F${hash.toLowerCase()}`,
+	);
+}
+
+export function rewriteLegacyFileUrl(url) {
+	return rewriteLegacyFileUrls(url);
+}
 
 function bytesToBinary(bytes) {
 	let binary = "";
