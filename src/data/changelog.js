@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.9.3 (228)",
+		tags: ["ai", "hotfix"],
+		desc: "修复更新日志标签列分割横线未对齐：标签单元格不再直接使用 flex 布局，改为内层标签列表容器，版本、标签和描述三列的行分隔线恢复对齐。",
+	},
+	{
 		version: "3.9.2 (227)",
 		tags: ["ai", "hotfix"],
 		desc: "更新日志的 AI 标记改为版本号前的 *：不再显示“使用AI”标签，版本号和标签筛选区域不再出现 AI 标签；页面顶部新增说明，* 表示该版本使用 AI 辅助开发。",

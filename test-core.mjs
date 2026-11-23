@@ -101,10 +101,10 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.9.2 (227)");
+assert.equal(findNowEntry(changelog).version, "3.9.3 (228)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.9.2 (227)",
+	"3.9.3 (228)",
 );
 assert.equal(isAiAssistedEntry({ tags: ["ai", "beta"] }), true);
 assert.equal(isAiAssistedEntry({ tags: [{ label: "使用AI" }] }), true);

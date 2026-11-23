@@ -247,22 +247,24 @@ onMounted(() => {
 								>{{ item.version }}
 							</td>
 							<td class="changelog-tags">
-								<button
-									v-for="tag in tagsOf(item)"
-									:key="tag.key"
-									type="button"
-									class="changelog-tag"
-									:style="tagStyle(tag)"
-									:title="
-										t('筛选标签：{label}', {
-											label: t(tag.label),
-										}) +
-										(tag.hint ? ' · ' + tag.hint : '')
-									"
-									@click="toggleTag(tag.key)"
-								>
-									{{ t(tag.label) }}
-								</button>
+								<div class="changelog-tag-list">
+									<button
+										v-for="tag in tagsOf(item)"
+										:key="tag.key"
+										type="button"
+										class="changelog-tag"
+										:style="tagStyle(tag)"
+										:title="
+											t('筛选标签：{label}', {
+												label: t(tag.label),
+											}) +
+											(tag.hint ? ' · ' + tag.hint : '')
+										"
+										@click="toggleTag(tag.key)"
+									>
+										{{ t(tag.label) }}
+									</button>
+								</div>
 							</td>
 							<td>{{ item.desc }}</td>
 						</tr>

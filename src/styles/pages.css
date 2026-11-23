@@ -442,6 +442,10 @@
 }
 
 .changelog-tags {
+	vertical-align: top;
+}
+
+.changelog-tag-list {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 5px;
