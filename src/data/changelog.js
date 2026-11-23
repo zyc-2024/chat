@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.14 beta 3 (203)",
+		tags: ["ai", "beta"],
+		desc: "Base64 上传改为按内容 MD5 前两位选择分片仓库；上传路径包含内容 hash 和时间戳，生成的 raw 链接指向 chat-files-xx。",
+	},
+	{
 		version: "3.2.14 beta 2 (202)",
 		tags: ["ai", "beta"],
 		desc: "选择文件上传改为写入 256 个分片仓库：根据文件 MD5 前两位选择 chat-files-xx，上传接口和生成的 raw 链接同步切换到对应仓库。",

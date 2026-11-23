@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
-import { GITEE_API, GITEE_TOKEN } from "../services/gitee.js";
+import SparkMD5 from "spark-md5";
+import { GITEE_TOKEN, fileRepoApi } from "../services/gitee.js";
 import { formatBytes } from "../lib/format.js";
 import { copyText } from "../lib/clipboard.js";
 import { showToast } from "../lib/toast.js";
@@ -13,10 +14,10 @@ const busy = ref(false);
 const output = ref(null);
 const error = ref("");
 
-function uploadRaw(stamp, body) {
+function uploadRaw(repoApi, path, body) {
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
-		xhr.open("POST", `${GITEE_API}/contents/f%2F${stamp}`, true);
+		xhr.open("POST", `${repoApi}/contents/${path}`, true);
 		xhr.setRequestHeader("Content-Type", "application/json");
 		xhr.upload.onprogress = (event) => {
 			if (event.lengthComputable) {
@@ -48,12 +49,15 @@ async function upload() {
 	progress.value = 0;
 	progressText.value = "";
 	const stamp = Date.now();
-	const rawUrl = `${GITEE_API}/raw/f%2F${stamp}?access_token=${GITEE_TOKEN}`;
+	const hash = SparkMD5.hash(raw);
+	const repoApi = fileRepoApi(hash);
+	const path = `f%2F${hash}%2F${stamp}`;
+	const rawUrl = `${repoApi}/raw/${path}?access_token=${GITEE_TOKEN}`;
 	try {
-		const response = await uploadRaw(stamp, {
+		const response = await uploadRaw(repoApi, path, {
 			access_token: GITEE_TOKEN,
 			content: raw,
-			message: `u[${stamp}]b64`,
+			message: `u[${stamp}]b64 h[${hash}]`,
 		});
 		if (response.status >= 200 && response.status < 300) {
 			progress.value = 100;
@@ -86,7 +90,9 @@ async function copy(value) {
 			<div class="standalone-head">
 				<div>
 					<h1>粘贴 Base64 上传</h1>
-					<p>把一段 Base64 文本直接上传到 Gitee 仓库并生成链接。</p>
+					<p>
+						把一段 Base64 文本按内容 MD5 前两位上传到对应的 Gitee 分片仓库并生成链接。
+					</p>
 				</div>
 				<router-link class="back-link" :to="{ name: 'home' }">
 					返回首页
@@ -155,7 +161,7 @@ async function copy(value) {
 			</div>
 
 			<div class="file-meta">
-				提示：Base64 内容会原样保存，请不要上传隐私或敏感信息。
+				提示：Base64 内容会按 MD5 前两位保存到 256 个分片仓库之一，请不要上传隐私或敏感信息。
 			</div>
 		</div>
 	</div>
