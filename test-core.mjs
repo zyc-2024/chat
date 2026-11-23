@@ -4,9 +4,10 @@ import {
 	createPrivateChannel,
 	createPublicChannel,
 	deleteChannel,
-	fetchPublicChannelStatuses,
+	fetchPublicChannelSummaries,
 	getChannelStatus,
 	readChannel,
+	recallChannelMessage,
 	sendChannelMessage,
 } from "./src/services/chat.js";
 import { decodeBase64 } from "./src/services/gitee.js";
@@ -79,6 +80,8 @@ assert.equal(JSON.parse(publicStatusRaw).deleted, false);
 const publicStatus = await getChannelStatus({ type: "u", ch: "测试频道" });
 assert.equal(publicStatus.data.owner, "Alice");
 assert.equal(publicStatus.data.ownerType, "user");
+assert.equal(publicStatus.data.messageCount, 1);
+assert.ok(publicStatus.data.lastMessageTime);
 
 const first = await readChannel({ type: "u", ch: "测试频道" });
 assert.equal(first.messages.length, 1);
@@ -87,10 +90,55 @@ assert.equal(first.status.owner, "Alice");
 
 const afterSend = await sendChannelMessage(
 	{ type: "u", ch: "测试频道" },
-	{ name: "Alice", time: "20260101 00:00:00", ts: Date.now(), content: "hello" },
+	{
+		name: "Alice",
+		user: "Alice",
+		time: "20260101 00:00:00",
+		ts: Date.now(),
+		recalled: false,
+		content: "hello",
+	},
 );
 assert.equal(afterSend.length, 2);
 assert.equal(afterSend[1].content, "hello");
+
+const publicStatusAfterSend = await getChannelStatus({
+	type: "u",
+	ch: "测试频道",
+});
+assert.equal(publicStatusAfterSend.data.messageCount, 2);
+
+const recallByOther = await recallChannelMessage(
+	{ type: "u", ch: "测试频道" },
+	1,
+	{ name: "Bob", type: "user" },
+).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(recallByOther instanceof Error);
+assert.match(recallByOther.message, /只能撤回自己发送的消息/);
+
+const publicRecalled = await recallChannelMessage(
+	{ type: "u", ch: "测试频道" },
+	1,
+	alice,
+);
+assert.equal(publicRecalled[1].recalled, true);
+const publicAfterRecall = await readChannel({
+	type: "u",
+	ch: "测试频道",
+});
+assert.equal(publicAfterRecall.messages[1].recalled, true);
+assert.equal(publicAfterRecall.messages[1].content, "hello");
+
+const publicSummaries = await fetchPublicChannelSummaries([
+	encodeURIComponent("测试频道"),
+]);
+assert.equal(
+	publicSummaries.get(encodeURIComponent("测试频道")).messageCount,
+	2,
+);
 
 const priv = await createPrivateChannel("secret-key", "Bob", () => {}, bob);
 assert.equal(priv.id, 8);
@@ -109,6 +157,8 @@ const privateStatus = await getChannelStatus({
 });
 assert.equal(privateStatus.data.owner, "Bob");
 assert.equal(privateStatus.data.ownerType, "guest");
+assert.equal(privateStatus.data.messageCount, 3);
+assert.ok(privateStatus.data.lastMessageTime);
 
 const privRead = await readChannel({
 	type: "r",
@@ -121,10 +171,38 @@ assert.equal(privRead.status.owner, "Bob");
 
 const privSend = await sendChannelMessage(
 	{ type: "r", id: "8", key: "secret-key" },
-	{ name: "Bob", time: "20260101 00:00:00", ts: Date.now(), content: "secret" },
+	{
+		name: "Bob",
+		user: "Bob",
+		time: "20260101 00:00:00",
+		ts: Date.now(),
+		recalled: false,
+		content: "secret",
+	},
 );
 assert.equal(privSend.length, 4);
 assert.equal(privSend[3].content, "secret");
+
+const privateStatusAfterSend = await getChannelStatus({
+	type: "r",
+	id: "8",
+	key: "secret-key",
+});
+assert.equal(privateStatusAfterSend.data.messageCount, 4);
+
+const privateRecalled = await recallChannelMessage(
+	{ type: "r", id: "8", key: "secret-key" },
+	3,
+	bob,
+);
+assert.equal(privateRecalled[3].recalled, true);
+const privateAfterRecall = await readChannel({
+	type: "r",
+	id: "8",
+	key: "secret-key",
+});
+assert.equal(privateAfterRecall.messages[3].recalled, true);
+assert.equal(privateAfterRecall.messages[3].content, "secret");
 
 const wrongKey = await readChannel({
 	type: "r",
@@ -181,10 +259,17 @@ const publicStatusAfter = await getChannelStatus({
 	ch: "测试频道",
 });
 assert.equal(publicStatusAfter.data.deleted, true);
-const statuses = await fetchPublicChannelStatuses([
+const deletedSummaries = await fetchPublicChannelSummaries([
 	encodeURIComponent("测试频道"),
 ]);
-assert.equal(statuses.get(encodeURIComponent("测试频道")).deleted, true);
+assert.equal(
+	deletedSummaries.get(encodeURIComponent("测试频道")).deleted,
+	true,
+);
+assert.equal(
+	deletedSummaries.get(encodeURIComponent("测试频道")).messageCount,
+	2,
+);
 
 const readDeletedPublic = await readChannel({
 	type: "u",

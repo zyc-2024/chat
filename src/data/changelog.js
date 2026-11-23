@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.5 (192)",
+		tags: ["ai"],
+		desc: "频道列表和聊天页显示消息条数与最后发言时间，统计数据写入 status 文件并在每次发言后更新；消息增加 recalled 标记，只有发送者可撤回，其他人看到撤回提示，本人可在最后一条撤回消息旁重新编辑并放回输入框；聊天输入框字体改为宋体。",
+	},
+	{
 		version: "3.2.4 (191)",
 		tags: ["ai"],
 		desc: "频道创建时在 status/public/<name>.json 或 status/private/<id>.json 写入创建者标记；创建者可在聊天页删除自己的频道，删除只写入 deleted 标记并隐藏频道；私有频道状态文件同样使用频道口令加密。",

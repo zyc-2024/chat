@@ -13,10 +13,11 @@ import Modal from "../components/Modal.vue";
 import {
 	deleteChannel,
 	readChannel,
+	recallChannelMessage,
 	sendChannelMessage,
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
-import { safeDecode, timeStamp } from "../lib/format.js";
+import { prettyTime, safeDecode, timeStamp } from "../lib/format.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { chatName, currentIdentity, useIdentity } from "../lib/identity.js";
 import { showToast } from "../lib/toast.js";
@@ -72,6 +73,7 @@ const newCount = ref(0);
 const draft = ref("");
 const refreshSeconds = ref(5);
 const scrollEl = ref(null);
+const editorEl = ref(null);
 const switchTarget = ref("");
 const channelStatus = ref(null);
 
@@ -106,6 +108,22 @@ const visibleMessages = computed(() =>
 );
 const canLoadMore = computed(() => visibleStart.value > 0);
 const preview = computed(() => renderMarkdown(draft.value));
+const lastRecalledIndex = computed(() => {
+	const me = currentIdentity().name;
+	for (let i = allMessages.value.length - 1; i >= 0; i--) {
+		const message = allMessages.value[i];
+		if (message.recalled && message.user === me) return i;
+	}
+	return -1;
+});
+const chatStats = computed(() => {
+	const count = allMessages.value.length;
+	const last = allMessages.value[count - 1];
+	return {
+		count,
+		lastTime: last ? prettyTime(last.time) : "",
+	};
+});
 const statusText = computed(() => {
 	if (loading.value) return "正在加载聊天记录…";
 	if (refreshing.value) return "正在刷新…";
@@ -242,9 +260,10 @@ async function send() {
 	try {
 		const message = {
 			name: chatName.value,
-			user: auth.session ? auth.session.username : "",
+			user: identity.value.name,
 			time: timeStamp(),
 			ts: Date.now(),
+			recalled: false,
 			content: draft.value,
 		};
 		const messages = await sendChannelMessage(options.value, message);
@@ -339,6 +358,43 @@ function submitInterval() {
 	showToast(`刷新间隔已改为 ${refreshSeconds.value} 秒`, "success");
 }
 
+function canRecallMessage(message) {
+	return (
+		!message.recalled &&
+		!!message.user &&
+		message.user === identity.value.name
+	);
+}
+
+async function recallMessageAt(index) {
+	const message = allMessages.value[index];
+	if (!message) return;
+	try {
+		const messages = await recallChannelMessage(
+			options.value,
+			index,
+			identity.value,
+		);
+		allMessages.value = messages;
+		showToast("消息已撤回", "success");
+	} catch (e) {
+		if (e && e.code === "CHANNEL_DELETED") {
+			loaded.value = false;
+			allMessages.value = [];
+			visibleStart.value = 0;
+			loadError.value = e.message;
+			return;
+		}
+		showToast(e && e.message ? e.message : String(e), "error");
+	}
+}
+
+function reeditMessage(message) {
+	draft.value = message.content || "";
+	showToast("已放回消息框，可修改后重新发送", "info");
+	nextTick(() => editorEl.value?.focus());
+}
+
 function openDelete() {
 	if (!canDelete.value) return;
 	deleteError.value = "";
@@ -427,7 +483,13 @@ onBeforeUnmount(() => {
 				</button>
 				<div class="chat-title-wrap">
 					<h1 class="chat-title">{{ channelName }}</h1>
-					<div class="chat-sub">{{ channelSub }}</div>
+					<div class="chat-sub">
+						{{ channelSub }} · {{ chatStats.count }} 条消息<span
+							v-if="chatStats.lastTime"
+						>
+							· 最后发言 {{ chatStats.lastTime }}</span
+						>
+					</div>
 				</div>
 				<div class="chat-header-right">
 					<router-link
@@ -482,6 +544,10 @@ onBeforeUnmount(() => {
 						v-for="(message, index) in visibleMessages"
 						:key="visibleStart + index"
 						:message="message"
+						:can-recall="canRecallMessage(message)"
+						:can-reedit="visibleStart + index === lastRecalledIndex"
+						@recall="recallMessageAt(visibleStart + index)"
+						@reedit="reeditMessage(message)"
 					/>
 				</template>
 
@@ -499,6 +565,7 @@ onBeforeUnmount(() => {
 				<div class="composer-grid">
 					<div class="composer-editor">
 						<textarea
+							ref="editorEl"
 							v-model="draft"
 							placeholder="输入消息，按 Shift+Enter 发送；支持 Markdown 与 LaTeX"
 							@keydown="onKeydown"

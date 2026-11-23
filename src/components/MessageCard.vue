@@ -5,7 +5,10 @@ import { prettyTime } from "../lib/format.js";
 
 const props = defineProps({
 	message: { type: Object, required: true },
+	canRecall: { type: Boolean, default: false },
+	canReedit: { type: Boolean, default: false },
 });
+defineEmits(["recall", "reedit"]);
 
 const html = computed(() => renderMarkdown(props.message.content || ""));
 const name = computed(() => props.message.name || "Anonymous");
@@ -30,6 +33,31 @@ const hasProfileLink = computed(() => {
 			<span v-else class="message-name">{{ name }}</span>
 			<time class="message-time">{{ time }}</time>
 		</header>
-		<div class="message-body markdown-body" v-html="html"></div>
+		<div class="message-body">
+			<div v-if="message.recalled" class="message-recalled">
+				<span>该消息已被撤回</span>
+				<button
+					v-if="canReedit"
+					type="button"
+					class="message-reedit"
+					@click="$emit('reedit')"
+				>
+					重新编辑
+				</button>
+			</div>
+			<template v-else>
+				<div class="markdown-body" v-html="html"></div>
+				<div v-if="canRecall" class="message-actions">
+					<button
+						type="button"
+						class="message-recall"
+						title="撤回这条消息"
+						@click="$emit('recall')"
+					>
+						撤回
+					</button>
+				</div>
+			</template>
+		</div>
 	</article>
 </template>

@@ -4,10 +4,15 @@ import { useRouter } from "vue-router";
 import AuthBadge from "../components/AuthBadge.vue";
 import {
 	fetchChannelIndex,
-	fetchPublicChannelStatuses,
+	fetchPublicChannelSummaries,
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
-import { channelColor, channelInitial, safeDecode } from "../lib/format.js";
+import {
+	channelColor,
+	channelInitial,
+	prettyTime,
+	safeDecode,
+} from "../lib/format.js";
 import { currentAppVersion } from "../lib/appVersion.js";
 import { chatName } from "../lib/identity.js";
 import { showToast } from "../lib/toast.js";
@@ -15,6 +20,7 @@ import "../styles/home.css";
 
 const router = useRouter();
 const channels = ref([]);
+const summaries = ref(new Map());
 const loading = ref(true);
 const error = ref("");
 const search = ref("");
@@ -43,15 +49,17 @@ async function loadChannels() {
 	error.value = "";
 	try {
 		const list = await fetchChannelIndex();
-		let statuses = new Map();
+		let summaryMap = new Map();
 		try {
-			statuses = await fetchPublicChannelStatuses(list);
+			summaryMap = await fetchPublicChannelSummaries(list);
 		} catch (e) {
-			console.warn("读取频道状态失败，暂不隐藏已删除频道", e);
+			console.warn("读取频道统计失败，暂不隐藏已删除频道", e);
 		}
 		channels.value = list.filter(
-			(channel) => !(statuses.get(channel) && statuses.get(channel).deleted),
+			(channel) =>
+				!(summaryMap.get(channel) && summaryMap.get(channel).deleted),
 		);
+		summaries.value = summaryMap;
 	} catch (e) {
 		channels.value = [];
 		error.value = e && e.message ? e.message : String(e);
@@ -62,6 +70,22 @@ async function loadChannels() {
 
 function openChannel(rawName) {
 	router.push({ name: "chat", query: { type: "u", ch: safeDecode(rawName) } });
+}
+
+function shortTime(value) {
+	const formatted = prettyTime(value || "");
+	if (!formatted) return "";
+	return formatted.startsWith(String(new Date().getFullYear()))
+		? formatted.slice(5, 16)
+		: formatted.slice(0, 16);
+}
+
+function channelPreview(rawName) {
+	const summary = summaries.value.get(rawName);
+	if (!summary) return "公开频道 · 点击进入";
+	const count = Number(summary.messageCount) || 0;
+	const lastTime = shortTime(summary.lastMessageTime);
+	return `${count} 条消息${lastTime ? " · 最后 " + lastTime : " · 暂无发言"}`;
 }
 
 function createPublicChannel() {
@@ -211,7 +235,9 @@ onMounted(() => {
 								</span>
 								<span class="channel-main">
 									<span class="channel-name">{{ safeDecode(channel) }}</span>
-									<span class="channel-preview">公开频道 · 点击进入</span>
+									<span class="channel-preview">
+										{{ channelPreview(channel) }}
+									</span>
 								</span>
 								<span class="channel-meta">公开</span>
 							</a>

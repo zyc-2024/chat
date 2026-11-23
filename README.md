@@ -37,11 +37,19 @@
    - 创建频道时写入创建者标记：
      - 公开频道：`status/public/<频道名>.json`
      - 私有频道：`status/private/<频道 id>.json`
-   - 标记内容包含 `owner`、`ownerType`、`createdAt`、`deleted`、`deletedAt`。
+   - 标记内容包含 `owner`、`ownerType`、`createdAt`、`deleted`、`deletedAt`，以及消息统计字段。
    - 创建者可以在聊天页删除自己的频道；删除只写入 `deleted: true` 标记，不立即删除聊天记录或索引。
    - 首页会隐藏已删除频道，聊天页会拒绝继续进入和发送消息。
    - 私有频道的状态文件使用频道口令加密，和私密消息一样不会明文保存创建者和删除状态。
    - 旧频道如果没有状态文件，不会显示删除按钮。
+
+6. **频道统计、消息撤回与输入框字体**
+   - `status` 文件额外保存 `messageCount`、`lastMessageAt`、`lastMessageTime`、`lastMessageName`。
+   - 每次发言后自动更新统计；首页频道列表和聊天页顶部会显示消息条数与最后发言时间。
+   - 每条消息带 `recalled` 标记；只有发送者可以撤回自己的消息。
+   - 其他用户看到“该消息已被撤回”；撤回者可以在自己最后一条撤回消息旁点击“重新编辑”，把原内容放回输入框。
+   - 撤回只写标记，不删除原消息内容；私有频道的消息和状态仍然加密保存。
+   - 聊天输入框字体改为宋体（SimSun）。
 
 ## 路由
 
@@ -114,7 +122,7 @@ pnpm test
 格式示例：
 
 ```text
-3.2.4 (191)          -> Release tag: v3.2.4-191
+3.2.5 (192)          -> Release tag: v3.2.5-192
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 
