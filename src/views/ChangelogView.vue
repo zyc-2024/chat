@@ -13,8 +13,10 @@ import {
 	isLocalAppRuntime,
 } from "../lib/appVersion.js";
 import {
+	DATA_LOST_DATE,
 	findLatestStableEntry,
 	findNowEntry,
+	formatChangelogDate,
 	isAiAssistedEntry,
 	isAiTag,
 } from "../lib/changelogMeta.js";
@@ -153,6 +155,13 @@ function toggleTag(key) {
 	activeTag.value = activeTag.value === key ? "" : key;
 }
 
+function dateText(value) {
+	if (!value || value === DATA_LOST_DATE) return t("【数据丢失】");
+	return (
+		formatChangelogDate(value, locale.value) || t("【数据丢失】")
+	);
+}
+
 function tagStyle(tag) {
 	const color = tag.color || "#69736d";
 	const isHex = /^#[0-9a-f]{6}$/i.test(color);
@@ -230,6 +239,7 @@ onMounted(() => {
 					<thead>
 						<tr>
 							<th>{{ t("版本号") }}</th>
+							<th>{{ t("时间") }}</th>
 							<th>{{ t("标签") }}</th>
 							<th>{{ t("描述") }}</th>
 						</tr>
@@ -246,6 +256,7 @@ onMounted(() => {
 									>*</span
 								>{{ item.version }}
 							</td>
+							<td class="changelog-date">{{ dateText(item.date) }}</td>
 							<td class="changelog-tags">
 								<div class="changelog-tag-list">
 									<button

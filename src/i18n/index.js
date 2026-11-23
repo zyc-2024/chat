@@ -342,6 +342,8 @@ const english = {
 	"检查更新失败（{status}）": "Update check failed ({status})",
 	"版本号前的 * 表示该版本使用 AI 辅助开发。":
 		"A * before the version number means the version was developed with AI assistance.",
+	"时间": "Time",
+	"【数据丢失】": "[DATA LOST]",
 	"正在获取远端更新日志…": "Loading remote changelog…",
 	"已加载远端更新日志": "Remote changelog loaded.",
 	"远端更新日志不可用，显示本地版本":

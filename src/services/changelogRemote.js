@@ -37,6 +37,35 @@ function normalizeDefinitions(definitions) {
 	return list.length ? list : null;
 }
 
+function buildNumberOf(version) {
+	const match = String(version || "").match(/\((\d+)\)\s*$/);
+	return match ? Number(match[1]) : 0;
+}
+
+export function mergeChangelogEntries(remoteEntries, localEntries) {
+	const map = new Map();
+	for (const entry of Array.isArray(localEntries) ? localEntries : []) {
+		if (!entry || !entry.version) continue;
+		map.set(entry.version, { ...entry });
+	}
+	for (const entry of Array.isArray(remoteEntries) ? remoteEntries : []) {
+		if (!entry || !entry.version) continue;
+		const local = map.get(entry.version);
+		map.set(entry.version, {
+			...(local || {}),
+			...entry,
+			date: entry.date || (local && local.date) || "DATA_LOST",
+			tags:
+				Array.isArray(entry.tags) && entry.tags.length
+					? entry.tags
+					: (local && local.tags) || [],
+		});
+	}
+	return [...map.values()].sort(
+		(a, b) => buildNumberOf(b.version) - buildNumberOf(a.version),
+	);
+}
+
 export function useLocalChangelog() {
 	changelogEntries.value = localChangelog;
 	changelogDefinitions.value = localTags;
@@ -71,7 +100,10 @@ export async function loadRemoteChangelog() {
 		if (!entries.length) {
 			throw new Error("empty changelog");
 		}
-		changelogEntries.value = entries;
+		changelogEntries.value = mergeChangelogEntries(
+			entries,
+			localChangelog,
+		);
 		changelogDefinitions.value =
 			normalizeDefinitions(data.changelogTags) || localTags;
 		changelogSource.value = "remote";

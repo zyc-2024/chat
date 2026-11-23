@@ -26,9 +26,12 @@ import {
 	parseReleaseVersion,
 	updateAvailable,
 } from "./src/services/appUpdate.js";
+import { mergeChangelogEntries } from "./src/services/changelogRemote.js";
 import {
+	DATA_LOST_DATE,
 	findLatestStableEntry,
 	findNowEntry,
+	formatChangelogDate,
 	isAiAssistedEntry,
 	isAiTag,
 	isBetaVersion,
@@ -101,15 +104,40 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.9.3 (228)");
+assert.equal(findNowEntry(changelog).version, "3.9.4 (229)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.9.3 (228)",
+	"3.9.4 (229)",
 );
 assert.equal(isAiAssistedEntry({ tags: ["ai", "beta"] }), true);
 assert.equal(isAiAssistedEntry({ tags: [{ label: "使用AI" }] }), true);
 assert.equal(isAiAssistedEntry({ tags: ["beta", "hotfix"] }), false);
 assert.equal(isAiTag("使用AI"), true);
+assert.ok(changelog[0].date);
+assert.ok(changelog.every((entry) => entry.date));
+assert.ok(formatChangelogDate(changelog[0].date, "zh-CN"));
+assert.equal(
+	changelog.find((entry) => entry.version === "Early build 1~7").date,
+	DATA_LOST_DATE,
+);
+const mergedChangelog = mergeChangelogEntries(
+	[
+		{ version: "3.9.4 (229)", desc: "remote desc" },
+		{ version: "9.9.9 (999)", desc: "remote only" },
+	],
+	[
+		{
+			version: "3.9.4 (229)",
+			date: "2026-01-01T00:00:00.000Z",
+			tags: ["ai"],
+			desc: "local desc",
+		},
+	],
+);
+assert.equal(mergedChangelog[0].version, "9.9.9 (999)");
+assert.equal(mergedChangelog[1].desc, "remote desc");
+assert.equal(mergedChangelog[1].date, "2026-01-01T00:00:00.000Z");
+assert.deepEqual(mergedChangelog[1].tags, ["ai"]);
 
 const releaseA = parseReleaseVersion({
 	name: "3.9.0 beta 1 (224)",

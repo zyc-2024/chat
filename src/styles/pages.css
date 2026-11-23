@@ -433,6 +433,13 @@
 }
 
 .changelog-table td:nth-child(2) {
+	width: 155px;
+	color: var(--theme-muted);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.changelog-tags {
 	width: 210px;
 }
 
@@ -655,6 +662,10 @@
 	}
 
 	.changelog-table td:nth-child(2) {
+		margin-bottom: 6px;
+	}
+
+	.changelog-tags {
 		margin-bottom: 6px;
 	}
 

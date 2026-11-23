@@ -1,3 +1,20 @@
+export const DATA_LOST_DATE = "DATA_LOST";
+
+/** 格式化 changelog 时间；无可靠时间时返回空字符串。 */
+export function formatChangelogDate(value, language = "zh-CN") {
+	if (!value || value === DATA_LOST_DATE) return "";
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return "";
+	return date.toLocaleString(language === "en" ? "en-US" : "zh-CN", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: false,
+	});
+}
+
 /** 判断标签是否代表 AI 辅助开发。 */
 export function isAiTag(tag) {
 	const value =
