@@ -178,6 +178,41 @@ export function refreshAdmin() {
 	return admin;
 }
 
+/** 把个性主题同步到当前登录账号。 */
+export async function saveThemeToAccount(theme) {
+	if (!auth.session) {
+		throw new Error(t("请先登录自己的账号"));
+	}
+	const username = auth.session.username;
+	const account = await readAccount(username);
+	if (!account) {
+		throw new Error(t("找不到这个账号"));
+	}
+	account.data.settings = {
+		...(account.data.settings || {}),
+		theme,
+	};
+	await putJson(
+		account.path,
+		account.data,
+		"theme update " + username,
+		account.sha,
+	);
+	return theme;
+}
+
+/** 读取当前登录账号保存的个性主题。 */
+export async function loadThemeFromAccount() {
+	if (!auth.session) {
+		throw new Error(t("请先登录自己的账号"));
+	}
+	const account = await readAccount(auth.session.username);
+	if (!account) {
+		throw new Error(t("找不到这个账号"));
+	}
+	return (account.data.settings && account.data.settings.theme) || null;
+}
+
 /**
  * 修改显示名。已登录时同时尝试同步到云端账号；失败也不影响本地使用。
  */

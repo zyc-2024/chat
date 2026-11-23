@@ -60,6 +60,12 @@ const router = createRouter({
 			component: () => import("../views/ChangelogView.vue"),
 		},
 		{
+			path: "/settings",
+			name: "settings",
+			meta: { title: "个性设置" },
+			component: () => import("../views/SettingsView.vue"),
+		},
+		{
 			path: "/:pathMatch(.*)*",
 			name: "not-found",
 			meta: { title: "404" },

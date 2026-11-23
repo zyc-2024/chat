@@ -186,6 +186,12 @@ onMounted(load);
 						>
 							{{ t("登录") }}
 						</router-link>
+						<router-link
+							class="ghost-button"
+							:to="{ name: 'settings' }"
+						>
+							{{ t("个性设置") }}
+						</router-link>
 						<LanguageSwitcher />
 					</div>
 				</div>

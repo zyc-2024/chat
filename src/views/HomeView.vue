@@ -234,6 +234,21 @@ onMounted(() => {
 					<button
 						type="button"
 						class="rail-button"
+						:title="t('个性设置')"
+						@click="router.push({ name: 'settings' })"
+					>
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<path
+								d="M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3H12a2 2 0 0 1 0-4h3a6 6 0 0 0 0-12h-3Z"
+							/>
+							<circle cx="8.5" cy="9" r="1" />
+							<circle cx="12" cy="7" r="1" />
+							<circle cx="15.5" cy="9" r="1" />
+						</svg>
+					</button>
+					<button
+						type="button"
+						class="rail-button"
 						:title="auth.session ? t('我的主页') : t('登录 / 账号')"
 						@click="openAccount"
 					>
@@ -341,6 +356,10 @@ onMounted(() => {
 						·
 						<router-link :to="{ name: 'changelog' }">
 							{{ t("更新日志") }}
+						</router-link>
+						·
+						<router-link :to="{ name: 'settings' }">
+							{{ t("个性设置") }}
 						</router-link>
 						·
 						<a

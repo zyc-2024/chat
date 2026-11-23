@@ -1,3 +1,18 @@
+:root {
+	--theme-accent: #04783e;
+	--theme-accent-soft: rgba(4, 120, 62, 0.1);
+	--theme-accent-border: rgba(4, 120, 62, 0.28);
+	--theme-page-bg: #eef2ef;
+	--theme-surface: #ffffff;
+	--theme-text: #1d2b23;
+	--theme-muted: #69736d;
+	--theme-border: #e5eae7;
+	--theme-chat-bg: #fbfcfb;
+	--theme-message-bg: #ffffff;
+	--theme-page-image: none;
+	--theme-overlay: rgba(238, 242, 239, 0.22);
+}
+
 * {
 	box-sizing: border-box;
 }
@@ -11,8 +26,8 @@ body,
 body {
 	min-width: 320px;
 	margin: 0;
-	background: #ededed;
-	color: #1f1f1f;
+	background: var(--theme-page-bg);
+	color: var(--theme-text);
 	font-family:
 		"PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
 	-webkit-font-smoothing: antialiased;
@@ -21,7 +36,7 @@ body {
 }
 
 a {
-	color: #075f86;
+	color: var(--theme-accent);
 }
 
 button,
@@ -46,10 +61,10 @@ button:disabled {
 .mini-button {
 	height: 30px;
 	padding: 0 12px;
-	border: 1px solid #ddd;
+	border: 1px solid var(--theme-border);
 	border-radius: 7px;
-	background: #fff;
-	color: #555;
+	background: var(--theme-surface);
+	color: var(--theme-muted);
 	font-size: 12px;
 	line-height: 28px;
 	transition:
@@ -58,18 +73,18 @@ button:disabled {
 }
 
 .mini-button:hover {
-	background: #f4f4f4;
-	border-color: #d0d0d0;
+	background: var(--theme-accent-soft);
+	border-color: var(--theme-accent-border);
 }
 
 .mini-button.primary {
-	border-color: #04783e;
-	background: #04783e;
+	border-color: var(--theme-accent);
+	background: var(--theme-accent);
 	color: #fff;
 }
 
 .mini-button.primary:hover {
-	background: #036a36;
+	filter: brightness(0.92);
 }
 
 .mini-button.danger {
@@ -98,24 +113,27 @@ button:disabled {
 }
 
 .primary-button {
-	border: 1px solid #04783e;
-	background: #04783e;
+	border: 1px solid var(--theme-accent);
+	background: var(--theme-accent);
 	color: #fff;
 }
 
 .primary-button:hover {
-	background: #036a36;
-	border-color: #036a36;
+	border-color: var(--theme-accent);
+	background: var(--theme-accent);
+	filter: brightness(0.92);
 }
 
 .ghost-button {
-	border: 1px solid #ddd;
-	background: #fff;
-	color: #555;
+	border: 1px solid var(--theme-border);
+	background: var(--theme-surface);
+	color: var(--theme-muted);
 }
 
 .ghost-button:hover {
-	background: #f4f4f4;
+	border-color: var(--theme-accent-border);
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
 }
 
 .danger-button {
@@ -168,7 +186,7 @@ a.auth-badge-name:hover {
 /* ---------- Markdown / message content ---------- */
 
 .markdown-body {
-	color: #363636;
+	color: var(--theme-text);
 	font-size: 15px;
 	line-height: 1.72;
 	overflow-wrap: anywhere;

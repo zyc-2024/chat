@@ -74,7 +74,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 	max-height: min(86vh, 620px);
 	overflow: auto;
 	border-radius: 14px;
-	background: #fff;
+	background: var(--theme-surface);
+	color: var(--theme-text);
 	box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
 }
 
@@ -83,7 +84,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 	align-items: center;
 	justify-content: space-between;
 	padding: 18px 20px 12px;
-	border-bottom: 1px solid #f0f0f0;
+	border-bottom: 1px solid var(--theme-border);
 }
 
 .modal-head h2 {
@@ -99,15 +100,15 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 	border: 0;
 	border-radius: 8px;
 	background: transparent;
-	color: #777;
+	color: var(--theme-muted);
 	font-size: 22px;
 	line-height: 1;
 	cursor: pointer;
 }
 
 .modal-close:hover {
-	background: #f2f2f2;
-	color: #222;
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
 }
 
 .modal-body {

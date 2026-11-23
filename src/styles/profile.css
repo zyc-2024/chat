@@ -96,7 +96,7 @@
 	padding: 28px;
 	border: 1px solid rgba(255, 255, 255, 0.6);
 	border-radius: 18px;
-	background: rgba(255, 255, 255, 0.94);
+	background: var(--theme-surface);
 	box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32);
 	backdrop-filter: blur(16px);
 }
@@ -120,7 +120,7 @@
 .profile-avatar-fallback {
 	display: grid;
 	place-items: center;
-	background: linear-gradient(145deg, #04783e, #036a36);
+	background: var(--theme-accent);
 	color: #fff;
 	font-size: 30px;
 	font-weight: 700;
@@ -134,7 +134,7 @@
 .profile-name {
 	overflow: hidden;
 	margin: 0;
-	color: #1d2b23;
+	color: var(--theme-text);
 	font-size: 24px;
 	font-weight: 700;
 	text-overflow: ellipsis;
@@ -143,7 +143,7 @@
 
 .profile-meta {
 	margin-top: 5px;
-	color: #69736d;
+	color: var(--theme-muted);
 	font-size: 12px;
 	line-height: 1.5;
 }
@@ -196,7 +196,7 @@
 
 .profile-empty {
 	padding: 30px 12px;
-	color: #69736d;
+	color: var(--theme-muted);
 	font-size: 14px;
 	line-height: 1.7;
 	text-align: center;
@@ -221,7 +221,7 @@
 
 .profile-loading {
 	padding: 42px 12px;
-	color: #69736d;
+	color: var(--theme-muted);
 	font-size: 14px;
 	text-align: center;
 }
@@ -234,7 +234,7 @@
 }
 
 .profile-error p {
-	color: #69736d;
+	color: var(--theme-muted);
 	font-size: 13px;
 	line-height: 1.7;
 }
@@ -275,7 +275,7 @@
 	padding: 28px 30px 30px;
 	border: 1px solid rgba(255, 255, 255, 0.6);
 	border-radius: 18px;
-	background: rgba(255, 255, 255, 0.95);
+	background: var(--theme-surface);
 	box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
 	backdrop-filter: blur(14px);
 }
@@ -290,14 +290,14 @@
 
 .edit-profile-head h1 {
 	margin: 0;
-	color: #1d2b23;
+	color: var(--theme-text);
 	font-size: 22px;
 	font-weight: 700;
 }
 
 .edit-profile-head p {
 	margin: 6px 0 0;
-	color: #69736d;
+	color: var(--theme-muted);
 	font-size: 13px;
 	line-height: 1.65;
 }
@@ -344,7 +344,7 @@
 	border: 1px solid #dfe5e1;
 	border-radius: 9px;
 	outline: none;
-	background: #fff;
+	background: var(--theme-surface);
 	color: #2c3831;
 	font-size: 13px;
 	transition:
@@ -407,14 +407,14 @@
 .edit-preview {
 	min-width: 0;
 	padding: 17px;
-	border: 1px solid #e5eae7;
+	border: 1px solid var(--theme-border);
 	border-radius: 13px;
-	background: #fbfcfb;
+	background: var(--theme-chat-bg);
 }
 
 .edit-preview-label {
 	margin-bottom: 12px;
-	color: #69736d;
+	color: var(--theme-muted);
 	font-size: 11px;
 	font-weight: 600;
 	letter-spacing: 0.06em;
@@ -424,7 +424,7 @@
 .edit-preview-card {
 	padding: 16px;
 	border-radius: 12px;
-	background: #fff;
+	background: var(--theme-surface);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
@@ -443,7 +443,7 @@
 	height: 48px;
 	overflow: hidden;
 	border-radius: 50%;
-	background: linear-gradient(145deg, #04783e, #036a36);
+	background: var(--theme-accent);
 	color: #fff;
 	font-size: 19px;
 	font-weight: 700;
@@ -457,7 +457,7 @@
 }
 
 .edit-preview-name {
-	color: #1d2b23;
+	color: var(--theme-text);
 	font-size: 15px;
 	font-weight: 600;
 }
