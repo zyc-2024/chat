@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.14 beta 2 (202)",
+		tags: ["ai", "beta"],
+		desc: "选择文件上传改为写入 256 个分片仓库：根据文件 MD5 前两位选择 chat-files-xx，上传接口和生成的 raw 链接同步切换到对应仓库。",
+	},
+	{
 		version: "3.2.14 beta 1 (201)",
 		tags: ["ai", "beta"],
 		desc: "开始把上传文件迁移到 256 个 Gitee 分片仓库：新增按 32 位 MD5 前两位选择仓库的工具函数、仓库初始化与旧文件迁移脚本，并加入旧上传链接改写和映射测试。",

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import SparkMD5 from "spark-md5";
-import { GITEE_API, GITEE_TOKEN } from "../services/gitee.js";
+import { GITEE_TOKEN, fileRepoApi } from "../services/gitee.js";
 import { formatBytes } from "../lib/format.js";
 import { copyText } from "../lib/clipboard.js";
 import { showToast } from "../lib/toast.js";
@@ -102,12 +102,13 @@ async function upload() {
 		progressText.value = "计算 MD5 并编码……";
 		const md5 = SparkMD5.ArrayBuffer.hash(buffer);
 		const base64 = arrayBufferToBase64(buffer);
+		const repoApi = fileRepoApi(md5);
 		const path = `f%2F${md5}%2F${encodeURIComponent(selected.name)}`;
-		const rawUrl = `${GITEE_API}/raw/${path}?access_token=${GITEE_TOKEN}`;
+		const rawUrl = `${repoApi}/raw/${path}?access_token=${GITEE_TOKEN}`;
 		const markdown = `[${selected.name}](${rawUrl})`;
 
 		progress.value = 1;
-		const response = await uploadRequest(`${GITEE_API}/contents/${path}`, {
+		const response = await uploadRequest(`${repoApi}/contents/${path}`, {
 			access_token: GITEE_TOKEN,
 			content: base64,
 			message: `u[${selected.name}]s[${formatBytes(
@@ -158,7 +159,7 @@ async function copy(value, label) {
 				<div>
 					<h1>上传文件</h1>
 					<p>
-						文件会以 base64 形式保存到 Gitee 仓库，上传后生成可直接引用的链接。
+						文件会以 base64 形式保存到 Gitee 分片仓库（按 MD5 前两位选择 256 个仓库之一），上传后生成可直接引用的链接。
 					</p>
 				</div>
 				<router-link class="back-link" :to="{ name: 'home' }">
