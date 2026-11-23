@@ -331,6 +331,19 @@ const english = {
 	"应用主题": "Apply theme",
 	"主题已应用并保存到本地":
 		"Theme applied and saved locally.",
+	"拍一拍": "Nudge",
+	"设置别人拍你时显示的后缀，例如“的小脑袋”，预览：{example}":
+		"Set the suffix shown when someone nudges you, for example “'s little head”. Preview: {example}",
+	"的肩膀": "'s shoulder",
+	"{name} 拍了拍你{suffix}": "{name} nudged you{suffix}",
+	"{from} 拍了拍 {to}{suffix}": "{from} nudged {to}{suffix}",
+	"输入拍一拍后缀，例如：的小脑袋":
+		"Enter a nudge suffix, for example: 's little head",
+	"保存拍一拍": "Save nudge",
+	"拍一拍内容已保存": "Nudge text saved.",
+	"拍一拍设置需要登录账号。": "Log in to customize your nudge text.",
+	"拍一拍中……": "Nudging…",
+	"已拍一拍 {name}": "Nudged {name}.",
 	"游客身份没有个人主页": "Guest identities do not have profiles.",
 	"游客用户名由设备自动生成，登录后才能修改昵称":
 		"Guest names are generated automatically. Log in to change your nickname.",

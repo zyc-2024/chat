@@ -14,6 +14,14 @@ defineEmits(["reedit", "jump-quote", "menu"]);
 const html = computed(() => renderMarkdown(props.message.content || ""));
 const name = computed(() => props.message.name || t("匿名"));
 const time = computed(() => prettyTime(props.message.time));
+const isNudge = computed(() => props.message.type === "nudge");
+const nudgeLine = computed(() =>
+	t("{from} 拍了拍 {to}{suffix}", {
+		from: props.message.fromName || name.value,
+		to: props.message.toName || t("匿名"),
+		suffix: props.message.suffix || "",
+	}),
+);
 const hasProfileLink = computed(() => {
 	const user = String(props.message.user || "");
 	return !!user && !/^Guest_/i.test(user);
@@ -32,7 +40,18 @@ const quoteText = computed(() => {
 </script>
 
 <template>
-	<article class="message-card" :data-message-hash="message.hash">
+	<article
+		class="message-card"
+		:class="{ 'message-card-nudge': isNudge }"
+		:data-message-hash="message.hash"
+	>
+		<template v-if="isNudge">
+			<div class="message-nudge">
+				<span>{{ nudgeLine }}</span>
+				<time>{{ time }}</time>
+			</div>
+		</template>
+		<template v-else>
 		<header class="message-head">
 			<router-link
 				v-if="hasProfileLink"
@@ -85,5 +104,6 @@ const quoteText = computed(() => {
 				<div class="markdown-body" v-html="html"></div>
 			</template>
 		</div>
+		</template>
 	</article>
 </template>

@@ -20,6 +20,7 @@ import {
 import { auth } from "../services/auth.js";
 import { addFriend } from "../services/friends.js";
 import { rewriteLegacyFileUrls } from "../services/gitee.js";
+import { createNudgeMessage, fetchNudgeSuffix } from "../services/nudge.js";
 import { copyText } from "../lib/clipboard.js";
 import { t } from "../i18n/index.js";
 import { prettyTime, safeDecode, timeStamp } from "../lib/format.js";
@@ -463,7 +464,7 @@ function openMessageMenu(event, index) {
 	const message = allMessages.value[index];
 	if (!message) return;
 	event.preventDefault();
-	if (message.recalled) {
+	if (message.recalled || message.type === "nudge") {
 		closeMessageMenu();
 		return;
 	}
@@ -478,6 +479,7 @@ function openMessageMenu(event, index) {
 		!/^Guest_/i.test(message.user)
 	) {
 		items.push({ key: "friend", label: t("加好友") });
+		items.push({ key: "nudge", label: t("拍一拍") });
 	}
 	if (canRecallMessage(message)) {
 		items.push({ key: "recall", label: t("撤回"), danger: true });
@@ -509,6 +511,38 @@ function runMessageMenu(key) {
 		recallMessageAt(index);
 	} else if (key === "friend") {
 		addFriendFromMessage(message);
+	} else if (key === "nudge") {
+		nudgeMessage(message);
+	}
+}
+
+async function nudgeMessage(message) {
+	if (!auth.session) return;
+	try {
+		const suffix = await fetchNudgeSuffix(message.user);
+		const nudge = createNudgeMessage(
+			{
+				username: auth.session.username,
+				name: chatName.value,
+			},
+			{ username: message.user, name: message.name },
+			suffix,
+		);
+		const messages = await sendChannelMessage(options.value, nudge);
+		allMessages.value = messages;
+		visibleStart.value = Math.max(0, messages.length - PAGE_SIZE);
+		await nextTick();
+		scrollToBottom("smooth");
+		showToast(
+			t("已拍一拍 {name}", { name: message.name || message.user }),
+			"success",
+		);
+	} catch (error) {
+		showToast(
+			error && error.message ? error.message : String(error),
+			"error",
+			4000,
+		);
 	}
 }
 

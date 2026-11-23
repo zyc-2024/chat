@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.8.0 beta 1 (221)",
+		tags: ["ai", "beta"],
+		desc: "加入“拍一拍”：登录用户可在频道消息右键菜单或好友私信页拍一拍其他真实用户；被拍用户可在个性设置中自定义后缀，拍一拍作为特殊消息保存在频道或好友会话中。",
+	},
+	{
 		version: "3.7.0 (220)",
 		tags: ["ai"],
 		desc: "好友与私信功能完成：好友列表、右键加好友、主页加好友、登录用户一对一私信、独立 friends/msg 存储和自动刷新均已接入，并补充中英文文案与文档。",

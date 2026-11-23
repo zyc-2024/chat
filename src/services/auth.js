@@ -213,6 +213,44 @@ export async function loadThemeFromAccount() {
 	return (account.data.settings && account.data.settings.theme) || null;
 }
 
+/** 保存“拍一拍”后缀到当前登录账号。 */
+export async function saveNudgeToAccount(text) {
+	if (!auth.session) {
+		throw new Error(t("请先登录自己的账号"));
+	}
+	const username = auth.session.username;
+	const account = await readAccount(username);
+	if (!account) {
+		throw new Error(t("找不到这个账号"));
+	}
+	const suffix = String(text || "").trim().slice(0, 40);
+	account.data.settings = {
+		...(account.data.settings || {}),
+		nudge: suffix,
+	};
+	await putJson(
+		account.path,
+		account.data,
+		"nudge update " + username,
+		account.sha,
+	);
+	return suffix;
+}
+
+/** 读取当前登录账号的“拍一拍”后缀。 */
+export async function loadNudgeFromAccount() {
+	if (!auth.session) {
+		throw new Error(t("请先登录自己的账号"));
+	}
+	const account = await readAccount(auth.session.username);
+	if (!account) {
+		throw new Error(t("找不到这个账号"));
+	}
+	return String(
+		(account.data.settings && account.data.settings.nudge) || "",
+	);
+}
+
 /**
  * 修改显示名。已登录时同时尝试同步到云端账号；失败也不影响本地使用。
  */

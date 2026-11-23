@@ -26,7 +26,9 @@ import {
 	loadFriendMessages,
 	loadFriends,
 	sendFriendMessage,
+	sendFriendNudge,
 } from "./src/services/friends.js";
+import { fetchNudgeSuffix } from "./src/services/nudge.js";
 import { setLocale, t } from "./src/i18n/index.js";
 
 // CI 的 Node 可能带有英文 navigator；服务层错误断言依赖默认中文。
@@ -378,7 +380,7 @@ put(
 	`private/user_${friendAccountHash}.json`,
 	JSON.stringify({
 		username: "FriendUser",
-		settings: { lastName: "Friend User" },
+		settings: { lastName: "Friend User", nudge: "的小脑袋" },
 		profile: { username: "FriendUser" },
 	}),
 );
@@ -411,6 +413,15 @@ assert.equal(
 assert.ok(
 	files.has(friendConversationPath("TestUser", "FriendUser")),
 );
+assert.equal(await fetchNudgeSuffix("FriendUser"), "的小脑袋");
+const nudgedFriendMessages = await sendFriendNudge(friendMe, {
+	username: "FriendUser",
+	name: "Friend User",
+});
+assert.equal(nudgedFriendMessages.length, 2);
+assert.equal(nudgedFriendMessages[1].type, "nudge");
+assert.equal(nudgedFriendMessages[1].suffix, "的小脑袋");
+assert.match(nudgedFriendMessages[1].content, /拍了拍/);
 const friendRejected = await sendFriendMessage(
 	friendMe,
 	"SomeoneElse",

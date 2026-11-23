@@ -4,7 +4,9 @@ import { useRouter } from "vue-router";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import {
 	auth,
+	loadNudgeFromAccount,
 	loadThemeFromAccount,
+	saveNudgeToAccount,
 	saveThemeToAccount,
 } from "../services/auth.js";
 import {
@@ -26,6 +28,8 @@ const draft = reactive({ ...currentTheme.value });
 const uploadName = ref("");
 const uploading = ref(false);
 const busy = ref("");
+const nudgeText = ref("");
+const nudgeBusy = ref(false);
 
 const previewPageStyle = computed(() => ({
 	backgroundColor: draft.pageBackground,
@@ -127,8 +131,32 @@ function goStore() {
 	router.push({ name: "theme-store" });
 }
 
-onMounted(() => {
+async function saveNudge() {
+	if (nudgeBusy.value || !auth.session) return;
+	nudgeBusy.value = true;
+	try {
+		nudgeText.value = await saveNudgeToAccount(nudgeText.value);
+		showToast(t("拍一拍内容已保存"), "success");
+	} catch (error) {
+		showToast(
+			error && error.message ? error.message : String(error),
+			"error",
+			4000,
+		);
+	} finally {
+		nudgeBusy.value = false;
+	}
+}
+
+onMounted(async () => {
 	applyTheme(draft);
+	if (auth.session) {
+		try {
+			nudgeText.value = await loadNudgeFromAccount();
+		} catch (e) {
+			// 读取失败时保留空值
+		}
+	}
 });
 
 onBeforeUnmount(() => {
@@ -281,6 +309,43 @@ onBeforeUnmount(() => {
 				</div>
 				<p v-if="!auth.session" class="theme-hint">
 					{{ t("同步到账号需要先登录。") }}
+				</p>
+			</section>
+
+			<section class="theme-section">
+				<h2 class="theme-section-title">{{ t("拍一拍") }}</h2>
+				<p class="theme-hint">
+					{{
+						t(
+							"设置别人拍你时显示的后缀，例如“的小脑袋”，预览：{example}",
+							{
+								example: t("{name} 拍了拍你{suffix}", {
+									name: chatName,
+									suffix: nudgeText || t("的肩膀"),
+								}),
+							},
+						)
+					}}
+				</p>
+				<div class="theme-upload-row">
+					<input
+						v-model="nudgeText"
+						type="text"
+						maxlength="40"
+						:disabled="!auth.session"
+						:placeholder="t('输入拍一拍后缀，例如：的小脑袋')"
+					/>
+					<button
+						type="button"
+						class="primary-button"
+						:disabled="nudgeBusy || !auth.session"
+						@click="saveNudge"
+					>
+						{{ nudgeBusy ? t("保存中……") : t("保存拍一拍") }}
+					</button>
+				</div>
+				<p v-if="!auth.session" class="theme-hint">
+					{{ t("拍一拍设置需要登录账号。") }}
 				</p>
 			</section>
 

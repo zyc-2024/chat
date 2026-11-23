@@ -15,6 +15,7 @@ import {
 	loadFriendMessages,
 	loadFriends,
 	sendFriendMessage,
+	sendFriendNudge,
 } from "../services/friends.js";
 import { t } from "../i18n/index.js";
 import { chatName } from "../lib/identity.js";
@@ -37,6 +38,7 @@ const selected = ref(null);
 const messages = ref([]);
 const messagesLoading = ref(false);
 const sending = ref(false);
+const nudging = ref(false);
 const addName = ref("");
 const adding = ref(false);
 const error = ref("");
@@ -66,6 +68,14 @@ function messageHtml(message) {
 
 function isMine(message) {
 	return me.value && message.user === me.value.username;
+}
+
+function nudgeLine(message) {
+	return t("{from} 拍了拍 {to}{suffix}", {
+		from: message.fromName || message.name || t("匿名"),
+		to: message.toName || selected.value?.name || t("匿名"),
+		suffix: message.suffix || "",
+	});
 }
 
 function scrollToBottom() {
@@ -163,6 +173,26 @@ async function send() {
 		showToast(e && e.message ? e.message : String(e), "error", 4000);
 	} finally {
 		sending.value = false;
+	}
+}
+
+async function nudgeFriend() {
+	if (!me.value || !selected.value || nudging.value) return;
+	nudging.value = true;
+	try {
+		messages.value = await sendFriendNudge(me.value, {
+			username: selected.value.username,
+			name: selected.value.name,
+		});
+		scrollToBottom();
+		showToast(
+			t("已拍一拍 {name}", { name: selected.value.name }),
+			"success",
+		);
+	} catch (e) {
+		showToast(e && e.message ? e.message : String(e), "error", 4000);
+	} finally {
+		nudging.value = false;
 	}
 }
 
@@ -334,6 +364,14 @@ onBeforeUnmount(() => {
 							<button
 								type="button"
 								class="ghost-button"
+								:disabled="nudging"
+								@click="nudgeFriend"
+							>
+								{{ nudging ? t("拍一拍中……") : t("拍一拍") }}
+							</button>
+							<button
+								type="button"
+								class="ghost-button"
 								@click="refreshNow"
 							>
 								{{ t("刷新") }}
@@ -354,21 +392,32 @@ onBeforeUnmount(() => {
 						<div v-else-if="!messages.length" class="friends-empty">
 							{{ t("还没有私信，发第一条吧。") }}
 						</div>
-						<div
+						<template
 							v-for="message in messages"
 							:key="message.hash"
-							class="friend-message"
-							:class="{ mine: isMine(message) }"
 						>
-							<div class="friend-message-meta">
-								<span>{{ message.name || message.user }}</span>
+							<div
+								v-if="message.type === 'nudge'"
+								class="friend-nudge"
+							>
+								<span>{{ nudgeLine(message) }}</span>
 								<time>{{ prettyTime(message.time) }}</time>
 							</div>
 							<div
-								class="friend-message-body markdown-body"
-								v-html="messageHtml(message)"
-							></div>
-						</div>
+								v-else
+								class="friend-message"
+								:class="{ mine: isMine(message) }"
+							>
+								<div class="friend-message-meta">
+									<span>{{ message.name || message.user }}</span>
+									<time>{{ prettyTime(message.time) }}</time>
+								</div>
+								<div
+									class="friend-message-body markdown-body"
+									v-html="messageHtml(message)"
+								></div>
+							</div>
+						</template>
 					</div>
 
 					<div class="friends-composer">

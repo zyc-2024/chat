@@ -3,6 +3,7 @@ import { getJson, postJson, putJson } from "./gitee.js";
 import { getProfile } from "./auth.js";
 import { t } from "../i18n/index.js";
 import { timeStamp } from "../lib/format.js";
+import { createNudgeMessage, fetchNudgeSuffix } from "./nudge.js";
 
 const FRIEND_DIR = "friends";
 const FRIEND_MSG_DIR = "friends/msg";
@@ -187,14 +188,7 @@ export async function loadFriendMessages(me, target) {
 	);
 }
 
-export async function sendFriendMessage(me, target, content) {
-	const text = String(content || "");
-	if (!text.trim()) {
-		throw new Error(t("消息不能为空"));
-	}
-	if (!(await areFriends(me, target))) {
-		throw new Error(t("你们还不是好友"));
-	}
+async function appendFriendMessage(me, target, message) {
 	const path = friendConversationPath(me.username, target);
 	let attempt = 0;
 	while (attempt < 2) {
@@ -204,18 +198,15 @@ export async function sendFriendMessage(me, target, content) {
 			const messages = (Array.isArray(data.msg) ? data.msg : []).map(
 				normalizeMessage,
 			);
-			const ts = Date.now();
-			const message = {
-				hash: CryptoJS.MD5(
-					`${ts}|${Math.random()}|${me.username}|${text}`,
-				).toString(CryptoJS.enc.Hex),
-				name: String(me.name || me.username),
-				user: me.username,
-				time: timeStamp(new Date(ts)),
-				ts,
-				content: text,
+			const prepared = {
+				...message,
+				hash:
+					String(message.hash || "").trim() ||
+					CryptoJS.MD5(
+						`${message.ts}|${Math.random()}|${message.user}|${message.content}`,
+					).toString(CryptoJS.enc.Hex),
 			};
-			messages.push(message);
+			messages.push(prepared);
 			const payload = { ...data, msg: messages };
 			if (file) {
 				await putJson(
@@ -236,4 +227,35 @@ export async function sendFriendMessage(me, target, content) {
 		}
 	}
 	throw new Error(t("好友消息发送失败"));
+}
+
+export async function sendFriendMessage(me, target, content) {
+	const text = String(content || "");
+	if (!text.trim()) {
+		throw new Error(t("消息不能为空"));
+	}
+	if (!(await areFriends(me, target))) {
+		throw new Error(t("你们还不是好友"));
+	}
+	const ts = Date.now();
+	return appendFriendMessage(me, target, {
+		name: String(me.name || me.username),
+		user: me.username,
+		time: timeStamp(new Date(ts)),
+		ts,
+		content: text,
+	});
+}
+
+export async function sendFriendNudge(me, target) {
+	const targetUsername = target && target.username;
+	if (!(await areFriends(me, targetUsername))) {
+		throw new Error(t("你们还不是好友"));
+	}
+	const suffix = await fetchNudgeSuffix(target.username);
+	return appendFriendMessage(
+		me,
+		targetUsername,
+		createNudgeMessage(me, target, suffix),
+	);
 }

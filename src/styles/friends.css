@@ -244,6 +244,35 @@
 	background: var(--theme-message-bg);
 }
 
+.friend-nudge {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: fit-content;
+	max-width: 90%;
+	margin: 10px auto;
+	padding: 7px 12px;
+	border: 1px dashed var(--theme-accent-border);
+	border-radius: 20px;
+	background: var(--theme-accent-soft);
+	color: var(--theme-muted);
+	font-size: 12px;
+	line-height: 1.5;
+	text-align: center;
+}
+
+.friend-nudge span {
+	color: var(--theme-accent);
+	font-weight: 500;
+}
+
+.friend-nudge time {
+	flex: 0 0 auto;
+	font-size: 10px;
+	font-variant-numeric: tabular-nums;
+}
+
 .friend-message.mine {
 	margin-left: auto;
 	border-color: var(--theme-accent-border);

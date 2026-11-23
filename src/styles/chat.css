@@ -225,6 +225,36 @@
 	box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.16);
 }
 
+.message-card.message-card-nudge {
+	border-style: dashed;
+	border-color: var(--theme-accent-border);
+	background: var(--theme-accent-soft);
+	box-shadow: none;
+}
+
+.message-nudge {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 10px 14px;
+	color: var(--theme-muted);
+	font-size: 12px;
+	line-height: 1.6;
+	text-align: center;
+}
+
+.message-nudge span {
+	color: var(--theme-accent);
+	font-weight: 500;
+}
+
+.message-nudge time {
+	flex: 0 0 auto;
+	font-size: 10px;
+	font-variant-numeric: tabular-nums;
+}
+
 .message-head {
 	display: flex;
 	align-items: center;
