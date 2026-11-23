@@ -585,6 +585,71 @@
 	color: #04783e;
 }
 
+.latex-helper {
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.latex-helper-intro {
+	margin: 0;
+	color: #5f6d64;
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.latex-group-title {
+	margin: 0 0 8px;
+	color: #3c4a42;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.latex-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+	gap: 7px;
+}
+
+.latex-item {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 3px;
+	min-height: 46px;
+	padding: 7px 9px;
+	border: 1px solid #e2e9e4;
+	border-radius: 8px;
+	background: #fbfdfb;
+	color: #415249;
+	text-align: left;
+}
+
+.latex-item:hover {
+	border-color: #bfe6d0;
+	background: #f3fcf7;
+	color: #056633;
+}
+
+.latex-item-symbol {
+	color: #1d2b23;
+	font-family: "Cambria Math", "Latin Modern Math", "Times New Roman", serif;
+	font-size: 15px;
+	line-height: 1.3;
+}
+
+.latex-item-label {
+	color: #69736d;
+	font-size: 11px;
+	line-height: 1.3;
+}
+
+.latex-helper-actions {
+	display: flex;
+	justify-content: flex-end;
+	padding-top: 2px;
+}
+
 .composer-actions {
 	display: flex;
 	flex-wrap: wrap;
@@ -807,6 +872,15 @@
 	.composer-resize-handle {
 		height: 18px;
 		margin: 0;
+	}
+
+	.latex-grid {
+		grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+	}
+
+	.latex-item {
+		min-height: 44px;
+		padding: 6px 8px;
 	}
 
 	.composer-actions {

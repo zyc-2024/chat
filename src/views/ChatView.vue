@@ -82,6 +82,8 @@ const switchTarget = ref("");
 const channelStatus = ref(null);
 const quoting = ref(null);
 const moreActionsOpen = ref(false);
+const latexOpen = ref(false);
+const latexSelection = ref({ start: 0, end: 0 });
 const messageMenu = ref({
 	open: false,
 	x: 0,
@@ -89,6 +91,94 @@ const messageMenu = ref({
 	index: -1,
 	items: [],
 });
+
+const latexGroups = [
+	{
+		title: "常用公式",
+		items: [
+			{ label: "行内公式", symbol: "$x$", snippet: "$ $SEL $", placeholder: "x" },
+			{
+				label: "独立公式",
+				symbol: "$$",
+				snippet: "$$\n$SEL\n$$",
+				placeholder: "x",
+			},
+			{ label: "分数", symbol: "a/b", snippet: "\\frac{$CURSOR}{b}" },
+			{ label: "根号", symbol: "√", snippet: "\\sqrt{$CURSOR}" },
+			{ label: "上标", symbol: "x²", snippet: "x^{$CURSOR}" },
+			{ label: "下标", symbol: "x₂", snippet: "x_{$CURSOR}" },
+		],
+	},
+	{
+		title: "公式结构",
+		items: [
+			{
+				label: "求和",
+				symbol: "∑",
+				snippet: "\\sum_{i=1}^{n} $CURSOR",
+			},
+			{
+				label: "积分",
+				symbol: "∫",
+				snippet: "\\int_{a}^{b} $CURSOR \\, dx",
+			},
+			{ label: "极限", symbol: "lim", snippet: "\\lim_{x \\to $CURSOR}" },
+			{ label: "向量", symbol: "a⃗", snippet: "\\vec{$CURSOR}" },
+			{
+				label: "矩阵",
+				symbol: "[ ]",
+				snippet:
+					"\\begin{pmatrix}\n$CURSOR & \\\\\n & \n\\end{pmatrix}",
+			},
+			{
+				label: "分段函数",
+				symbol: "{",
+				snippet: "\\begin{cases}\n$CURSOR \\\\\n\\end{cases}",
+			},
+			{
+				label: "对齐环境",
+				symbol: "≡",
+				snippet: "\\begin{aligned}\n$CURSOR\n\\end{aligned}",
+			},
+		],
+	},
+	{
+		title: "希腊字母",
+		items: [
+			{ label: "α", symbol: "α", snippet: "\\alpha" },
+			{ label: "β", symbol: "β", snippet: "\\beta" },
+			{ label: "γ", symbol: "γ", snippet: "\\gamma" },
+			{ label: "δ", symbol: "δ", snippet: "\\delta" },
+			{ label: "θ", symbol: "θ", snippet: "\\theta" },
+			{ label: "λ", symbol: "λ", snippet: "\\lambda" },
+			{ label: "μ", symbol: "μ", snippet: "\\mu" },
+			{ label: "π", symbol: "π", snippet: "\\pi" },
+			{ label: "σ", symbol: "σ", snippet: "\\sigma" },
+			{ label: "φ", symbol: "φ", snippet: "\\phi" },
+			{ label: "ω", symbol: "ω", snippet: "\\omega" },
+			{ label: "Δ", symbol: "Δ", snippet: "\\Delta" },
+			{ label: "Ω", symbol: "Ω", snippet: "\\Omega" },
+		],
+	},
+	{
+		title: "运算符",
+		items: [
+			{ label: "×", symbol: "×", snippet: "\\times" },
+			{ label: "÷", symbol: "÷", snippet: "\\div" },
+			{ label: "·", symbol: "·", snippet: "\\cdot" },
+			{ label: "±", symbol: "±", snippet: "\\pm" },
+			{ label: "≤", symbol: "≤", snippet: "\\le" },
+			{ label: "≥", symbol: "≥", snippet: "\\ge" },
+			{ label: "≠", symbol: "≠", snippet: "\\ne" },
+			{ label: "≈", symbol: "≈", snippet: "\\approx" },
+			{ label: "∞", symbol: "∞", snippet: "\\infty" },
+			{ label: "∂", symbol: "∂", snippet: "\\partial" },
+			{ label: "∇", symbol: "∇", snippet: "\\nabla" },
+			{ label: "→", symbol: "→", snippet: "\\to" },
+			{ label: "⇒", symbol: "⇒", snippet: "\\Rightarrow" },
+		],
+	},
+];
 
 const EDITOR_HEIGHT_KEY = "chat_composer_height_v1";
 const EDITOR_HEIGHT_MIN = 64;
@@ -180,6 +270,57 @@ function stopEditorResize() {
 function resetEditorHeight() {
 	editorHeight.value = defaultEditorHeight();
 	saveEditorHeight();
+}
+
+function openLatexHelper() {
+	const el = editorEl.value;
+	const length = draft.value.length;
+	const start = el
+		? Math.min(el.selectionStart ?? length, length)
+		: length;
+	const end = el ? Math.min(el.selectionEnd ?? length, length) : length;
+	latexSelection.value = { start, end };
+	latexOpen.value = true;
+}
+
+function insertLatexSnippet(item) {
+	const snippet = String(item.snippet || "");
+	const placeholder = item.placeholder || "x";
+	const selection = latexSelection.value;
+	const length = draft.value.length;
+	const start = Math.min(selection.start, length);
+	const end = Math.min(Math.max(selection.end, start), length);
+	const selected = draft.value.slice(start, end);
+	const body = selected || placeholder;
+	const bodyIndex = snippet.indexOf("$SEL");
+	const cursorIndex = snippet.indexOf("$CURSOR");
+	let inserted = snippet.replaceAll("$SEL", body);
+	let selectStart = start + inserted.length;
+	let selectEnd = selectStart;
+	if (cursorIndex >= 0) {
+		const position = inserted.indexOf("$CURSOR");
+		inserted = inserted.replace("$CURSOR", "");
+		selectStart = selectEnd = start + position;
+	} else if (bodyIndex >= 0 && !selected) {
+		selectStart = start + bodyIndex;
+		selectEnd = selectStart + body.length;
+	}
+	draft.value =
+		draft.value.slice(0, start) + inserted + draft.value.slice(end);
+	latexSelection.value = { start: selectStart, end: selectEnd };
+}
+
+function closeLatexHelper() {
+	latexOpen.value = false;
+	nextTick(() => {
+		const el = editorEl.value;
+		if (!el) return;
+		el.focus();
+		el.setSelectionRange(
+			latexSelection.value.start,
+			latexSelection.value.end,
+		);
+	});
 }
 
 const renameOpen = ref(false);
@@ -730,6 +871,7 @@ watch(
 		draft.value = "";
 		quoting.value = null;
 		moreActionsOpen.value = false;
+		latexOpen.value = false;
 		closeMessageMenu();
 		loadError.value = "";
 		refreshError.value = "";
@@ -959,6 +1101,14 @@ onBeforeUnmount(() => {
 					</button>
 					<button
 						type="button"
+						class="ghost-button latex-helper-toggle"
+						:title="t('LaTeX 辅助编辑')"
+						@click="openLatexHelper"
+					>
+						∑ LaTeX
+					</button>
+					<button
+						type="button"
 						class="ghost-button composer-more-toggle"
 						@click="moreActionsOpen = !moreActionsOpen"
 					>
@@ -1110,6 +1260,59 @@ onBeforeUnmount(() => {
 					</button>
 				</div>
 			</form>
+		</Modal>
+
+		<Modal
+			:open="latexOpen"
+			:title="t('LaTeX 辅助编辑')"
+			width="560px"
+			@close="closeLatexHelper"
+		>
+			<div class="latex-helper">
+				<p class="latex-helper-intro">
+					{{
+						t(
+							"点击模板插入到光标位置；先选中文字再点击，可以把选中内容放进公式。",
+						)
+					}}
+				</p>
+				<section
+					v-for="group in latexGroups"
+					:key="group.title"
+					class="latex-group"
+				>
+					<h3 class="latex-group-title">{{ t(group.title) }}</h3>
+					<div class="latex-grid">
+						<button
+							v-for="item in group.items"
+							:key="item.label"
+							type="button"
+							class="latex-item"
+							:title="item.label"
+							@click="insertLatexSnippet(item)"
+						>
+							<span class="latex-item-symbol">
+								{{ item.symbol }}
+							</span>
+							<span
+								v-if="item.label !== item.symbol"
+								class="latex-item-label"
+							>
+								{{ t(item.label) }}
+							</span>
+						</button>
+					</div>
+				</section>
+				<div class="latex-helper-actions">
+					<button
+						type="button"
+						class="primary-button"
+						@click="closeLatexHelper"
+					>
+						{{ t("完成") }}
+					</button>
+				</div>
+			</div>
 		</Modal>
 
 		<Modal

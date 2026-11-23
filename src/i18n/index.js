@@ -186,6 +186,26 @@ const english = {
 	"拖动调整输入框高度": "Drag to resize the composer",
 	"拖动调整输入框高度，双击恢复默认":
 		"Drag to resize the composer; double-click to reset",
+	"LaTeX 辅助编辑": "LaTeX helper",
+	"点击模板插入到光标位置；先选中文字再点击，可以把选中内容放进公式。":
+		"Click a template to insert it at the cursor. Select text first to place it inside the formula.",
+	"常用公式": "Common formulas",
+	"公式结构": "Structures",
+	"希腊字母": "Greek letters",
+	"运算符": "Operators",
+	"行内公式": "Inline math",
+	"独立公式": "Display math",
+	"分数": "Fraction",
+	"根号": "Square root",
+	"上标": "Superscript",
+	"下标": "Subscript",
+	"求和": "Summation",
+	"积分": "Integral",
+	"极限": "Limit",
+	"向量": "Vector",
+	"矩阵": "Matrix",
+	"分段函数": "Piecewise function",
+	"对齐环境": "Aligned equations",
 
 	"登录可选": "Optional login",
 	"你已登录。账号仅用于保存昵称和个人资料，聊天、创建频道和上传文件无需登录。":

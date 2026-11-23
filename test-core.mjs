@@ -21,6 +21,9 @@ import {
 import { isAdminUsername } from "./src/services/auth.js";
 import { setLocale, t } from "./src/i18n/index.js";
 
+// CI 的 Node 可能带有英文 navigator；服务层错误断言依赖默认中文。
+setLocale("zh-CN");
+
 assert.equal(
 	fileShard("42e874ae9692483e15ef9c9d0b6a5f8e"),
 	"42",
