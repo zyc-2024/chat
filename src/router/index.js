@@ -66,6 +66,12 @@ const router = createRouter({
 			component: () => import("../views/SettingsView.vue"),
 		},
 		{
+			path: "/themes",
+			name: "theme-store",
+			meta: { title: "主题商店" },
+			component: () => import("../views/ThemeStoreView.vue"),
+		},
+		{
 			path: "/:pathMatch(.*)*",
 			name: "not-found",
 			meta: { title: "404" },

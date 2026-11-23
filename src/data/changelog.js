@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.6.0 beta 2 (216)",
+		tags: ["ai", "beta"],
+		desc: "加入公开主题商店：可以浏览、应用其他用户上传的免费主题，也可以从个性设置把当前主题命名后上传；主题数据保存在 Gitee 的 themes/index.json。",
+	},
+	{
 		version: "3.6.0 beta 1 (215)",
 		tags: ["ai", "beta"],
 		desc: "加入个性设置与主题引擎：支持 8 种颜色、背景图片和遮罩、6 个内置预设；主题可保存到本机，登录后可同步到账号或从账号读取，并支持实时预览和全站颜色应用。",
