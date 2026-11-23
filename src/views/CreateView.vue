@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
 	createPrivateChannel,
@@ -16,6 +16,8 @@ const status = ref("准备中……");
 const error = ref("");
 const resultText = ref("");
 const running = ref(false);
+let redirectTimer = null;
+let redirectTarget = null;
 
 function queryString(name, fallback = "") {
 	const value = route.query[name];
@@ -48,8 +50,25 @@ function onProgress(value, text) {
 	status.value = text;
 }
 
+function goToChat() {
+	if (!redirectTarget) return;
+	router.replace(redirectTarget).catch(() => {});
+}
+
+function startRedirect(target) {
+	redirectTarget = target;
+	if (redirectTimer) clearInterval(redirectTimer);
+	goToChat();
+	redirectTimer = window.setInterval(goToChat, 1000);
+}
+
 async function run() {
 	if (running.value) return;
+	if (redirectTimer) {
+		clearInterval(redirectTimer);
+		redirectTimer = null;
+	}
+	redirectTarget = null;
 	error.value = "";
 	resultText.value = "";
 	progress.value = 0;
@@ -65,8 +84,7 @@ async function run() {
 				currentIdentity(),
 			);
 			resultText.value = `公开频道“${result.channel}”已经创建好了，正在进入……`;
-			await new Promise((resolve) => setTimeout(resolve, 450));
-			router.replace({
+			startRedirect({
 				name: "chat",
 				query: { type: "u", ch: result.channel },
 			});
@@ -80,8 +98,7 @@ async function run() {
 				currentIdentity(),
 			);
 			resultText.value = `私密频道已创建。频道 id：${result.id}，凭证：${result.key}。请务必保存好这两项，正在进入……`;
-			await new Promise((resolve) => setTimeout(resolve, 700));
-			router.replace({
+			startRedirect({
 				name: "chat",
 				query: { type: "r", id: String(result.id), key: result.key },
 			});
@@ -95,6 +112,9 @@ async function run() {
 }
 
 onMounted(run);
+onBeforeUnmount(() => {
+	if (redirectTimer) clearInterval(redirectTimer);
+});
 </script>
 
 <template>

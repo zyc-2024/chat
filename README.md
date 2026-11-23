@@ -38,7 +38,7 @@
      - 公开频道：`status/public/<频道名>.json`
      - 私有频道：`status/private/<频道 id>.json`
    - 标记内容包含 `owner`、`ownerType`、`createdAt`、`deleted`、`deletedAt`，以及消息统计字段。
-   - 创建者可以在聊天页删除自己的频道；删除只写入 `deleted: true` 标记，不立即删除聊天记录或索引。
+   - 创建者可以在聊天页删除自己的频道；删除只写入 `deleted: true` 标记。
    - 首页会隐藏已删除频道，聊天页会拒绝继续进入和发送消息。
    - 私有频道的状态文件使用频道口令加密，和私密消息一样不会明文保存创建者和删除状态。
    - 旧频道如果没有状态文件，不会显示删除按钮。
@@ -122,7 +122,7 @@ pnpm test
 格式示例：
 
 ```text
-3.2.5 (192)          -> Release tag: v3.2.5-192
+3.2.6 (193)          -> Release tag: v3.2.6-193
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 

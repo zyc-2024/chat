@@ -698,7 +698,7 @@ onBeforeUnmount(() => {
 			@close="deleteOpen = false"
 		>
 			<p class="chat-delete-note">
-				删除后会写入 deleted 标记，频道会从首页隐藏；聊天记录不会被立即从仓库删除。只有创建者可以操作。
+				删除后会写入 deleted 标记，频道会从首页隐藏。只有创建者可以操作。
 			</p>
 			<div v-if="deleteError" class="chat-delete-error">
 				{{ deleteError }}
