@@ -27,6 +27,7 @@ import {
 	updateAvailable,
 } from "./src/services/appUpdate.js";
 import { mergeChangelogEntries } from "./src/services/changelogRemote.js";
+import { mathModeAt, wrapLatexSnippet } from "./src/lib/latex.js";
 import {
 	DATA_LOST_DATE,
 	findLatestStableEntry,
@@ -104,10 +105,10 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.9.4 (229)");
+assert.equal(findNowEntry(changelog).version, "3.9.5 (230)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.9.4 (229)",
+	"3.9.5 (230)",
 );
 assert.equal(isAiAssistedEntry({ tags: ["ai", "beta"] }), true);
 assert.equal(isAiAssistedEntry({ tags: [{ label: "使用AI" }] }), true);
@@ -138,6 +139,18 @@ assert.equal(mergedChangelog[0].version, "9.9.9 (999)");
 assert.equal(mergedChangelog[1].desc, "remote desc");
 assert.equal(mergedChangelog[1].date, "2026-01-01T00:00:00.000Z");
 assert.deepEqual(mergedChangelog[1].tags, ["ai"]);
+
+assert.equal(mathModeAt("plain text", 5), null);
+assert.equal(mathModeAt("$x$", 2), "inline");
+assert.equal(mathModeAt("$$x$$", 3), "display");
+assert.equal(mathModeAt("\\$x", 2), null);
+assert.equal(wrapLatexSnippet("\\alpha", null), "$\\alpha$");
+assert.equal(wrapLatexSnippet("\\alpha", "inline"), "\\alpha");
+assert.equal(
+	wrapLatexSnippet("\\begin{pmatrix}a\\end{pmatrix}", null, true),
+	"$$\n\\begin{pmatrix}a\\end{pmatrix}\n$$",
+);
+assert.equal(wrapLatexSnippet("$x$", null), "$x$");
 
 const releaseA = parseReleaseVersion({
 	name: "3.9.0 beta 1 (224)",

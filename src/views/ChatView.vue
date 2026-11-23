@@ -23,6 +23,7 @@ import { rewriteLegacyFileUrls } from "../services/gitee.js";
 import { createNudgeMessage, fetchNudgeSuffix } from "../services/nudge.js";
 import { copyText } from "../lib/clipboard.js";
 import { t } from "../i18n/index.js";
+import { mathModeAt, wrapLatexSnippet } from "../lib/latex.js";
 import { prettyTime, safeDecode, timeStamp } from "../lib/format.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { chatName, currentIdentity, useIdentity } from "../lib/identity.js";
@@ -85,6 +86,8 @@ const channelStatus = ref(null);
 const quoting = ref(null);
 const moreActionsOpen = ref(false);
 const latexOpen = ref(false);
+const activeLatexGroup = ref("common");
+const latexQuery = ref("");
 const latexSelection = ref({ start: 0, end: 0 });
 const messageMenu = ref({
 	open: false,
@@ -96,88 +99,483 @@ const messageMenu = ref({
 
 const latexGroups = [
 	{
+		id: "common",
 		title: "常用公式",
 		items: [
-			{ label: "行内公式", symbol: "$x$", snippet: "$ $SEL $", placeholder: "x" },
+			{
+				label: "行内公式",
+				symbol: "$x$",
+				snippet: "$ $SEL $",
+				placeholder: "x",
+				wrap: false,
+				template: "inline",
+			},
 			{
 				label: "独立公式",
 				symbol: "$$",
 				snippet: "$$\n$SEL\n$$",
 				placeholder: "x",
+				wrap: false,
+				template: "display",
 			},
-			{ label: "分数", symbol: "a/b", snippet: "\\frac{$CURSOR}{b}" },
-			{ label: "根号", symbol: "√", snippet: "\\sqrt{$CURSOR}" },
-			{ label: "上标", symbol: "x²", snippet: "x^{$CURSOR}" },
-			{ label: "下标", symbol: "x₂", snippet: "x_{$CURSOR}" },
+			{
+				label: "分数",
+				symbol: "a/b",
+				snippet: "\\frac{$SEL}{b}",
+				placeholder: "a",
+			},
+			{
+				label: "根号",
+				symbol: "√",
+				snippet: "\\sqrt{$SEL}",
+				placeholder: "x",
+			},
+			{
+				label: "n 次根",
+				symbol: "ⁿ√",
+				snippet: "\\sqrt[n]{$SEL}",
+				placeholder: "x",
+			},
+			{
+				label: "上标",
+				symbol: "x²",
+				snippet: "x^{$SEL}",
+				placeholder: "2",
+			},
+			{
+				label: "下标",
+				symbol: "x₂",
+				snippet: "x_{$SEL}",
+				placeholder: "i",
+			},
+			{
+				label: "上下标",
+				symbol: "x²₃",
+				snippet: "x_{$SEL}^{n}",
+				placeholder: "i",
+			},
+			{
+				label: "组合数",
+				symbol: "C",
+				snippet: "\\binom{n}{$SEL}",
+				placeholder: "k",
+			},
+			{
+				label: "绝对值",
+				symbol: "|x|",
+				snippet: "\\left|$SEL\\right|",
+				placeholder: "x",
+			},
 		],
 	},
 	{
+		id: "structure",
 		title: "公式结构",
 		items: [
-			{
-				label: "求和",
-				symbol: "∑",
-				snippet: "\\sum_{i=1}^{n} $CURSOR",
-			},
+			{ label: "求和", symbol: "∑", snippet: "\\sum_{i=1}^{n} $CURSOR" },
+			{ label: "连乘", symbol: "∏", snippet: "\\prod_{i=1}^{n} $CURSOR" },
 			{
 				label: "积分",
 				symbol: "∫",
 				snippet: "\\int_{a}^{b} $CURSOR \\, dx",
 			},
+			{
+				label: "二重积分",
+				symbol: "∬",
+				snippet: "\\iint_{D} $CURSOR \\, dA",
+			},
 			{ label: "极限", symbol: "lim", snippet: "\\lim_{x \\to $CURSOR}" },
-			{ label: "向量", symbol: "a⃗", snippet: "\\vec{$CURSOR}" },
+			{
+				label: "向量",
+				symbol: "a⃗",
+				snippet: "\\vec{$SEL}",
+				placeholder: "a",
+			},
 			{
 				label: "矩阵",
 				symbol: "[ ]",
 				snippet:
 					"\\begin{pmatrix}\n$CURSOR & \\\\\n & \n\\end{pmatrix}",
+				block: true,
+			},
+			{
+				label: "行列式",
+				symbol: "| |",
+				snippet:
+					"\\begin{vmatrix}\n$CURSOR & \\\\\n & \n\\end{vmatrix}",
+				block: true,
+			},
+			{
+				label: "增广矩阵",
+				symbol: "[|]",
+				snippet:
+					"\\left(\\begin{array}{cc|c}\n$CURSOR & & \\\\\n & & \n\\end{array}\\right)",
+				block: true,
 			},
 			{
 				label: "分段函数",
 				symbol: "{",
 				snippet: "\\begin{cases}\n$CURSOR \\\\\n\\end{cases}",
+				block: true,
 			},
 			{
 				label: "对齐环境",
 				symbol: "≡",
 				snippet: "\\begin{aligned}\n$CURSOR\n\\end{aligned}",
+				block: true,
+			},
+			{
+				label: "方程组",
+				symbol: "eq",
+				snippet:
+					"\\begin{cases}\nx + y = 1 \\\\\n$CURSOR\n\\end{cases}",
+				block: true,
 			},
 		],
 	},
 	{
+		id: "greek",
 		title: "希腊字母",
 		items: [
 			{ label: "α", symbol: "α", snippet: "\\alpha" },
 			{ label: "β", symbol: "β", snippet: "\\beta" },
 			{ label: "γ", symbol: "γ", snippet: "\\gamma" },
 			{ label: "δ", symbol: "δ", snippet: "\\delta" },
+			{ label: "ε", symbol: "ε", snippet: "\\varepsilon" },
+			{ label: "ζ", symbol: "ζ", snippet: "\\zeta" },
+			{ label: "η", symbol: "η", snippet: "\\eta" },
 			{ label: "θ", symbol: "θ", snippet: "\\theta" },
+			{ label: "ι", symbol: "ι", snippet: "\\iota" },
+			{ label: "κ", symbol: "κ", snippet: "\\kappa" },
 			{ label: "λ", symbol: "λ", snippet: "\\lambda" },
 			{ label: "μ", symbol: "μ", snippet: "\\mu" },
+			{ label: "ν", symbol: "ν", snippet: "\\nu" },
+			{ label: "ξ", symbol: "ξ", snippet: "\\xi" },
 			{ label: "π", symbol: "π", snippet: "\\pi" },
+			{ label: "ρ", symbol: "ρ", snippet: "\\rho" },
 			{ label: "σ", symbol: "σ", snippet: "\\sigma" },
-			{ label: "φ", symbol: "φ", snippet: "\\phi" },
+			{ label: "τ", symbol: "τ", snippet: "\\tau" },
+			{ label: "φ", symbol: "φ", snippet: "\\varphi" },
+			{ label: "χ", symbol: "χ", snippet: "\\chi" },
+			{ label: "ψ", symbol: "ψ", snippet: "\\psi" },
 			{ label: "ω", symbol: "ω", snippet: "\\omega" },
+			{ label: "Γ", symbol: "Γ", snippet: "\\Gamma" },
 			{ label: "Δ", symbol: "Δ", snippet: "\\Delta" },
+			{ label: "Θ", symbol: "Θ", snippet: "\\Theta" },
+			{ label: "Λ", symbol: "Λ", snippet: "\\Lambda" },
+			{ label: "Ξ", symbol: "Ξ", snippet: "\\Xi" },
+			{ label: "Π", symbol: "Π", snippet: "\\Pi" },
+			{ label: "Σ", symbol: "Σ", snippet: "\\Sigma" },
+			{ label: "Φ", symbol: "Φ", snippet: "\\Phi" },
+			{ label: "Ψ", symbol: "Ψ", snippet: "\\Psi" },
 			{ label: "Ω", symbol: "Ω", snippet: "\\Omega" },
 		],
 	},
 	{
+		id: "operators",
 		title: "运算符",
 		items: [
 			{ label: "×", symbol: "×", snippet: "\\times" },
 			{ label: "÷", symbol: "÷", snippet: "\\div" },
 			{ label: "·", symbol: "·", snippet: "\\cdot" },
 			{ label: "±", symbol: "±", snippet: "\\pm" },
+			{ label: "∓", symbol: "∓", snippet: "\\mp" },
 			{ label: "≤", symbol: "≤", snippet: "\\le" },
 			{ label: "≥", symbol: "≥", snippet: "\\ge" },
 			{ label: "≠", symbol: "≠", snippet: "\\ne" },
 			{ label: "≈", symbol: "≈", snippet: "\\approx" },
+			{ label: "≡", symbol: "≡", snippet: "\\equiv" },
+			{ label: "∼", symbol: "∼", snippet: "\\sim" },
 			{ label: "∞", symbol: "∞", snippet: "\\infty" },
 			{ label: "∂", symbol: "∂", snippet: "\\partial" },
 			{ label: "∇", symbol: "∇", snippet: "\\nabla" },
-			{ label: "→", symbol: "→", snippet: "\\to" },
+			{ label: "∈", symbol: "∈", snippet: "\\in" },
+			{ label: "∉", symbol: "∉", snippet: "\\notin" },
+			{ label: "⊂", symbol: "⊂", snippet: "\\subset" },
+			{ label: "⊆", symbol: "⊆", snippet: "\\subseteq" },
+			{ label: "∪", symbol: "∪", snippet: "\\cup" },
+			{ label: "∩", symbol: "∩", snippet: "\\cap" },
+			{ label: "∅", symbol: "∅", snippet: "\\varnothing" },
+			{ label: "∀", symbol: "∀", snippet: "\\forall" },
+			{ label: "∃", symbol: "∃", snippet: "\\exists" },
+			{ label: "¬", symbol: "¬", snippet: "\\neg" },
+			{ label: "∧", symbol: "∧", snippet: "\\land" },
+			{ label: "∨", symbol: "∨", snippet: "\\lor" },
 			{ label: "⇒", symbol: "⇒", snippet: "\\Rightarrow" },
+			{ label: "⇔", symbol: "⇔", snippet: "\\Leftrightarrow" },
+		],
+	},
+	{
+		id: "arrows",
+		title: "箭头",
+		items: [
+			{ label: "→", symbol: "→", snippet: "\\to" },
+			{ label: "←", symbol: "←", snippet: "\\leftarrow" },
+			{ label: "↔", symbol: "↔", snippet: "\\leftrightarrow" },
+			{ label: "⇒", symbol: "⇒", snippet: "\\Rightarrow" },
+			{ label: "⇐", symbol: "⇐", snippet: "\\Leftarrow" },
+			{ label: "⇔", symbol: "⇔", snippet: "\\Leftrightarrow" },
+			{ label: "↑", symbol: "↑", snippet: "\\uparrow" },
+			{ label: "↓", symbol: "↓", snippet: "\\downarrow" },
+			{ label: "↗", symbol: "↗", snippet: "\\nearrow" },
+			{ label: "↘", symbol: "↘", snippet: "\\searrow" },
+			{ label: "↦", symbol: "↦", snippet: "\\mapsto" },
+			{ label: "⟶", symbol: "⟶", snippet: "\\longrightarrow" },
+		],
+	},
+	{
+		id: "calculus",
+		title: "微积分",
+		items: [
+			{ label: "导数", symbol: "d/dx", snippet: "\\frac{d}{dx} $CURSOR" },
+			{
+				label: "偏导",
+				symbol: "∂/∂x",
+				snippet: "\\frac{\\partial}{\\partial x} $CURSOR",
+			},
+			{ label: "梯度", symbol: "∇", snippet: "\\nabla $CURSOR" },
+			{ label: "散度", symbol: "div", snippet: "\\nabla \\cdot $CURSOR" },
+			{ label: "旋度", symbol: "curl", snippet: "\\nabla \\times $CURSOR" },
+			{ label: "拉普拉斯", symbol: "Δ", snippet: "\\nabla^2 $CURSOR" },
+			{
+				label: "定积分",
+				symbol: "∫ᵃᵇ",
+				snippet: "\\int_{a}^{b} $CURSOR \\, dx",
+			},
+			{
+				label: "不定积分",
+				symbol: "∫",
+				snippet: "\\int $CURSOR \\, dx",
+			},
+			{
+				label: "级数",
+				symbol: "∞",
+				snippet: "\\sum_{n=1}^{\\infty} $CURSOR",
+			},
+			{ label: "上极限", symbol: "limsup", snippet: "\\limsup_{n \\to \\infty} $CURSOR" },
+			{ label: "下极限", symbol: "liminf", snippet: "\\liminf_{n \\to \\infty} $CURSOR" },
+		],
+	},
+	{
+		id: "accents",
+		title: "重音与修饰",
+		items: [
+			{
+				label: "向量",
+				symbol: "a⃗",
+				snippet: "\\vec{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "横线",
+				symbol: "a̅",
+				snippet: "\\bar{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "帽子",
+				symbol: "â",
+				snippet: "\\hat{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "点",
+				symbol: "ȧ",
+				snippet: "\\dot{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "双点",
+				symbol: "ä",
+				snippet: "\\ddot{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "波浪",
+				symbol: "ã",
+				snippet: "\\tilde{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "上划线",
+				symbol: "‾",
+				snippet: "\\overline{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "下划线",
+				symbol: "_",
+				snippet: "\\underline{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "上括号",
+				symbol: "⏞",
+				snippet: "\\overbrace{$SEL}",
+				placeholder: "a",
+			},
+			{
+				label: "下括号",
+				symbol: "⏟",
+				snippet: "\\underbrace{$SEL}",
+				placeholder: "a",
+			},
+		],
+	},
+	{
+		id: "brackets",
+		title: "括号",
+		items: [
+			{
+				label: "圆括号",
+				symbol: "( )",
+				snippet: "\\left($SEL\\right)",
+				placeholder: "x",
+			},
+			{
+				label: "方括号",
+				symbol: "[ ]",
+				snippet: "\\left[$SEL\\right]",
+				placeholder: "x",
+			},
+			{
+				label: "花括号",
+				symbol: "{ }",
+				snippet: "\\left\\{$SEL\\right\\}",
+				placeholder: "x",
+			},
+			{
+				label: "尖括号",
+				symbol: "⟨ ⟩",
+				snippet: "\\left\\langle $SEL\\right\\rangle",
+				placeholder: "x",
+			},
+			{
+				label: "范数",
+				symbol: "‖ ‖",
+				snippet: "\\left\\|$SEL\\right\\|",
+				placeholder: "x",
+			},
+			{
+				label: "取整",
+				symbol: "⌊ ⌋",
+				snippet: "\\left\\lfloor $SEL\\right\\rfloor",
+				placeholder: "x",
+			},
+			{
+				label: "上取整",
+				symbol: "⌈ ⌉",
+				snippet: "\\left\\lceil $SEL\\right\\rceil",
+				placeholder: "x",
+			},
+		],
+	},
+	{
+		id: "functions",
+		title: "函数",
+		items: [
+			{ label: "正弦", symbol: "sin", snippet: "\\sin $CURSOR" },
+			{ label: "余弦", symbol: "cos", snippet: "\\cos $CURSOR" },
+			{ label: "正切", symbol: "tan", snippet: "\\tan $CURSOR" },
+			{ label: "对数", symbol: "log", snippet: "\\log_{$CURSOR}" },
+			{ label: "自然对数", symbol: "ln", snippet: "\\ln $CURSOR" },
+			{ label: "指数", symbol: "exp", snippet: "\\exp $CURSOR" },
+			{ label: "最大值", symbol: "max", snippet: "\\max_{$CURSOR}" },
+			{ label: "最小值", symbol: "min", snippet: "\\min_{$CURSOR}" },
+			{ label: "最大公约数", symbol: "gcd", snippet: "\\gcd($CURSOR)" },
+			{ label: "行列式", symbol: "det", snippet: "\\det($CURSOR)" },
+			{ label: "取模", symbol: "mod", snippet: "\\bmod $CURSOR" },
+		],
+	},
+	{
+		id: "font",
+		title: "字体",
+		items: [
+			{
+				label: "黑板粗体",
+				symbol: "ℝ",
+				snippet: "\\mathbb{$SEL}",
+				placeholder: "R",
+			},
+			{
+				label: "花体",
+				symbol: "ℱ",
+				snippet: "\\mathcal{$SEL}",
+				placeholder: "F",
+			},
+			{
+				label: "粗体",
+				symbol: "𝐱",
+				snippet: "\\mathbf{$SEL}",
+				placeholder: "x",
+			},
+			{
+				label: "斜体",
+				symbol: "𝑥",
+				snippet: "\\mathit{$SEL}",
+				placeholder: "x",
+			},
+			{
+				label: "正体",
+				symbol: "x",
+				snippet: "\\mathrm{$SEL}",
+				placeholder: "x",
+			},
+			{
+				label: "文本",
+				symbol: "text",
+				snippet: "\\text{$SEL}",
+				placeholder: "text",
+			},
+			{
+				label: "无衬线",
+				symbol: "𝗑",
+				snippet: "\\mathsf{$SEL}",
+				placeholder: "x",
+			},
+			{
+				label: "等宽",
+				symbol: "𝚡",
+				snippet: "\\mathtt{$SEL}",
+				placeholder: "x",
+			},
+		],
+	},
+	{
+		id: "spacing",
+		title: "间距与排版",
+		items: [
+			{ label: "小空格", symbol: "␣", snippet: "\\," },
+			{ label: "中空格", symbol: "␣␣", snippet: "\\:" },
+			{ label: "大空格", symbol: "␣␣␣", snippet: "\\;" },
+			{ label: "负空格", symbol: "⌫", snippet: "\\!" },
+			{ label: "全角空格", symbol: "⇥", snippet: "\\quad" },
+			{ label: "双全角空格", symbol: "⇥⇥", snippet: "\\qquad" },
+			{ label: "换行", symbol: "↵", snippet: "\\\\" },
+			{ label: "对齐", symbol: "&", snippet: "&" },
+			{ label: "显示上下限", symbol: "lim", snippet: "\\limits" },
+			{ label: "取消上下限", symbol: "lim", snippet: "\\nolimits" },
+		],
+	},
+	{
+		id: "misc",
+		title: "其他符号",
+		items: [
+			{ label: "无穷", symbol: "∞", snippet: "\\infty" },
+			{ label: "空集", symbol: "∅", snippet: "\\varnothing" },
+			{ label: "角", symbol: "∠", snippet: "\\angle" },
+			{ label: "度", symbol: "°", snippet: "^{\\circ}" },
+			{ label: "撇", symbol: "′", snippet: "^{\\prime}" },
+			{ label: "省略号", symbol: "…", snippet: "\\dots" },
+			{ label: "居中省略号", symbol: "⋯", snippet: "\\cdots" },
+			{ label: "竖省略号", symbol: "⋮", snippet: "\\vdots" },
+			{ label: "斜省略号", symbol: "⋱", snippet: "\\ddots" },
+			{ label: "所以", symbol: "∴", snippet: "\\therefore" },
+			{ label: "因为", symbol: "∵", snippet: "\\because" },
+			{ label: "约化普朗克常数", symbol: "ℏ", snippet: "\\hbar" },
+			{ label: "脚本 l", symbol: "ℓ", snippet: "\\ell" },
+			{ label: "实部", symbol: "ℜ", snippet: "\\Re" },
+			{ label: "虚部", symbol: "ℑ", snippet: "\\Im" },
 		],
 	},
 ];
@@ -274,6 +672,14 @@ function resetEditorHeight() {
 	saveEditorHeight();
 }
 
+function toggleLatexHelper() {
+	if (latexOpen.value) {
+		closeLatexHelper();
+		return;
+	}
+	openLatexHelper();
+}
+
 function openLatexHelper() {
 	const el = editorEl.value;
 	const length = draft.value.length;
@@ -285,35 +691,86 @@ function openLatexHelper() {
 	latexOpen.value = true;
 }
 
+function syncLatexSelection() {
+	const el = editorEl.value;
+	if (!el) return;
+	const length = draft.value.length;
+	latexSelection.value = {
+		start: Math.min(el.selectionStart ?? length, length),
+		end: Math.min(el.selectionEnd ?? length, length),
+	};
+}
+
+function selectLatexGroup(id) {
+	activeLatexGroup.value = id;
+	latexQuery.value = "";
+}
+
 function insertLatexSnippet(item) {
 	const snippet = String(item.snippet || "");
 	const placeholder = item.placeholder || "x";
-	const selection = latexSelection.value;
+	const el = editorEl.value;
 	const length = draft.value.length;
-	const start = Math.min(selection.start, length);
-	const end = Math.min(Math.max(selection.end, start), length);
+	const start = el
+		? Math.min(el.selectionStart ?? length, length)
+		: Math.min(latexSelection.value.start, length);
+	const end = el
+		? Math.min(el.selectionEnd ?? length, length)
+		: Math.min(Math.max(latexSelection.value.end, start), length);
 	const selected = draft.value.slice(start, end);
 	const body = selected || placeholder;
-	const bodyIndex = snippet.indexOf("$SEL");
-	const cursorIndex = snippet.indexOf("$CURSOR");
-	let inserted = snippet.replaceAll("$SEL", body);
+	const mode = mathModeAt(draft.value, start);
+	const focusAt = (selectStart, selectEnd) => {
+		latexSelection.value = { start: selectStart, end: selectEnd };
+		nextTick(() => {
+			const editor = editorEl.value;
+			if (!editor) return;
+			editor.focus();
+			editor.setSelectionRange(selectStart, selectEnd);
+		});
+	};
+	if (item.template && mode) {
+		draft.value =
+			draft.value.slice(0, start) + body + draft.value.slice(end);
+		focusAt(start + body.length, start + body.length);
+		return;
+	}
+	const marker = "\u0000SEL\u0000";
+	let inserted = snippet.replaceAll("$SEL", marker);
+	if (item.wrap !== false) {
+		const wrapped = wrapLatexSnippet(
+			inserted,
+			mode,
+			Boolean(item.block),
+		);
+		if (wrapped !== inserted) {
+			const before = draft.value[start - 1] || "";
+			const after = draft.value[end] || "";
+			inserted = `${before === "$" ? " " : ""}${wrapped}${after === "$" ? " " : ""}`;
+		} else {
+			inserted = wrapped;
+		}
+	}
+	const markerIndex = inserted.indexOf(marker);
+	inserted = inserted.replace(marker, body);
+	const cursorIndex = inserted.indexOf("$CURSOR");
 	let selectStart = start + inserted.length;
 	let selectEnd = selectStart;
 	if (cursorIndex >= 0) {
-		const position = inserted.indexOf("$CURSOR");
 		inserted = inserted.replace("$CURSOR", "");
-		selectStart = selectEnd = start + position;
-	} else if (bodyIndex >= 0 && !selected) {
-		selectStart = start + bodyIndex;
+		selectStart = selectEnd = start + cursorIndex;
+	} else if (markerIndex >= 0 && !selected) {
+		selectStart = start + markerIndex;
 		selectEnd = selectStart + body.length;
 	}
 	draft.value =
 		draft.value.slice(0, start) + inserted + draft.value.slice(end);
-	latexSelection.value = { start: selectStart, end: selectEnd };
+	focusAt(selectStart, selectEnd);
 }
 
 function closeLatexHelper() {
 	latexOpen.value = false;
+	latexQuery.value = "";
 	nextTick(() => {
 		const el = editorEl.value;
 		if (!el) return;
@@ -359,6 +816,39 @@ const visibleMessages = computed(() =>
 );
 const canLoadMore = computed(() => visibleStart.value > 0);
 const preview = computed(() => renderMarkdown(draft.value));
+const latexFilteredGroups = computed(() => {
+	const query = latexQuery.value.trim().toLowerCase();
+	if (!query) {
+		const group =
+			latexGroups.find((item) => item.id === activeLatexGroup.value) ||
+			latexGroups[0];
+		return group ? [group] : [];
+	}
+	return latexGroups
+		.map((group) => ({
+			...group,
+			items: group.items.filter((item) =>
+				[item.label, item.symbol, item.snippet].some((value) =>
+					String(value || "").toLowerCase().includes(query),
+				),
+			),
+		}))
+		.filter((group) => group.items.length);
+});
+const latexMode = computed(() =>
+	latexOpen.value
+		? mathModeAt(draft.value, latexSelection.value.start)
+		: null,
+);
+const latexModeHint = computed(() => {
+	if (latexMode.value === "inline") {
+		return t("当前在行内公式中，点击直接插入");
+	}
+	if (latexMode.value === "display") {
+		return t("当前在块公式中，点击直接插入");
+	}
+	return t("当前不在公式中，点击会自动补全 $");
+});
 const messageByHash = computed(() => {
 	const map = new Map();
 	for (const message of allMessages.value) {
@@ -1117,6 +1607,107 @@ onBeforeUnmount(() => {
 						×
 					</button>
 				</div>
+				<section
+					v-if="latexOpen"
+					class="latex-panel"
+					:aria-label="t('LaTeX 辅助编辑')"
+				>
+					<header class="latex-panel-head">
+						<div class="latex-panel-title">
+							<strong>{{ t("LaTeX 辅助编辑") }}</strong>
+							<span>{{ t("公式外自动补全 $，块公式使用 $$") }}</span>
+						</div>
+						<div class="latex-panel-tools">
+							<input
+								v-model="latexQuery"
+								class="latex-search"
+								type="search"
+								:placeholder="t('搜索符号或命令')"
+								:aria-label="t('搜索符号或命令')"
+							/>
+							<button
+								type="button"
+								class="latex-panel-close"
+								:title="t('收起')"
+								:aria-label="t('收起')"
+								@click="closeLatexHelper"
+							>
+								×
+							</button>
+						</div>
+					</header>
+					<nav class="latex-tabs" :aria-label="t('公式分类')">
+						<button
+							v-for="group in latexGroups"
+							:key="group.id"
+							type="button"
+							class="latex-tab"
+							:class="{
+								active:
+									group.id === activeLatexGroup &&
+									!latexQuery.trim(),
+							}"
+							@click="selectLatexGroup(group.id)"
+						>
+							{{ t(group.title) }}
+						</button>
+					</nav>
+					<div class="latex-panel-body">
+						<div
+							v-if="!latexFilteredGroups.length"
+							class="latex-empty"
+						>
+							{{ t("没有匹配的公式") }}
+						</div>
+						<section
+							v-for="group in latexFilteredGroups"
+							:key="group.id"
+							class="latex-group"
+						>
+							<h3
+								v-if="latexQuery.trim()"
+								class="latex-group-title"
+							>
+								{{ t(group.title) }}
+							</h3>
+							<div class="latex-grid">
+								<button
+									v-for="item in group.items"
+									:key="item.label"
+									type="button"
+									class="latex-item"
+									:title="item.label"
+									@click="insertLatexSnippet(item)"
+								>
+									<span class="latex-item-symbol">
+										{{ item.symbol }}
+									</span>
+									<span
+										v-if="item.label !== item.symbol"
+										class="latex-item-label"
+									>
+										{{ t(item.label) }}
+									</span>
+								</button>
+							</div>
+						</section>
+					</div>
+					<footer class="latex-panel-foot">
+						<span
+							class="latex-mode-hint"
+							:class="{ inside: latexMode }"
+						>
+							{{ latexModeHint }}
+						</span>
+						<button
+							type="button"
+							class="primary-button latex-done"
+							@click="closeLatexHelper"
+						>
+							{{ t("完成") }}
+						</button>
+					</footer>
+				</section>
 				<div class="composer-grid">
 					<div class="composer-editor">
 						<textarea
@@ -1129,6 +1720,9 @@ onBeforeUnmount(() => {
 								)
 							"
 							@keydown="onKeydown"
+							@select="syncLatexSelection"
+							@keyup="syncLatexSelection"
+							@click="syncLatexSelection"
 						></textarea>
 					</div>
 					<div
@@ -1168,8 +1762,10 @@ onBeforeUnmount(() => {
 					<button
 						type="button"
 						class="ghost-button latex-helper-toggle"
+						:class="{ active: latexOpen }"
 						:title="t('LaTeX 辅助编辑')"
-						@click="openLatexHelper"
+						:aria-expanded="latexOpen"
+						@click="toggleLatexHelper"
 					>
 						∑ LaTeX
 					</button>
@@ -1326,59 +1922,6 @@ onBeforeUnmount(() => {
 					</button>
 				</div>
 			</form>
-		</Modal>
-
-		<Modal
-			:open="latexOpen"
-			:title="t('LaTeX 辅助编辑')"
-			width="560px"
-			@close="closeLatexHelper"
-		>
-			<div class="latex-helper">
-				<p class="latex-helper-intro">
-					{{
-						t(
-							"点击模板插入到光标位置；先选中文字再点击，可以把选中内容放进公式。",
-						)
-					}}
-				</p>
-				<section
-					v-for="group in latexGroups"
-					:key="group.title"
-					class="latex-group"
-				>
-					<h3 class="latex-group-title">{{ t(group.title) }}</h3>
-					<div class="latex-grid">
-						<button
-							v-for="item in group.items"
-							:key="item.label"
-							type="button"
-							class="latex-item"
-							:title="item.label"
-							@click="insertLatexSnippet(item)"
-						>
-							<span class="latex-item-symbol">
-								{{ item.symbol }}
-							</span>
-							<span
-								v-if="item.label !== item.symbol"
-								class="latex-item-label"
-							>
-								{{ t(item.label) }}
-							</span>
-						</button>
-					</div>
-				</section>
-				<div class="latex-helper-actions">
-					<button
-						type="button"
-						class="primary-button"
-						@click="closeLatexHelper"
-					>
-						{{ t("完成") }}
-					</button>
-				</div>
-			</div>
 		</Modal>
 
 		<Modal

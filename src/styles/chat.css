@@ -625,17 +625,164 @@
 	color: #04783e;
 }
 
-.latex-helper {
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
+.latex-helper-toggle.active {
+	border-color: var(--theme-accent-border);
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
 }
 
-.latex-helper-intro {
-	margin: 0;
-	color: var(--theme-muted);
+.latex-panel {
+	display: flex;
+	flex-direction: column;
+	margin: 0 0 10px;
+	border: 1px solid var(--theme-border);
+	border-radius: 12px;
+	background: var(--theme-surface);
+	overflow: hidden;
+}
+
+.latex-panel-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 8px 12px;
+	padding: 10px 12px 8px;
+	border-bottom: 1px solid var(--theme-border);
+}
+
+.latex-panel-title {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+	color: var(--theme-text);
 	font-size: 13px;
-	line-height: 1.7;
+}
+
+.latex-panel-title span {
+	color: var(--theme-muted);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.latex-panel-tools {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: auto;
+}
+
+.latex-search {
+	width: 180px;
+	height: 30px;
+	padding: 0 9px;
+	border: 1px solid var(--theme-border);
+	border-radius: 8px;
+	background: var(--theme-chat-bg);
+	color: var(--theme-text);
+	font-size: 12px;
+}
+
+.latex-search:focus {
+	border-color: var(--theme-accent-border);
+	outline: none;
+	box-shadow: 0 0 0 3px var(--theme-accent-soft);
+}
+
+.latex-panel-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--theme-muted);
+	font-size: 18px;
+	line-height: 1;
+}
+
+.latex-panel-close:hover {
+	border-color: var(--theme-border);
+	color: var(--theme-text);
+}
+
+.latex-tabs {
+	display: flex;
+	gap: 4px;
+	overflow-x: auto;
+	padding: 7px 10px;
+	border-bottom: 1px solid var(--theme-border);
+	scrollbar-width: thin;
+}
+
+.latex-tab {
+	flex: none;
+	padding: 4px 9px;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	background: transparent;
+	color: var(--theme-muted);
+	font-size: 12px;
+	line-height: 1.4;
+	white-space: nowrap;
+}
+
+.latex-tab:hover {
+	background: var(--theme-accent-soft);
+	color: var(--theme-text);
+}
+
+.latex-tab.active {
+	border-color: var(--theme-accent-border);
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
+}
+
+.latex-panel-body {
+	max-height: min(34vh, 260px);
+	overflow-y: auto;
+	padding: 10px 12px 12px;
+}
+
+.latex-panel-body .latex-group + .latex-group {
+	margin-top: 12px;
+}
+
+.latex-empty {
+	padding: 18px 4px;
+	color: var(--theme-muted);
+	font-size: 12px;
+	text-align: center;
+}
+
+.latex-panel-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 8px 12px;
+	border-top: 1px solid var(--theme-border);
+}
+
+.latex-mode-hint {
+	min-width: 0;
+	color: var(--theme-muted);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.latex-mode-hint.inside {
+	color: var(--theme-accent);
+}
+
+.latex-done {
+	height: 30px;
+	padding: 0 14px;
+	font-size: 12px;
 }
 
 .latex-group-title {
@@ -647,8 +794,8 @@
 
 .latex-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-	gap: 7px;
+	grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+	gap: 6px;
 }
 
 .latex-item {
@@ -656,8 +803,8 @@
 	flex-direction: column;
 	align-items: flex-start;
 	gap: 3px;
-	min-height: 46px;
-	padding: 7px 9px;
+	min-height: 42px;
+	padding: 6px 8px;
 	border: 1px solid var(--theme-border);
 	border-radius: 8px;
 	background: var(--theme-surface);
@@ -682,12 +829,6 @@
 	color: var(--theme-muted);
 	font-size: 11px;
 	line-height: 1.3;
-}
-
-.latex-helper-actions {
-	display: flex;
-	justify-content: flex-end;
-	padding-top: 2px;
 }
 
 .composer-actions {
@@ -923,6 +1064,46 @@
 	.latex-item {
 		min-height: 44px;
 		padding: 6px 8px;
+	}
+
+	.latex-panel {
+		margin-bottom: 8px;
+	}
+
+	.latex-panel-head {
+		padding: 8px 10px 6px;
+	}
+
+	.latex-panel-title {
+		flex: 1 1 100%;
+	}
+
+	.latex-panel-tools {
+		width: 100%;
+		margin-left: 0;
+	}
+
+	.latex-search {
+		flex: 1;
+		width: auto;
+		font-size: 16px;
+	}
+
+	.latex-panel-body {
+		max-height: 42vh;
+		padding: 8px 10px 10px;
+	}
+
+	.latex-tabs {
+		padding: 6px 8px;
+	}
+
+	.latex-panel-foot {
+		padding: 6px 10px;
+	}
+
+	.latex-mode-hint {
+		font-size: 11px;
 	}
 
 	.composer-actions {

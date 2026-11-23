@@ -38,6 +38,12 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.9.5 (230)",
+		date: "2026-11-24T00:47:56+08:00",
+		tags: ["ai"],
+		desc: "LaTeX 辅助编辑面板改为在发送框上方展开：新增分类标签、搜索和更多符号模板；不在公式环境时自动补全 $，块公式自动使用 $$，选中文字可直接套入公式模板。",
+	},
+	{
 		version: "3.9.4 (229)",
 		date: "2026-11-24T00:40:44+08:00",
 		tags: ["ai", "hotfix"],
