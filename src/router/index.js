@@ -1,4 +1,6 @@
+import { watch } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
+import { locale, t } from "../i18n/index.js";
 
 const router = createRouter({
 	history: createWebHashHistory(),
@@ -69,11 +71,13 @@ const router = createRouter({
 	},
 });
 
-router.afterEach((to) => {
-	const title = to.meta && to.meta.title;
-	document.title = title
-		? `${title} · zyc2024 的聊天网页`
-		: "zyc2024 的聊天网页";
-});
+function updateDocumentTitle(route) {
+	const title = route && route.meta && route.meta.title;
+	const appTitle = t("zyc2024 的聊天网页");
+	document.title = title ? `${t(title)} · ${appTitle}` : appTitle;
+}
+
+router.afterEach(updateDocumentTitle);
+watch(locale, () => updateDocumentTitle(router.currentRoute.value));
 
 export default router;
