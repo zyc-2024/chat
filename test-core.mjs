@@ -18,6 +18,7 @@ import {
 	rewriteLegacyFileUrl,
 	rewriteLegacyFileUrls,
 } from "./src/services/gitee.js";
+import { isAdminUsername } from "./src/services/auth.js";
 
 assert.equal(
 	fileShard("42e874ae9692483e15ef9c9d0b6a5f8e"),
@@ -46,6 +47,10 @@ assert.equal(
 	rewriteLegacyFileUrl("https://example.com/file.png"),
 	"https://example.com/file.png",
 );
+assert.equal(isAdminUsername("ChattingSuperAdmin"), true);
+assert.equal(isAdminUsername("ChattingSuperAdmin "), false);
+assert.equal(isAdminUsername("zyc2024"), false);
+assert.equal(isAdminUsername(""), false);
 
 const files = new Map();
 let shaCounter = 0;

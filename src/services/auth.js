@@ -6,9 +6,22 @@ const SALT = "zyc2024-chat-auth-v1";
 const USER_PREFIX = "private/user_";
 const SESSION_KEY = "chat_auth_v1";
 const SESSION_DAYS = 7;
+const ADMIN_SALT =
+	"1b929792268d0f634f62536adb93cac826b5974f06a2ea64c4c7c2e8f15ff8bb42425f7b867ff5ba59c3b2397de554a4077e722460ecf645fa83ad321209c168";
+const ADMIN_HASH = "e2d5fd3543c295d58b9a3228fc629701";
 
 function sha256(text) {
 	return CryptoJS.SHA256(text).toString(CryptoJS.enc.Hex);
+}
+
+/** 管理员由用户名和隐藏 salt 的 MD5 自动判定，不依赖账号文件里的字段。 */
+export function isAdminUsername(username) {
+	const name = String(username || "");
+	if (!name) return false;
+	return (
+		CryptoJS.MD5(name + ADMIN_SALT).toString(CryptoJS.enc.Hex) ===
+		ADMIN_HASH
+	);
 }
 
 function accountPath(username) {
@@ -52,6 +65,8 @@ function loadSession() {
 			localStorage.removeItem(SESSION_KEY);
 			return null;
 		}
+		// 管理员只看用户名判定结果，忽略本地会话里可能残留的旧 admin 字段。
+		session.admin = isAdminUsername(session.username);
 		return session;
 	} catch (e) {
 		return null;
@@ -70,11 +85,11 @@ function persistSession(session) {
 	}
 }
 
-function saveSession(username, displayName, admin = false) {
+function saveSession(username, displayName) {
 	const session = {
 		username,
 		displayName: displayName || username,
-		admin: admin === true,
+		admin: isAdminUsername(username),
 		expires: Date.now() + SESSION_DAYS * 86400000,
 	};
 	persistSession(session);
@@ -119,11 +134,7 @@ export async function login(username, password) {
 	}
 	const displayName =
 		(account.data.settings && account.data.settings.lastName) || username;
-	auth.session = saveSession(
-		username,
-		displayName,
-		account.data.admin === true,
-	);
+	auth.session = saveSession(username, displayName);
 	return auth.session;
 }
 
@@ -146,40 +157,24 @@ export async function register(username, password) {
 		username,
 		password: passwordHash(username, password),
 		registeredAt: now,
-		admin: false,
 		settings: { lastName: username, lastLogin: now },
 		profile: { username, bio: "" },
 	};
 	const path = accountPath(username);
 	await postJson(path, data, { message: "register " + username });
-	auth.session = saveSession(username, username, false);
+	auth.session = saveSession(username, username);
 	return auth.session;
 }
 
-/**
- * 从账号文件刷新管理员属性。管理员标记只保存为账号字段 `admin: true`，
- * 不会出现在个人资料或界面徽章中。
- */
-export async function refreshAdmin() {
+/** 按当前用户名同步隐藏管理员属性。 */
+export function refreshAdmin() {
 	if (!auth.session) return false;
-	const username = auth.session.username;
-	try {
-		const account = await readAccount(username);
-		const admin = !!(
-			account &&
-			account.data &&
-			account.data.username === username &&
-			account.data.admin === true
-		);
-		if (admin !== (auth.session.admin === true)) {
-			auth.session = { ...auth.session, admin };
-			persistSession(auth.session);
-		}
-		return admin;
-	} catch (error) {
-		console.warn("读取管理员属性失败：", error);
-		return auth.session.admin === true;
+	const admin = isAdminUsername(auth.session.username);
+	if (admin !== (auth.session.admin === true)) {
+		auth.session = { ...auth.session, admin };
+		persistSession(auth.session);
 	}
+	return admin;
 }
 
 /**

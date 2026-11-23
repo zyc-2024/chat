@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.16 (207)",
+		tags: ["ai", "hotfix"],
+		desc: "内部逻辑调整，不涉及界面变化。",
+	},
+	{
 		version: "3.2.15 (206)",
 		tags: ["ai", "hotfix"],
 		desc: "修复分片上传文件迁移脚本：Gitee 对不存在的文件可能返回空数组而不是 404，现在会正确识别为缺失并写入目标分片仓库，再删除旧文件。",
