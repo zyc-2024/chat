@@ -10,11 +10,15 @@ import {
 import { useRoute, useRouter } from "vue-router";
 import MessageCard from "../components/MessageCard.vue";
 import Modal from "../components/Modal.vue";
-import { readChannel, sendChannelMessage } from "../services/chat.js";
+import {
+	deleteChannel,
+	readChannel,
+	sendChannelMessage,
+} from "../services/chat.js";
 import { auth } from "../services/auth.js";
 import { safeDecode, timeStamp } from "../lib/format.js";
 import { renderMarkdown } from "../lib/markdown.js";
-import { chatName, useIdentity } from "../lib/identity.js";
+import { chatName, currentIdentity, useIdentity } from "../lib/identity.js";
 import { showToast } from "../lib/toast.js";
 import "../styles/chat.css";
 
@@ -69,14 +73,33 @@ const draft = ref("");
 const refreshSeconds = ref(5);
 const scrollEl = ref(null);
 const switchTarget = ref("");
+const channelStatus = ref(null);
 
 const renameOpen = ref(false);
 const renameValue = ref("");
 const renameBusy = ref(false);
 const intervalOpen = ref(false);
 const intervalValue = ref(5);
+const deleteOpen = ref(false);
+const deleteBusy = ref(false);
+const deleteError = ref("");
 
 let timer = null;
+
+const identity = computed(() => currentIdentity());
+const canDelete = computed(() => {
+	const status = channelStatus.value;
+	if (!status || status.deleted) return false;
+	if (status.owner !== identity.value.name) return false;
+	if (
+		status.ownerType &&
+		identity.value.type &&
+		status.ownerType !== identity.value.type
+	) {
+		return false;
+	}
+	return true;
+});
 
 const visibleMessages = computed(() =>
 	allMessages.value.slice(visibleStart.value),
@@ -123,6 +146,7 @@ async function load() {
 			throw new Error("私密频道缺少 id 或凭证，请从首页重新进入");
 		}
 		const result = await readChannel(options.value);
+		channelStatus.value = result.status || null;
 		allMessages.value = result.messages;
 		visibleStart.value = Math.max(0, result.messages.length - PAGE_SIZE);
 		loaded.value = true;
@@ -142,6 +166,7 @@ async function refresh(silent = true) {
 	refreshing.value = true;
 	try {
 		const result = await readChannel(options.value);
+		channelStatus.value = result.status || null;
 		const oldLength = allMessages.value.length;
 		const wasAtBottom = atBottom();
 		const visibleCount = Math.max(0, oldLength - visibleStart.value);
@@ -166,6 +191,16 @@ async function refresh(silent = true) {
 		refreshError.value = "";
 		return true;
 	} catch (e) {
+		if (e && e.code === "CHANNEL_DELETED") {
+			loaded.value = false;
+			allMessages.value = [];
+			visibleStart.value = 0;
+			newCount.value = 0;
+			loadError.value = e.message;
+			refreshError.value = "";
+			if (!silent) showToast(e.message, "error");
+			return false;
+		}
 		refreshError.value = "自动刷新失败，稍后会重试";
 		if (!silent) {
 			showToast(e && e.message ? e.message : String(e), "error");
@@ -220,6 +255,15 @@ async function send() {
 		await nextTick();
 		scrollToBottom("smooth");
 	} catch (e) {
+		if (e && e.code === "CHANNEL_DELETED") {
+			loaded.value = false;
+			allMessages.value = [];
+			visibleStart.value = 0;
+			loadError.value = e.message;
+			sendError.value = "";
+			showToast(e.message, "error", 4000);
+			return;
+		}
 		sendError.value = e && e.message ? e.message : String(e);
 		showToast(sendError.value, "error", 4000);
 	} finally {
@@ -295,6 +339,28 @@ function submitInterval() {
 	showToast(`刷新间隔已改为 ${refreshSeconds.value} 秒`, "success");
 }
 
+function openDelete() {
+	if (!canDelete.value) return;
+	deleteError.value = "";
+	deleteOpen.value = true;
+}
+
+async function confirmDelete() {
+	if (deleteBusy.value) return;
+	deleteBusy.value = true;
+	deleteError.value = "";
+	try {
+		await deleteChannel(options.value, identity.value);
+		deleteOpen.value = false;
+		showToast("频道已删除", "success");
+		router.push({ name: "home" });
+	} catch (e) {
+		deleteError.value = e && e.message ? e.message : String(e);
+	} finally {
+		deleteBusy.value = false;
+	}
+}
+
 function switchChannel() {
 	const value = switchTarget.value.trim();
 	if (!value) {
@@ -325,6 +391,9 @@ watch(
 		loadError.value = "";
 		refreshError.value = "";
 		sendError.value = "";
+		channelStatus.value = null;
+		deleteOpen.value = false;
+		deleteError.value = "";
 		await load();
 		restartTimer();
 	},
@@ -468,6 +537,14 @@ onBeforeUnmount(() => {
 					<button type="button" class="ghost-button" @click="openInterval">
 						刷新间隔
 					</button>
+					<button
+						v-if="canDelete"
+						type="button"
+						class="danger-button"
+						@click="openDelete"
+					>
+						删除频道
+					</button>
 					<span class="composer-status">{{ statusText }}</span>
 				</div>
 
@@ -546,6 +623,36 @@ onBeforeUnmount(() => {
 					<button type="submit" class="primary-button">保存</button>
 				</div>
 			</form>
+		</Modal>
+
+		<Modal
+			:open="deleteOpen"
+			title="删除频道"
+			@close="deleteOpen = false"
+		>
+			<p class="chat-delete-note">
+				删除后会写入 deleted 标记，频道会从首页隐藏；聊天记录不会被立即从仓库删除。只有创建者可以操作。
+			</p>
+			<div v-if="deleteError" class="chat-delete-error">
+				{{ deleteError }}
+			</div>
+			<div class="modal-actions">
+				<button
+					type="button"
+					class="ghost-button"
+					@click="deleteOpen = false"
+				>
+					取消
+				</button>
+				<button
+					type="button"
+					class="danger-button"
+					:disabled="deleteBusy"
+					@click="confirmDelete"
+				>
+					{{ deleteBusy ? "删除中…" : "确认删除" }}
+				</button>
+			</div>
 		</Modal>
 	</div>
 </template>

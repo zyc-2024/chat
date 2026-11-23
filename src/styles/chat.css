@@ -328,7 +328,8 @@
 }
 
 .composer-actions .primary-button,
-.composer-actions .ghost-button {
+.composer-actions .ghost-button,
+.composer-actions .danger-button {
 	height: 34px;
 	padding: 0 14px;
 	font-size: 13px;
@@ -410,6 +411,24 @@
 	display: flex;
 	justify-content: flex-end;
 	gap: 9px;
+}
+
+.chat-delete-note {
+	margin: 0 0 14px;
+	color: #5f6d64;
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.chat-delete-error {
+	margin-bottom: 14px;
+	padding: 10px 12px;
+	border: 1px solid #f0d6d6;
+	border-radius: 8px;
+	background: #fff8f8;
+	color: #9d2f2f;
+	font-size: 12px;
+	line-height: 1.6;
 }
 
 @media (max-width: 760px) {

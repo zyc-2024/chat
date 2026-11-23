@@ -3,6 +3,9 @@ import { Buffer } from "node:buffer";
 import {
 	createPrivateChannel,
 	createPublicChannel,
+	deleteChannel,
+	fetchPublicChannelStatuses,
+	getChannelStatus,
 	readChannel,
 	sendChannelMessage,
 } from "./src/services/chat.js";
@@ -53,18 +56,34 @@ globalThis.fetch = async (url, options = {}) => {
 
 put("private/id.json", "7");
 
+const alice = { name: "Alice", type: "user" };
+const bob = { name: "Bob", type: "guest" };
+
 const progress = [];
-const pub = await createPublicChannel("测试频道", "Alice", (value, text) =>
-	progress.push([value, text]),
+const pub = await createPublicChannel(
+	"测试频道",
+	"Alice",
+	(value, text) => progress.push([value, text]),
+	alice,
 );
 assert.equal(pub.channel, "测试频道");
 
 const index = JSON.parse(files.get("public/index.json").content);
 assert.deepEqual(index.ch, [encodeURIComponent("测试频道")]);
 
+const publicStatusPath = "status/public/测试频道.json";
+const publicStatusRaw = files.get(publicStatusPath).content;
+assert.match(publicStatusRaw, /Alice/);
+assert.equal(JSON.parse(publicStatusRaw).deleted, false);
+
+const publicStatus = await getChannelStatus({ type: "u", ch: "测试频道" });
+assert.equal(publicStatus.data.owner, "Alice");
+assert.equal(publicStatus.data.ownerType, "user");
+
 const first = await readChannel({ type: "u", ch: "测试频道" });
 assert.equal(first.messages.length, 1);
 assert.match(first.messages[0].content, /Created channel/);
+assert.equal(first.status.owner, "Alice");
 
 const afterSend = await sendChannelMessage(
 	{ type: "u", ch: "测试频道" },
@@ -73,10 +92,23 @@ const afterSend = await sendChannelMessage(
 assert.equal(afterSend.length, 2);
 assert.equal(afterSend[1].content, "hello");
 
-const priv = await createPrivateChannel("secret-key", "Bob", () => {});
+const priv = await createPrivateChannel("secret-key", "Bob", () => {}, bob);
 assert.equal(priv.id, 8);
 assert.equal(files.get("private/id.json").content, "8");
 assert.ok(!files.get("private/msg/8_"));
+
+const privateStatusPath = "status/private/8.json";
+const privateStatusRaw = files.get(privateStatusPath).content;
+assert.ok(!privateStatusRaw.includes("Bob"));
+assert.equal(JSON.parse(privateStatusRaw).version, 1);
+
+const privateStatus = await getChannelStatus({
+	type: "r",
+	id: "8",
+	key: "secret-key",
+});
+assert.equal(privateStatus.data.owner, "Bob");
+assert.equal(privateStatus.data.ownerType, "guest");
 
 const privRead = await readChannel({
 	type: "r",
@@ -85,6 +117,7 @@ const privRead = await readChannel({
 });
 assert.equal(privRead.messages.length, 3);
 assert.match(privRead.messages[1].content, /Key: secret-key/);
+assert.equal(privRead.status.owner, "Bob");
 
 const privSend = await sendChannelMessage(
 	{ type: "r", id: "8", key: "secret-key" },
@@ -102,7 +135,7 @@ const wrongKey = await readChannel({
 	(error) => error,
 );
 assert.ok(wrongKey instanceof Error);
-assert.match(wrongKey.message, /聊天记录不存在/);
+assert.match(wrongKey.message, /频道状态解密失败/);
 
 const privatePath = [...files.keys()].find((path) =>
 	path.startsWith("private/msg/8_"),
@@ -127,8 +160,93 @@ const corrupt = await readChannel({
 assert.ok(corrupt instanceof Error);
 assert.match(corrupt.message, /无法解密/);
 
+const badDelete = await deleteChannel(
+	{ type: "u", ch: "测试频道" },
+	{ name: "Bob", type: "user" },
+).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(badDelete instanceof Error);
+assert.match(badDelete.message, /只能删除自己创建的频道/);
+
+const deletedPublic = await deleteChannel(
+	{ type: "u", ch: "测试频道" },
+	alice,
+);
+assert.equal(deletedPublic.deleted, true);
+
+const publicStatusAfter = await getChannelStatus({
+	type: "u",
+	ch: "测试频道",
+});
+assert.equal(publicStatusAfter.data.deleted, true);
+const statuses = await fetchPublicChannelStatuses([
+	encodeURIComponent("测试频道"),
+]);
+assert.equal(statuses.get(encodeURIComponent("测试频道")).deleted, true);
+
+const readDeletedPublic = await readChannel({
+	type: "u",
+	ch: "测试频道",
+}).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(readDeletedPublic instanceof Error);
+assert.equal(readDeletedPublic.code, "CHANNEL_DELETED");
+
+const recreateDeleted = await createPublicChannel(
+	"测试频道",
+	"Alice",
+	() => {},
+	alice,
+).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(recreateDeleted instanceof Error);
+assert.equal(recreateDeleted.code, "CHANNEL_DELETED");
+
+const badPrivateDelete = await deleteChannel(
+	{ type: "r", id: "8", key: "secret-key" },
+	{ name: "Alice", type: "user" },
+).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(badPrivateDelete instanceof Error);
+assert.match(badPrivateDelete.message, /只能删除自己创建的频道/);
+
+const deletedPrivate = await deleteChannel(
+	{ type: "r", id: "8", key: "secret-key" },
+	bob,
+);
+assert.equal(deletedPrivate.deleted, true);
+
+const privateStatusAfter = await getChannelStatus({
+	type: "r",
+	id: "8",
+	key: "secret-key",
+});
+assert.equal(privateStatusAfter.data.deleted, true);
+assert.ok(!files.get(privateStatusPath).content.includes("Bob"));
+
+const readDeletedPrivate = await readChannel({
+	type: "r",
+	id: "8",
+	key: "secret-key",
+}).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(readDeletedPrivate instanceof Error);
+assert.equal(readDeletedPrivate.code, "CHANNEL_DELETED");
+
 const filesList = [...files.keys()];
 assert.ok(filesList.includes("public/msg/测试频道.json"));
+assert.ok(filesList.includes(publicStatusPath));
+assert.ok(filesList.includes(privateStatusPath));
 assert.ok(filesList.some((path) => path.startsWith("private/msg/8_")));
 
 console.log("core service tests passed");

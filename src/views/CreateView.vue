@@ -5,7 +5,7 @@ import {
 	createPrivateChannel,
 	createPublicChannel,
 } from "../services/chat.js";
-import { chatName } from "../lib/identity.js";
+import { chatName, currentIdentity } from "../lib/identity.js";
 import "../styles/pages.css";
 
 const route = useRoute();
@@ -62,6 +62,7 @@ async function run() {
 				name,
 				chatName.value,
 				onProgress,
+				currentIdentity(),
 			);
 			resultText.value = `公开频道“${result.channel}”已经创建好了，正在进入……`;
 			await new Promise((resolve) => setTimeout(resolve, 450));
@@ -76,6 +77,7 @@ async function run() {
 				key,
 				chatName.value,
 				onProgress,
+				currentIdentity(),
 			);
 			resultText.value = `私密频道已创建。频道 id：${result.id}，凭证：${result.key}。请务必保存好这两项，正在进入……`;
 			await new Promise((resolve) => setTimeout(resolve, 700));

@@ -94,6 +94,14 @@ export const chatName = computed(() => {
 	return guestUsername.value;
 });
 
+/** 频道归属使用的唯一身份：真实账号用 username，游客用 Guest_<HASH>。 */
+export function currentIdentity() {
+	if (auth.session) {
+		return { name: auth.session.username, type: "user" };
+	}
+	return { name: guestUsername.value, type: "guest" };
+}
+
 export function useIdentity() {
 	async function rename(name) {
 		if (!auth.session) {
@@ -104,5 +112,5 @@ export function useIdentity() {
 		return await setDisplayName(next);
 	}
 
-	return { guestUsername, isGuestSession, chatName, rename };
+	return { guestUsername, isGuestSession, chatName, rename, currentIdentity };
 }

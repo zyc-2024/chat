@@ -2,7 +2,10 @@
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import AuthBadge from "../components/AuthBadge.vue";
-import { fetchChannelIndex } from "../services/chat.js";
+import {
+	fetchChannelIndex,
+	fetchPublicChannelStatuses,
+} from "../services/chat.js";
 import { auth } from "../services/auth.js";
 import { channelColor, channelInitial, safeDecode } from "../lib/format.js";
 import { currentAppVersion } from "../lib/appVersion.js";
@@ -39,7 +42,16 @@ async function loadChannels() {
 	loading.value = true;
 	error.value = "";
 	try {
-		channels.value = await fetchChannelIndex();
+		const list = await fetchChannelIndex();
+		let statuses = new Map();
+		try {
+			statuses = await fetchPublicChannelStatuses(list);
+		} catch (e) {
+			console.warn("读取频道状态失败，暂不隐藏已删除频道", e);
+		}
+		channels.value = list.filter(
+			(channel) => !(statuses.get(channel) && statuses.get(channel).deleted),
+		);
 	} catch (e) {
 		channels.value = [];
 		error.value = e && e.message ? e.message : String(e);

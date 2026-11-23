@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.4 (191)",
+		tags: ["ai"],
+		desc: "频道创建时在 status/public/<name>.json 或 status/private/<id>.json 写入创建者标记；创建者可在聊天页删除自己的频道，删除只写入 deleted 标记并隐藏频道；私有频道状态文件同样使用频道口令加密。",
+	},
+	{
 		version: "3.2.3 (190)",
 		tags: ["ai"],
 		desc: "未登录用户自动分配与设备信息绑定的 Guest_<HASH> 游客用户名并自动登录；游客没有个人主页，登录后才能修改昵称。",
