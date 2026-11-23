@@ -247,6 +247,20 @@ onMounted(() => {
 						</svg>
 					</button>
 					<button
+						v-if="auth.session"
+						type="button"
+						class="rail-button"
+						:title="t('好友')"
+						@click="router.push({ name: 'friends' })"
+					>
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<circle cx="9" cy="8" r="3" />
+							<path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
+							<path d="M16 6a3 3 0 0 1 0 6" />
+							<path d="M17 14a5 5 0 0 1 4 5" />
+						</svg>
+					</button>
+					<button
 						type="button"
 						class="rail-button"
 						:title="auth.session ? t('我的主页') : t('登录 / 账号')"
@@ -361,6 +375,12 @@ onMounted(() => {
 						<router-link :to="{ name: 'settings' }">
 							{{ t("个性设置") }}
 						</router-link>
+						<template v-if="auth.session">
+							·
+							<router-link :to="{ name: 'friends' }">
+								{{ t("好友") }}
+							</router-link>
+						</template>
 						·
 						<a
 							href="https://github.com/zyc-2024/chat/releases/latest"

@@ -72,6 +72,12 @@ const router = createRouter({
 			component: () => import("../views/ThemeStoreView.vue"),
 		},
 		{
+			path: "/friends",
+			name: "friends",
+			meta: { title: "好友" },
+			component: () => import("../views/FriendsView.vue"),
+		},
+		{
 			path: "/:pathMatch(.*)*",
 			name: "not-found",
 			meta: { title: "404" },

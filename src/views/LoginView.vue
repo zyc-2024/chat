@@ -164,6 +164,12 @@ function continueAsGuest() {
 						>
 							{{ t("个性设置") }}
 						</router-link>
+						<router-link
+							class="ghost-button"
+							:to="{ name: 'friends' }"
+						>
+							{{ t("好友") }}
+						</router-link>
 						<button type="button" class="danger-button" @click="doLogout">
 							{{ t("退出登录") }}
 						</button>

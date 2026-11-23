@@ -18,6 +18,7 @@ import {
 	sendChannelMessage,
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
+import { addFriend } from "../services/friends.js";
 import { rewriteLegacyFileUrls } from "../services/gitee.js";
 import { copyText } from "../lib/clipboard.js";
 import { t } from "../i18n/index.js";
@@ -470,6 +471,14 @@ function openMessageMenu(event, index) {
 		{ key: "copy", label: t("复制") },
 		{ key: "quote", label: t("引用") },
 	];
+	if (
+		auth.session &&
+		message.user &&
+		message.user !== auth.session.username &&
+		!/^Guest_/i.test(message.user)
+	) {
+		items.push({ key: "friend", label: t("加好友") });
+	}
 	if (canRecallMessage(message)) {
 		items.push({ key: "recall", label: t("撤回"), danger: true });
 	}
@@ -498,6 +507,29 @@ function runMessageMenu(key) {
 		startQuote(message);
 	} else if (key === "recall") {
 		recallMessageAt(index);
+	} else if (key === "friend") {
+		addFriendFromMessage(message);
+	}
+}
+
+async function addFriendFromMessage(message) {
+	if (!auth.session) return;
+	try {
+		await addFriend(
+			{
+				username: auth.session.username,
+				name: chatName.value,
+			},
+			message.user,
+			message.name,
+		);
+		showToast(t("已添加好友"), "success");
+	} catch (error) {
+		showToast(
+			error && error.message ? error.message : String(error),
+			"error",
+			4000,
+		);
 	}
 }
 

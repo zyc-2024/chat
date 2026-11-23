@@ -3,9 +3,11 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import { auth } from "../services/auth.js";
+import { addFriend } from "../services/friends.js";
 import { loadProfile } from "../services/profile.js";
 import { locale, t } from "../i18n/index.js";
 import { renderMarkdown } from "../lib/markdown.js";
+import { showToast } from "../lib/toast.js";
 import "../styles/profile.css";
 
 const route = useRoute();
@@ -15,6 +17,7 @@ const loading = ref(true);
 const error = ref("");
 const profile = ref(null);
 const avatarFailed = ref(false);
+const addingFriend = ref(false);
 
 const username = computed(() => {
 	const value = route.query.u;
@@ -23,6 +26,13 @@ const username = computed(() => {
 });
 const isOwner = computed(
 	() => !!(auth.session && auth.session.username === username.value),
+);
+const canAddFriend = computed(
+	() =>
+		!!auth.session &&
+		!isOwner.value &&
+		!!username.value &&
+		!/^Guest_/i.test(username.value),
 );
 const initial = computed(() => {
 	const name = (profile.value && profile.value.user) || username.value || "?";
@@ -46,6 +56,30 @@ const metaText = computed(() => {
 	if (joined) parts.push(t("加入于 {date}", { date: joined }));
 	return parts.join(" · ");
 });
+
+async function addProfileFriend() {
+	if (!auth.session || addingFriend.value || !profile.value) return;
+	addingFriend.value = true;
+	try {
+		await addFriend(
+			{
+				username: auth.session.username,
+				name: auth.session.displayName || auth.session.username,
+			},
+			username.value,
+			profile.value.user,
+		);
+		showToast(t("已添加好友"), "success");
+		router.push({
+			name: "friends",
+			query: { u: username.value },
+		});
+	} catch (e) {
+		showToast(e && e.message ? e.message : String(e), "error", 4000);
+	} finally {
+		addingFriend.value = false;
+	}
+}
 
 function formatDate(value) {
 	if (!value) return "";
@@ -192,6 +226,15 @@ onMounted(load);
 						>
 							{{ t("个性设置") }}
 						</router-link>
+						<button
+							v-if="canAddFriend"
+							type="button"
+							class="primary-button"
+							:disabled="addingFriend"
+							@click="addProfileFriend"
+						>
+							{{ addingFriend ? t("添加中……") : t("加好友") }}
+						</button>
 						<LanguageSwitcher />
 					</div>
 				</div>

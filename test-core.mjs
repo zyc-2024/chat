@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
+import { createHash } from "node:crypto";
 import {
 	createPrivateChannel,
 	createPublicChannel,
@@ -19,6 +20,13 @@ import {
 	rewriteLegacyFileUrls,
 } from "./src/services/gitee.js";
 import { isAdminUsername } from "./src/services/auth.js";
+import {
+	addFriend,
+	friendConversationPath,
+	loadFriendMessages,
+	loadFriends,
+	sendFriendMessage,
+} from "./src/services/friends.js";
 import { setLocale, t } from "./src/i18n/index.js";
 
 // CI 的 Node 可能带有英文 navigator；服务层错误断言依赖默认中文。
@@ -362,6 +370,57 @@ const corrupt = await readChannel({
 );
 assert.ok(corrupt instanceof Error);
 assert.match(corrupt.message, /无法解密/);
+
+const friendAccountHash = createHash("sha256")
+	.update("zyc2024-chat-auth-v1:user:FriendUser")
+	.digest("hex");
+put(
+	`private/user_${friendAccountHash}.json`,
+	JSON.stringify({
+		username: "FriendUser",
+		settings: { lastName: "Friend User" },
+		profile: { username: "FriendUser" },
+	}),
+);
+const friendMe = { username: "TestUser", name: "Tester" };
+const addedFriend = await addFriend(friendMe, "FriendUser");
+assert.equal(addedFriend.username, "FriendUser");
+assert.equal(addedFriend.name, "Friend User");
+const myFriends = await loadFriends("TestUser");
+assert.ok(myFriends.some((item) => item.username === "FriendUser"));
+const theirFriends = await loadFriends("FriendUser");
+assert.ok(theirFriends.some((item) => item.username === "TestUser"));
+const emptyFriendMessages = await loadFriendMessages(friendMe, "FriendUser");
+assert.equal(emptyFriendMessages.length, 0);
+const sentFriendMessages = await sendFriendMessage(
+	friendMe,
+	"FriendUser",
+	"hello friend",
+);
+assert.equal(sentFriendMessages.length, 1);
+assert.equal(sentFriendMessages[0].user, "TestUser");
+const friendMessages = await loadFriendMessages(friendMe, "FriendUser");
+assert.equal(friendMessages.length, 1);
+assert.equal(friendMessages[0].content, "hello friend");
+assert.equal(
+	friendConversationPath("TestUser", "FriendUser").startsWith(
+		"friends/msg/",
+	),
+	true,
+);
+assert.ok(
+	files.has(friendConversationPath("TestUser", "FriendUser")),
+);
+const friendRejected = await sendFriendMessage(
+	friendMe,
+	"SomeoneElse",
+	"x",
+).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(friendRejected instanceof Error);
+assert.match(friendRejected.message, /还不是好友/);
 
 const badDelete = await deleteChannel(
 	{ type: "u", ch: "测试频道" },

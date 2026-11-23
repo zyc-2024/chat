@@ -19,6 +19,32 @@ const english = {
 	"更新日志": "Changelog",
 	"个性设置": "Appearance",
 	"主题商店": "Theme store",
+	"好友": "Friends",
+	"好友列表和私信仅限登录用户使用。":
+		"Friend lists and private messages are available to signed-in users only.",
+	"选择好友开始私信": "Choose a friend to start messaging",
+	"好友加载中……": "Loading friends…",
+	"还没有好友，输入用户名添加一个吧。":
+		"No friends yet. Add one by username below.",
+	"输入用户名添加好友": "Enter a username to add a friend",
+	"添加中……": "Adding…",
+	"添加好友": "Add friend",
+	"私信加载中……": "Loading private messages…",
+	"还没有私信，发第一条吧。":
+		"No private messages yet. Send the first one.",
+	"输入私信，按 Shift+Enter 发送；支持 Markdown 与 LaTeX":
+		"Type a private message. Press Shift+Enter to send. Markdown and LaTeX are supported.",
+	"选择一位好友开始私信": "Choose a friend to start messaging",
+	"加好友": "Add friend",
+	"已添加好友": "Friend added.",
+	"只能添加真实登录用户为好友":
+		"Only registered accounts can be added as friends.",
+	"不能添加自己为好友": "You cannot add yourself as a friend.",
+	"好友列表已满": "Your friend list is full.",
+	"好友列表更新失败": "Could not update the friend list.",
+	"你们还不是好友": "You are not friends yet.",
+	"好友消息发送失败": "Could not send the private message.",
+	"私信": "Private message",
 	"404": "404",
 	"语言": "Language",
 	"关闭": "Close",

@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.7.0 beta 1 (219)",
+		tags: ["ai", "beta"],
+		desc: "加入好友列表和私信：仅限登录用户，支持聊天消息右键加好友、主页加好友、好友页按用户名添加；好友关系写入双方列表，私信保存在独立的 friends/msg 文件夹，支持 Markdown/LaTeX 和自动刷新。",
+	},
+	{
 		version: "3.6.1 (218)",
 		tags: ["ai", "hotfix"],
 		desc: "修复主页私有频道的自动填充问题：频道凭证和频道 id 使用独立字段名、关闭自动填充并添加密码管理器忽略标记，不再与登录用户名和密码混用。",
