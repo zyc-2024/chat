@@ -81,6 +81,13 @@
    - 输入名称并确认后进入原有创建流程；空名称会留在弹窗内提示。
    - 首页原有的创建公开频道卡片仍然保留。
 
+12. **上传文件分片到 256 个仓库**
+   - 选择文件和 Base64 上传都会计算内容 MD5，并按前两位保存到 `zyc-2024/chat-files-00` ~ `chat-files-ff` 中的对应仓库。
+   - 上传路径继续使用 `f/<md5>/<文件名>`，生成的 raw 链接会直接指向分片仓库。
+   - 消息、个人资料 Markdown、头像和背景中的旧主仓库上传链接会自动改写到分片仓库；右键复制消息时也会复制改写后的链接。
+   - 旧文件迁移脚本：`node scripts/gitee-file-repos.mjs migrate`。
+   - 仓库初始化脚本可重复执行：`node scripts/gitee-file-repos.mjs setup`。
+
 ## 路由
 
 | 地址 | 功能 |
@@ -152,7 +159,7 @@ pnpm test
 格式示例：
 
 ```text
-3.2.13 (200)         -> Release tag: v3.2.13-200
+3.2.14 (205)         -> Release tag: v3.2.14-205
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 

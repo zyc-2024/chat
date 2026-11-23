@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.14 (205)",
+		tags: ["ai"],
+		desc: "上传文件分片存储完成：选择文件和 Base64 上传按内容 MD5 前两位写入 256 个 chat-files-xx 仓库；旧主仓库 f/ 文件迁移后删除，历史链接由前端自动改写，迁移和初始化脚本已加入仓库。",
+	},
+	{
 		version: "3.2.14 beta 4 (204)",
 		tags: ["ai", "beta"],
 		desc: "兼容迁移后的旧上传链接：消息、个人资料 Markdown、头像和背景中的旧主仓库 raw 链接会自动改写为对应 chat-files-xx 分片仓库；右键复制消息时也会复制改写后的链接。",
