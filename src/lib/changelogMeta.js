@@ -1,3 +1,21 @@
+/** 判断标签是否代表 AI 辅助开发。 */
+export function isAiTag(tag) {
+	const value =
+		typeof tag === "string"
+			? tag
+			: String((tag && (tag.id || tag.label)) || "");
+	return /^(ai|使用ai|ai生成)$/i.test(value.trim());
+}
+
+/** 判断某个版本是否使用了 AI 辅助开发。 */
+export function isAiAssistedEntry(entry) {
+	return (
+		!!entry &&
+		Array.isArray(entry.tags) &&
+		entry.tags.some((tag) => isAiTag(tag))
+	);
+}
+
 /** 判断版本号是否属于 beta。 */
 export function isBetaVersion(version) {
 	return /\bbeta\b/i.test(String(version || ""));

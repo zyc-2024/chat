@@ -29,6 +29,8 @@ import {
 import {
 	findLatestStableEntry,
 	findNowEntry,
+	isAiAssistedEntry,
+	isAiTag,
 	isBetaVersion,
 } from "./src/lib/changelogMeta.js";
 import {
@@ -99,11 +101,15 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.9.1 (226)");
+assert.equal(findNowEntry(changelog).version, "3.9.2 (227)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.9.1 (226)",
+	"3.9.2 (227)",
 );
+assert.equal(isAiAssistedEntry({ tags: ["ai", "beta"] }), true);
+assert.equal(isAiAssistedEntry({ tags: [{ label: "使用AI" }] }), true);
+assert.equal(isAiAssistedEntry({ tags: ["beta", "hotfix"] }), false);
+assert.equal(isAiTag("使用AI"), true);
 
 const releaseA = parseReleaseVersion({
 	name: "3.9.0 beta 1 (224)",

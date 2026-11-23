@@ -323,6 +323,23 @@
 	width: min(980px, 100%);
 }
 
+.changelog-note {
+	margin: -4px 0 14px;
+	padding: 9px 12px;
+	border: 1px solid var(--theme-border);
+	border-radius: 8px;
+	background: var(--theme-chat-bg);
+	color: var(--theme-muted);
+	font-size: 12px;
+	line-height: 1.65;
+}
+
+.changelog-ai-star {
+	margin-right: 2px;
+	color: var(--theme-accent);
+	font-weight: 700;
+}
+
 .tag-filter {
 	display: flex;
 	flex-wrap: wrap;

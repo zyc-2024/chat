@@ -184,9 +184,10 @@ pnpm test
 更新日志支持标签和按标签筛选，标签数据在 `src/data/changelog.js`：
 
 - `changelogTags` 定义内置标签的 `id`、`label`、`color`、`background`。
-- 条目里的 `tags` 可以写标签 id，例如 `["ai", "beta"]`。
+- 条目里的 `tags` 可以写标签 id，例如 `["beta", "hotfix"]`。历史数据里的 `"ai"` 不再显示为标签，而是在版本号前显示 `*`。
 - `latest` 标签由页面自动添加到最新一个非 beta 版本，颜色和文字取自 `changelogTags` 中匹配 `latest` / `最新` 的定义。
 - `now` 标签由页面自动添加到第一条记录：网页版表示当前部署的最新版，本地 app 表示当前正在使用的内置版本。
+- 版本号前的 `*` 表示该版本使用 AI 辅助开发，不再显示“AI”标签；页面顶部会说明这个标记。
 - 也可以直接写自定义标签对象，例如：
 
 ```js
@@ -211,7 +212,7 @@ pnpm test
 格式示例：
 
 ```text
-3.9.1 (226)          -> Release tag: v3.9.1-226
+3.9.2 (227)          -> Release tag: v3.9.2-227
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 

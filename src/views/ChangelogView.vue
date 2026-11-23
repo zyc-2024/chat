@@ -15,6 +15,8 @@ import {
 import {
 	findLatestStableEntry,
 	findNowEntry,
+	isAiAssistedEntry,
+	isAiTag,
 } from "../lib/changelogMeta.js";
 import { locale, t } from "../i18n/index.js";
 import "../styles/pages.css";
@@ -85,7 +87,10 @@ function resolveTag(tag) {
 }
 
 function tagsOf(entry) {
-	const tags = (entry.tags || []).map(resolveTag).filter(Boolean);
+	const tags = (entry.tags || [])
+		.filter((tag) => !isAiTag(tag))
+		.map(resolveTag)
+		.filter(Boolean);
 	if (entry === latestEntry.value) {
 		const latest = withHint(
 			resolveTag(latestDefinition.value),
@@ -110,6 +115,7 @@ function tagsOf(entry) {
 const allTags = computed(() => {
 	const map = new Map();
 	for (const tag of changelogDefinitions.value) {
+		if (isAiTag(tag)) continue;
 		const resolved = resolveTag(tag);
 		if (resolved) map.set(resolved.key, resolved);
 	}
@@ -178,6 +184,10 @@ onMounted(() => {
 				</div>
 			</div>
 
+			<p class="changelog-note">
+				{{ t("版本号前的 * 表示该版本使用 AI 辅助开发。") }}
+			</p>
+
 			<div
 				class="tag-filter"
 				:aria-label="t('按标签筛选更新记录')"
@@ -229,7 +239,13 @@ onMounted(() => {
 							v-for="item in filteredChangelog"
 							:key="item.version"
 						>
-							<td>{{ item.version }}</td>
+							<td>
+								<span
+									v-if="isAiAssistedEntry(item)"
+									class="changelog-ai-star"
+									>*</span
+								>{{ item.version }}
+							</td>
 							<td class="changelog-tags">
 								<button
 									v-for="tag in tagsOf(item)"

@@ -5,12 +5,6 @@
 
 export const changelogTags = [
 	{
-		id: "ai",
-		label: "使用AI",
-		color: "#6f42c1",
-		background: "#f3edff",
-	},
-	{
 		id: "beta",
 		label: "beta",
 		color: "#d07d2a",
@@ -43,6 +37,11 @@ export const changelogTags = [
 ];
 
 export const changelog = [
+	{
+		version: "3.9.2 (227)",
+		tags: ["ai", "hotfix"],
+		desc: "更新日志的 AI 标记改为版本号前的 *：不再显示“使用AI”标签，版本号和标签筛选区域不再出现 AI 标签；页面顶部新增说明，* 表示该版本使用 AI 辅助开发。",
+	},
 	{
 		version: "3.9.1 (226)",
 		tags: ["ai", "hotfix"],
