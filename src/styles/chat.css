@@ -521,7 +521,7 @@
 	font-family: "SimSun", "宋体", serif;
 	font-size: 14px;
 	line-height: 1.6;
-	resize: vertical;
+	resize: none;
 	transition:
 		border-color 0.15s ease,
 		box-shadow 0.15s ease;
@@ -550,6 +550,39 @@
 .composer-preview .empty-preview {
 	color: #69736d;
 	font-size: 12px;
+}
+
+.composer-resize-handle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 14px;
+	margin: 2px 0 -2px;
+	color: #c3cec7;
+	cursor: ns-resize;
+	touch-action: none;
+	user-select: none;
+}
+
+.composer-resize-handle::before {
+	width: 46px;
+	height: 4px;
+	border-radius: 2px;
+	background: currentColor;
+	box-shadow: 0 -3px 0 currentColor;
+	content: "";
+}
+
+.composer-resize-handle:hover {
+	color: #04783e;
+}
+
+.chat-composer.resizing {
+	user-select: none;
+}
+
+.chat-composer.resizing .composer-resize-handle {
+	color: #04783e;
 }
 
 .composer-actions {
@@ -769,6 +802,11 @@
 	.chat-composer {
 		padding: 9px 10px;
 		padding-bottom: max(9px, env(safe-area-inset-bottom));
+	}
+
+	.composer-resize-handle {
+		height: 18px;
+		margin: 0;
 	}
 
 	.composer-actions {

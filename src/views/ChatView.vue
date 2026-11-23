@@ -88,6 +88,98 @@ const messageMenu = ref({
 	items: [],
 });
 
+const EDITOR_HEIGHT_KEY = "chat_composer_height_v1";
+const EDITOR_HEIGHT_MIN = 64;
+const EDITOR_HEIGHT_MAX = 420;
+
+function maxEditorHeight() {
+	const viewport =
+		typeof window === "undefined" ? 800 : window.innerHeight;
+	return Math.max(
+		EDITOR_HEIGHT_MIN,
+		Math.min(EDITOR_HEIGHT_MAX, Math.round(viewport * 0.42)),
+	);
+}
+
+function clampEditorHeight(value) {
+	return Math.min(
+		maxEditorHeight(),
+		Math.max(EDITOR_HEIGHT_MIN, Math.round(Number(value) || 0)),
+	);
+}
+
+function defaultEditorHeight() {
+	const mobile =
+		typeof window !== "undefined" &&
+		window.matchMedia &&
+		window.matchMedia("(max-width: 760px)").matches;
+	return clampEditorHeight(mobile ? 70 : 106);
+}
+
+function loadEditorHeight() {
+	try {
+		const stored = Number(localStorage.getItem(EDITOR_HEIGHT_KEY));
+		if (Number.isFinite(stored) && stored > 0) {
+			return clampEditorHeight(stored);
+		}
+	} catch (e) {
+		// localStorage 不可用时使用默认高度
+	}
+	return defaultEditorHeight();
+}
+
+function saveEditorHeight() {
+	try {
+		localStorage.setItem(EDITOR_HEIGHT_KEY, String(editorHeight.value));
+	} catch (e) {
+		// ignore
+	}
+}
+
+const editorHeight = ref(loadEditorHeight());
+const resizingEditor = ref(false);
+let resizeMoveHandler = null;
+let resizeUpHandler = null;
+let resizeStartY = 0;
+let resizeStartHeight = 0;
+
+function startEditorResize(event) {
+	if (event.pointerType === "mouse" && event.button !== 0) return;
+	resizeStartY = event.clientY;
+	resizeStartHeight = editorHeight.value;
+	resizingEditor.value = true;
+	resizeMoveHandler = (moveEvent) => {
+		editorHeight.value = clampEditorHeight(
+			resizeStartHeight + (resizeStartY - moveEvent.clientY),
+		);
+	};
+	resizeUpHandler = () => stopEditorResize();
+	window.addEventListener("pointermove", resizeMoveHandler);
+	window.addEventListener("pointerup", resizeUpHandler, { once: true });
+	window.addEventListener("pointercancel", resizeUpHandler, { once: true });
+	event.preventDefault();
+}
+
+function stopEditorResize() {
+	if (!resizingEditor.value) return;
+	resizingEditor.value = false;
+	if (resizeMoveHandler) {
+		window.removeEventListener("pointermove", resizeMoveHandler);
+	}
+	if (resizeUpHandler) {
+		window.removeEventListener("pointerup", resizeUpHandler);
+		window.removeEventListener("pointercancel", resizeUpHandler);
+	}
+	resizeMoveHandler = null;
+	resizeUpHandler = null;
+	saveEditorHeight();
+}
+
+function resetEditorHeight() {
+	editorHeight.value = defaultEditorHeight();
+	saveEditorHeight();
+}
+
 const renameOpen = ref(false);
 const renameValue = ref("");
 const renameBusy = ref(false);
@@ -650,6 +742,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
 	if (timer) clearInterval(timer);
 	if (highlightTimer) clearTimeout(highlightTimer);
+	stopEditorResize();
 	window.removeEventListener("pointerdown", onGlobalPointerDown);
 	window.removeEventListener("keydown", onGlobalKeydown);
 	window.removeEventListener("scroll", onGlobalScroll, true);
@@ -766,7 +859,11 @@ onBeforeUnmount(() => {
 				</button>
 			</div>
 
-			<div v-if="!loadError" class="chat-composer">
+			<div
+				v-if="!loadError"
+				class="chat-composer"
+				:class="{ resizing: resizingEditor }"
+			>
 				<div v-if="quoting" class="composer-quote">
 					<div class="composer-quote-info">
 						<span class="composer-quote-label">
@@ -791,11 +888,15 @@ onBeforeUnmount(() => {
 						<textarea
 							ref="editorEl"
 							v-model="draft"
+							:style="{ height: editorHeight + 'px' }"
 							placeholder="输入消息，按 Shift+Enter 发送；支持 Markdown 与 LaTeX"
 							@keydown="onKeydown"
 						></textarea>
 					</div>
-					<div class="composer-preview">
+					<div
+						class="composer-preview"
+						:style="{ height: editorHeight + 'px' }"
+					>
 						<div v-if="!draft.trim()" class="empty-preview">
 							Markdown / LaTeX 预览
 						</div>
@@ -806,6 +907,16 @@ onBeforeUnmount(() => {
 						></div>
 					</div>
 				</div>
+
+				<div
+					class="composer-resize-handle"
+					role="separator"
+					aria-orientation="horizontal"
+					aria-label="拖动调整输入框高度"
+					title="拖动调整输入框高度，双击恢复默认"
+					@pointerdown="startEditorResize"
+					@dblclick="resetEditorHeight"
+				></div>
 
 				<div class="composer-actions">
 					<button

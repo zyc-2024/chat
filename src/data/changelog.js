@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.18 (209)",
+		tags: ["ai", "hotfix"],
+		desc: "聊天输入框支持拖动下方手柄调整高度，桌面和手机端都可用；高度会保存在本机，双击手柄恢复默认大小，预览区域同步调整。",
+	},
+	{
 		version: "3.2.17 (208)",
 		tags: ["ai", "hotfix"],
 		desc: "聊天页“一键到底”按钮改为常驻显示，不再只在远离底部时出现；消息列表底部增加了按钮占位空间，避免最后一条消息被悬浮按钮挡住。",
