@@ -301,7 +301,7 @@ onMounted(() => {
 				</div>
 
 				<div class="detail-body">
-					<div class="notice-bar">
+					<div v-if="!auth.session" class="notice-bar">
 						<span>
 							登录是可选的：未登录会自动分配与设备信息绑定的游客用户名
 							Guest_&lt;HASH&gt;，无需登录也能创建频道、聊天和上传文件；

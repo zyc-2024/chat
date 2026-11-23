@@ -110,7 +110,7 @@ function continueAsGuest() {
 		<div class="login-card">
 			<div class="login-brand">
 				<h1>zyc2024 的聊天网页</h1>
-				<span>登录可选</span>
+				<span v-if="!auth.session">登录可选</span>
 			</div>
 
 			<template v-if="auth.session">

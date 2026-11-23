@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.7 (194)",
+		tags: ["ai", "hotfix"],
+		desc: "已登录用户不再显示“登录可选”提示：首页的可选登录说明和登录页的“登录可选”徽章会自动隐藏。",
+	},
+	{
 		version: "3.2.6 (193)",
 		tags: ["ai", "hotfix"],
 		desc: "修复频道创建完成后的跳转：显示“已经创建好了”后立即尝试进入聊天页，并每秒重试直到成功；删除频道弹窗不再显示聊天记录相关提示。",
