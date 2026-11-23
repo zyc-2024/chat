@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.9 (196)",
+		tags: ["ai"],
+		desc: "消息增加唯一 hash 和 quote 字段（默认 null），可以引用其他消息；引用块自动渲染，点击后滚动到原消息并高亮，离底部较远时显示“一键到底”；重新编辑撤回消息时会恢复引用，私有频道的引用随消息一起加密。",
+	},
+	{
 		version: "3.2.8 (195)",
 		tags: ["ai", "hotfix"],
 		desc: "主页头像改为显示已登录用户的个人主页头像；没有头像或未登录时仍显示首字母。",

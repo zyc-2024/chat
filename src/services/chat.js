@@ -66,6 +66,54 @@ function channelDeletedError() {
 	return error;
 }
 
+/** 旧消息没有 hash 时使用的稳定 hash，保证不同客户端得到相同结果。 */
+export function legacyMessageHash(message, index) {
+	const source = message && typeof message === "object" ? message : {};
+	return SparkMD5.hash(
+		[
+			index,
+			source.ts || "",
+			source.time || "",
+			source.name || "",
+			source.user || "",
+			source.content || "",
+		].join("|"),
+	);
+}
+
+/** 新消息使用的随机 hash。 */
+export function createMessageHash() {
+	return SparkMD5.hash(
+		`${Date.now()}|${Math.random()}|${Math.random()}`,
+	);
+}
+
+function normalizeQuote(quote) {
+	if (!quote || typeof quote !== "object") return null;
+	const hash = String(quote.hash || "").trim();
+	if (!hash) return null;
+	return {
+		hash,
+		name: String(quote.name || "").trim(),
+	};
+}
+
+function normalizeMessage(message, index) {
+	const source = message && typeof message === "object" ? message : {};
+	const hash =
+		String(source.hash || "").trim() || legacyMessageHash(source, index);
+	return {
+		...source,
+		hash,
+		quote: normalizeQuote(source.quote),
+		recalled: source.recalled === true,
+	};
+}
+
+function normalizeMessages(messages) {
+	return (Array.isArray(messages) ? messages : []).map(normalizeMessage);
+}
+
 async function writeStatusSummary(path, key, summary) {
 	try {
 		const file = await getJson(path);
@@ -284,6 +332,8 @@ export async function createPublicChannel(
 						name: author,
 						time: createdTime,
 						ts: createdTs,
+						hash: createMessageHash(),
+						quote: null,
 						recalled: false,
 						content: `Created channel "${name}"`,
 					},
@@ -340,6 +390,8 @@ export async function createPrivateChannel(
 				name: author,
 				time: createdTime,
 				ts: createdTs,
+				hash: createMessageHash(),
+				quote: null,
 				recalled: false,
 				content: "This private channel has just been created!",
 			},
@@ -347,6 +399,8 @@ export async function createPrivateChannel(
 				name: author,
 				time: createdTime,
 				ts: createdTs,
+				hash: createMessageHash(),
+				quote: null,
 				recalled: false,
 				content: `Id: ${id}\nKey: ${password}`,
 			},
@@ -354,6 +408,8 @@ export async function createPrivateChannel(
 				name: author,
 				time: createdTime,
 				ts: createdTs,
+				hash: createMessageHash(),
+				quote: null,
 				recalled: false,
 				content: "Please remember them!",
 			},
@@ -403,11 +459,12 @@ export async function readChannel(options) {
 		throw new Error("聊天记录不存在，可能是频道 id 或频道名有误");
 	}
 	const data = unpack(file.data, options.type, options.key);
+	const messages = normalizeMessages(data && data.msg);
 	return {
 		path,
 		sha: file.sha,
-		data,
-		messages: Array.isArray(data && data.msg) ? data.msg : [],
+		data: { ...data, msg: messages },
+		messages,
 		status: status ? status.data : null,
 		statusSha: status ? status.sha : null,
 	};
@@ -428,8 +485,17 @@ export async function sendChannelMessage(options, message) {
 			const file = await getJson(path);
 			if (!file) throw new Error("聊天记录不存在");
 			const data = unpack(file.data, options.type, options.key);
-			const messages = Array.isArray(data.msg) ? data.msg.slice() : [];
-			messages.push(message);
+			const messages = normalizeMessages(data.msg);
+			const outgoing = normalizeMessage(
+				{
+					...message,
+					hash:
+						String((message && message.hash) || "").trim() ||
+						createMessageHash(),
+				},
+				messages.length,
+			);
+			messages.push(outgoing);
 			const next = { ...data, msg: messages };
 			const payload = options.type === "r" ? encryptData(next, options.key) : next;
 			await putJson(
@@ -472,7 +538,7 @@ export async function recallChannelMessage(options, messageIndex, owner) {
 			const file = await getJson(path);
 			if (!file) throw new Error("聊天记录不存在");
 			const data = unpack(file.data, options.type, options.key);
-			const messages = Array.isArray(data.msg) ? data.msg.slice() : [];
+			const messages = normalizeMessages(data.msg);
 			const target = messages[messageIndex];
 			if (!target) throw new Error("消息不存在");
 			if (target.user !== normalized.name) {

@@ -87,6 +87,8 @@ const first = await readChannel({ type: "u", ch: "测试频道" });
 assert.equal(first.messages.length, 1);
 assert.match(first.messages[0].content, /Created channel/);
 assert.equal(first.status.owner, "Alice");
+assert.ok(first.messages[0].hash);
+assert.equal(first.messages[0].quote, null);
 
 const afterSend = await sendChannelMessage(
 	{ type: "u", ch: "测试频道" },
@@ -101,12 +103,38 @@ const afterSend = await sendChannelMessage(
 );
 assert.equal(afterSend.length, 2);
 assert.equal(afterSend[1].content, "hello");
+assert.equal(afterSend[0].hash, first.messages[0].hash);
+assert.ok(afterSend[1].hash);
+assert.notEqual(afterSend[0].hash, afterSend[1].hash);
+assert.equal(afterSend[1].quote, null);
+
+const quotedSend = await sendChannelMessage(
+	{ type: "u", ch: "测试频道" },
+	{
+		name: "Bob",
+		user: "Bob",
+		time: "20260101 00:01:00",
+		ts: Date.now(),
+		quote: {
+			hash: afterSend[1].hash,
+			name: "Alice",
+			content: "引用时不应复制原消息内容",
+		},
+		recalled: false,
+		content: "reply with quote",
+	},
+);
+assert.equal(quotedSend.length, 3);
+assert.equal(quotedSend[2].quote.hash, afterSend[1].hash);
+assert.equal(quotedSend[2].quote.name, "Alice");
+assert.equal(quotedSend[2].quote.content, undefined);
+assert.ok(quotedSend[2].hash);
 
 const publicStatusAfterSend = await getChannelStatus({
 	type: "u",
 	ch: "测试频道",
 });
-assert.equal(publicStatusAfterSend.data.messageCount, 2);
+assert.equal(publicStatusAfterSend.data.messageCount, 3);
 
 const recallByOther = await recallChannelMessage(
 	{ type: "u", ch: "测试频道" },
@@ -131,14 +159,33 @@ const publicAfterRecall = await readChannel({
 });
 assert.equal(publicAfterRecall.messages[1].recalled, true);
 assert.equal(publicAfterRecall.messages[1].content, "hello");
+assert.equal(publicAfterRecall.messages[1].hash, afterSend[1].hash);
+assert.equal(publicAfterRecall.messages[2].quote.hash, afterSend[1].hash);
 
 const publicSummaries = await fetchPublicChannelSummaries([
 	encodeURIComponent("测试频道"),
 ]);
 assert.equal(
 	publicSummaries.get(encodeURIComponent("测试频道")).messageCount,
-	2,
+	3,
 );
+
+const legacyPath = "public/msg/测试频道.json";
+const legacyData = JSON.parse(files.get(legacyPath).content);
+delete legacyData.msg[2].hash;
+files.set(legacyPath, {
+	content: JSON.stringify(legacyData),
+	sha: files.get(legacyPath).sha,
+});
+const legacyReadA = await readChannel({ type: "u", ch: "测试频道" });
+const legacyReadB = await readChannel({ type: "u", ch: "测试频道" });
+assert.ok(legacyReadA.messages[2].hash);
+assert.equal(
+	legacyReadA.messages[2].hash,
+	legacyReadB.messages[2].hash,
+);
+assert.equal(legacyReadA.messages[2].quote.hash, afterSend[1].hash);
+assert.equal(legacyReadA.messages[2].quote.content, undefined);
 
 const priv = await createPrivateChannel("secret-key", "Bob", () => {}, bob);
 assert.equal(priv.id, 8);
@@ -182,13 +229,37 @@ const privSend = await sendChannelMessage(
 );
 assert.equal(privSend.length, 4);
 assert.equal(privSend[3].content, "secret");
+assert.ok(privSend[3].hash);
+assert.equal(privSend[3].quote, null);
+
+const privateQuoted = await sendChannelMessage(
+	{ type: "r", id: "8", key: "secret-key" },
+	{
+		name: "Bob",
+		user: "Bob",
+		time: "20260101 00:01:00",
+		ts: Date.now(),
+		quote: { hash: privSend[3].hash, name: "Bob" },
+		recalled: false,
+		content: "private reply with quote",
+	},
+);
+assert.equal(privateQuoted.length, 5);
+assert.equal(privateQuoted[4].quote.hash, privSend[3].hash);
+assert.ok(privateQuoted[4].hash);
+const encryptedPrivatePath = [...files.keys()].find((path) =>
+	path.startsWith("private/msg/8_"),
+);
+assert.ok(
+	!files.get(encryptedPrivatePath).content.includes("private reply with quote"),
+);
 
 const privateStatusAfterSend = await getChannelStatus({
 	type: "r",
 	id: "8",
 	key: "secret-key",
 });
-assert.equal(privateStatusAfterSend.data.messageCount, 4);
+assert.equal(privateStatusAfterSend.data.messageCount, 5);
 
 const privateRecalled = await recallChannelMessage(
 	{ type: "r", id: "8", key: "secret-key" },
@@ -203,6 +274,8 @@ const privateAfterRecall = await readChannel({
 });
 assert.equal(privateAfterRecall.messages[3].recalled, true);
 assert.equal(privateAfterRecall.messages[3].content, "secret");
+assert.equal(privateAfterRecall.messages[3].hash, privSend[3].hash);
+assert.equal(privateAfterRecall.messages[4].quote.hash, privSend[3].hash);
 
 const wrongKey = await readChannel({
 	type: "r",
@@ -268,7 +341,7 @@ assert.equal(
 );
 assert.equal(
 	deletedSummaries.get(encodeURIComponent("测试频道")).messageCount,
-	2,
+	3,
 );
 
 const readDeletedPublic = await readChannel({
@@ -337,7 +410,7 @@ assert.ok(filesList.some((path) => path.startsWith("private/msg/8_")));
 console.log("core service tests passed");
 console.log({
 	progressSteps: progress.length,
-	publicMessages: afterSend.length,
-	privateMessages: privSend.length,
+	publicMessages: quotedSend.length,
+	privateMessages: privateQuoted.length,
 	files: filesList,
 });

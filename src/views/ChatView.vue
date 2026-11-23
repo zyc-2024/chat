@@ -76,6 +76,8 @@ const scrollEl = ref(null);
 const editorEl = ref(null);
 const switchTarget = ref("");
 const channelStatus = ref(null);
+const quoting = ref(null);
+const showJumpBottom = ref(false);
 
 const renameOpen = ref(false);
 const renameValue = ref("");
@@ -87,6 +89,7 @@ const deleteBusy = ref(false);
 const deleteError = ref("");
 
 let timer = null;
+let highlightTimer = null;
 
 const identity = computed(() => currentIdentity());
 const canDelete = computed(() => {
@@ -108,6 +111,13 @@ const visibleMessages = computed(() =>
 );
 const canLoadMore = computed(() => visibleStart.value > 0);
 const preview = computed(() => renderMarkdown(draft.value));
+const messageByHash = computed(() => {
+	const map = new Map();
+	for (const message of allMessages.value) {
+		if (message.hash) map.set(message.hash, message);
+	}
+	return map;
+});
 const lastRecalledIndex = computed(() => {
 	const me = currentIdentity().name;
 	for (let i = allMessages.value.length - 1; i >= 0; i--) {
@@ -138,21 +148,92 @@ function atBottom() {
 	return el.scrollHeight - el.scrollTop - el.clientHeight < 90;
 }
 
+function updateScrollState() {
+	const el = scrollEl.value;
+	if (!el) return;
+	const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+	showJumpBottom.value = distance > 240;
+	if (distance < 90) newCount.value = 0;
+}
+
 function scrollToBottom(behavior = "auto") {
 	nextTick(() => {
 		const el = scrollEl.value;
 		if (!el) return;
 		el.scrollTo({ top: el.scrollHeight, behavior });
 		newCount.value = 0;
+		showJumpBottom.value = false;
 	});
 }
 
 function onScroll() {
-	if (atBottom()) newCount.value = 0;
+	updateScrollState();
 	const el = scrollEl.value;
 	if (el && el.scrollTop < 70 && canLoadMore.value) {
 		loadOlder();
 	}
+}
+
+function snippet(text, max = 90) {
+	const flat = String(text || "")
+		.replace(/\s+/g, " ")
+		.trim();
+	if (!flat) return "[空消息]";
+	return flat.length > max ? `${flat.slice(0, max)}…` : flat;
+}
+
+function resolveQuote(message) {
+	const quote = message && message.quote;
+	if (!quote || !quote.hash) return null;
+	const target = messageByHash.value.get(quote.hash);
+	return {
+		hash: quote.hash,
+		name: (target && target.name) || quote.name || "Anonymous",
+		content: target ? target.content || "" : "",
+		recalled: !!(target && target.recalled),
+		missing: !target,
+	};
+}
+
+function startQuote(message) {
+	if (!message || message.recalled) return;
+	quoting.value = {
+		hash: message.hash,
+		name: message.name || "Anonymous",
+		content: message.content || "",
+	};
+	nextTick(() => editorEl.value?.focus());
+}
+
+async function jumpToMessage(hash) {
+	const index = allMessages.value.findIndex(
+		(message) => message.hash === hash,
+	);
+	if (index < 0) {
+		showToast("找不到被引用的消息", "error");
+		return;
+	}
+	if (index < visibleStart.value) {
+		visibleStart.value = Math.max(0, index - 2);
+		await nextTick();
+	}
+	const container = scrollEl.value;
+	const target =
+		container &&
+		container.querySelector(`[data-message-hash="${hash}"]`);
+	if (!target) {
+		showToast("找不到被引用的消息", "error");
+		return;
+	}
+	target.scrollIntoView({ behavior: "smooth", block: "center" });
+	if (highlightTimer) clearTimeout(highlightTimer);
+	container
+		.querySelectorAll(".message-highlight")
+		.forEach((item) => item.classList.remove("message-highlight"));
+	target.classList.add("message-highlight");
+	highlightTimer = window.setTimeout(() => {
+		target.classList.remove("message-highlight");
+	}, 1800);
 }
 
 async function load() {
@@ -206,6 +287,8 @@ async function refresh(silent = true) {
 				newCount.value += added;
 			}
 		}
+		await nextTick();
+		updateScrollState();
 		refreshError.value = "";
 		return true;
 	} catch (e) {
@@ -263,6 +346,12 @@ async function send() {
 			user: identity.value.name,
 			time: timeStamp(),
 			ts: Date.now(),
+			quote: quoting.value
+				? {
+						hash: quoting.value.hash,
+						name: quoting.value.name || "Anonymous",
+					}
+				: null,
 			recalled: false,
 			content: draft.value,
 		};
@@ -270,6 +359,7 @@ async function send() {
 		allMessages.value = messages;
 		visibleStart.value = Math.max(0, messages.length - PAGE_SIZE);
 		draft.value = "";
+		quoting.value = null;
 		newCount.value = 0;
 		await nextTick();
 		scrollToBottom("smooth");
@@ -391,6 +481,16 @@ async function recallMessageAt(index) {
 
 function reeditMessage(message) {
 	draft.value = message.content || "";
+	if (message.quote && message.quote.hash) {
+		const target = messageByHash.value.get(message.quote.hash);
+		quoting.value = {
+			hash: message.quote.hash,
+			name: (target && target.name) || message.quote.name || "Anonymous",
+			content: target ? target.content || "" : "",
+		};
+	} else {
+		quoting.value = null;
+	}
 	showToast("已放回消息框，可修改后重新发送", "info");
 	nextTick(() => editorEl.value?.focus());
 }
@@ -444,6 +544,8 @@ watch(
 		visibleStart.value = 0;
 		newCount.value = 0;
 		draft.value = "";
+		quoting.value = null;
+		showJumpBottom.value = false;
 		loadError.value = "";
 		refreshError.value = "";
 		sendError.value = "";
@@ -464,6 +566,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
 	if (timer) clearInterval(timer);
+	if (highlightTimer) clearTimeout(highlightTimer);
 });
 </script>
 
@@ -505,7 +608,8 @@ onBeforeUnmount(() => {
 				</div>
 			</header>
 
-			<main ref="scrollEl" class="chat-scroll" @scroll="onScroll">
+			<div class="chat-main">
+				<main ref="scrollEl" class="chat-scroll" @scroll="onScroll">
 				<div v-if="loading" class="chat-empty">
 					聊天记录加载中……<br />如果加载时间过长，则可能是页面不存在
 				</div>
@@ -546,11 +650,24 @@ onBeforeUnmount(() => {
 						:message="message"
 						:can-recall="canRecallMessage(message)"
 						:can-reedit="visibleStart + index === lastRecalledIndex"
+						:quoted="resolveQuote(message)"
 						@recall="recallMessageAt(visibleStart + index)"
 						@reedit="reeditMessage(message)"
+						@quote="startQuote(message)"
+						@jump-quote="jumpToMessage"
 					/>
 				</template>
+				</main>
 
+				<button
+					v-if="showJumpBottom"
+					type="button"
+					class="chat-jump-bottom"
+					title="回到最新消息"
+					@click="scrollToBottom('smooth')"
+				>
+					一键到底 ↓
+				</button>
 				<button
 					v-if="newCount > 0"
 					type="button"
@@ -559,9 +676,28 @@ onBeforeUnmount(() => {
 				>
 					有 {{ newCount }} 条新消息 ↓
 				</button>
-			</main>
+			</div>
 
 			<div v-if="!loadError" class="chat-composer">
+				<div v-if="quoting" class="composer-quote">
+					<div class="composer-quote-info">
+						<span class="composer-quote-label">
+							引用 {{ quoting.name || "Anonymous" }}
+						</span>
+						<span class="composer-quote-text">
+							{{ snippet(quoting.content) }}
+						</span>
+					</div>
+					<button
+						type="button"
+						class="composer-quote-cancel"
+						title="取消引用"
+						aria-label="取消引用"
+						@click="quoting = null"
+					>
+						×
+					</button>
+				</div>
 				<div class="composer-grid">
 					<div class="composer-editor">
 						<textarea
