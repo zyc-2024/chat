@@ -5,12 +5,10 @@ import { prettyTime } from "../lib/format.js";
 
 const props = defineProps({
 	message: { type: Object, required: true },
-	canRecall: { type: Boolean, default: false },
 	canReedit: { type: Boolean, default: false },
-	canQuote: { type: Boolean, default: true },
 	quoted: { type: Object, default: null },
 });
-defineEmits(["recall", "reedit", "quote", "jump-quote"]);
+defineEmits(["reedit", "jump-quote", "menu"]);
 
 const html = computed(() => renderMarkdown(props.message.content || ""));
 const name = computed(() => props.message.name || "Anonymous");
@@ -44,7 +42,19 @@ const quoteText = computed(() => {
 				{{ name }}
 			</router-link>
 			<span v-else class="message-name">{{ name }}</span>
-			<time class="message-time">{{ time }}</time>
+			<div class="message-head-tools">
+				<time class="message-time">{{ time }}</time>
+				<button
+					v-if="!message.recalled"
+					type="button"
+					class="message-menu-button"
+					title="复制、引用或撤回"
+					aria-label="消息操作"
+					@click.stop="$emit('menu', $event)"
+				>
+					⋯
+				</button>
+			</div>
 		</header>
 		<div class="message-body">
 			<div v-if="message.recalled" class="message-recalled">
@@ -72,26 +82,6 @@ const quoteText = computed(() => {
 					<span class="message-quote-text">{{ quoteText }}</span>
 				</button>
 				<div class="markdown-body" v-html="html"></div>
-				<div v-if="canQuote || canRecall" class="message-actions">
-					<button
-						v-if="canQuote"
-						type="button"
-						class="message-quote-action"
-						title="引用这条消息"
-						@click="$emit('quote')"
-					>
-						引用
-					</button>
-					<button
-						v-if="canRecall"
-						type="button"
-						class="message-recall"
-						title="撤回这条消息"
-						@click="$emit('recall')"
-					>
-						撤回
-					</button>
-				</div>
 			</template>
 		</div>
 	</article>

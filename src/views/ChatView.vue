@@ -17,6 +17,7 @@ import {
 	sendChannelMessage,
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
+import { copyText } from "../lib/clipboard.js";
 import { prettyTime, safeDecode, timeStamp } from "../lib/format.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { chatName, currentIdentity, useIdentity } from "../lib/identity.js";
@@ -79,6 +80,13 @@ const channelStatus = ref(null);
 const quoting = ref(null);
 const showJumpBottom = ref(false);
 const moreActionsOpen = ref(false);
+const messageMenu = ref({
+	open: false,
+	x: 0,
+	y: 0,
+	index: -1,
+	items: [],
+});
 
 const renameOpen = ref(false);
 const renameValue = ref("");
@@ -204,6 +212,75 @@ function startQuote(message) {
 		content: message.content || "",
 	};
 	nextTick(() => editorEl.value?.focus());
+}
+
+function closeMessageMenu() {
+	if (messageMenu.value.open) {
+		messageMenu.value = { ...messageMenu.value, open: false };
+	}
+}
+
+function openMessageMenu(event, index) {
+	const message = allMessages.value[index];
+	if (!message) return;
+	event.preventDefault();
+	if (message.recalled) {
+		closeMessageMenu();
+		return;
+	}
+	const items = [
+		{ key: "copy", label: "复制" },
+		{ key: "quote", label: "引用" },
+	];
+	if (canRecallMessage(message)) {
+		items.push({ key: "recall", label: "撤回", danger: true });
+	}
+	const width = 156;
+	const height = items.length * 36 + 12;
+	const margin = 8;
+	const x = Math.min(
+		Math.max(event.clientX, margin),
+		Math.max(margin, window.innerWidth - width - margin),
+	);
+	const y = Math.min(
+		Math.max(event.clientY, margin),
+		Math.max(margin, window.innerHeight - height - margin),
+	);
+	messageMenu.value = { open: true, x, y, index, items };
+}
+
+function runMessageMenu(key) {
+	const index = messageMenu.value.index;
+	closeMessageMenu();
+	const message = allMessages.value[index];
+	if (!message) return;
+	if (key === "copy") {
+		copyMessage(message);
+	} else if (key === "quote") {
+		startQuote(message);
+	} else if (key === "recall") {
+		recallMessageAt(index);
+	}
+}
+
+async function copyMessage(message) {
+	const ok = await copyText(message.content || "");
+	showToast(
+		ok ? "消息已复制" : "复制失败，请手动选择",
+		ok ? "success" : "error",
+	);
+}
+
+function onGlobalPointerDown() {
+	closeMessageMenu();
+}
+
+function onGlobalKeydown(event) {
+	if (event.key === "Escape") closeMessageMenu();
+}
+
+function onGlobalScroll() {
+	closeMessageMenu();
 }
 
 async function jumpToMessage(hash) {
@@ -548,6 +625,7 @@ watch(
 		quoting.value = null;
 		showJumpBottom.value = false;
 		moreActionsOpen.value = false;
+		closeMessageMenu();
 		loadError.value = "";
 		refreshError.value = "";
 		sendError.value = "";
@@ -564,11 +642,19 @@ watch(refreshSeconds, restartTimer);
 onMounted(() => {
 	load();
 	restartTimer();
+	window.addEventListener("pointerdown", onGlobalPointerDown);
+	window.addEventListener("keydown", onGlobalKeydown);
+	window.addEventListener("scroll", onGlobalScroll, true);
+	window.addEventListener("resize", onGlobalScroll);
 });
 
 onBeforeUnmount(() => {
 	if (timer) clearInterval(timer);
 	if (highlightTimer) clearTimeout(highlightTimer);
+	window.removeEventListener("pointerdown", onGlobalPointerDown);
+	window.removeEventListener("keydown", onGlobalKeydown);
+	window.removeEventListener("scroll", onGlobalScroll, true);
+	window.removeEventListener("resize", onGlobalScroll);
 });
 </script>
 
@@ -650,13 +736,14 @@ onBeforeUnmount(() => {
 						v-for="(message, index) in visibleMessages"
 						:key="visibleStart + index"
 						:message="message"
-						:can-recall="canRecallMessage(message)"
 						:can-reedit="visibleStart + index === lastRecalledIndex"
 						:quoted="resolveQuote(message)"
-						@recall="recallMessageAt(visibleStart + index)"
 						@reedit="reeditMessage(message)"
-						@quote="startQuote(message)"
 						@jump-quote="jumpToMessage"
+						@menu="openMessageMenu($event, visibleStart + index)"
+						@contextmenu.prevent="
+							openMessageMenu($event, visibleStart + index)
+						"
 					/>
 				</template>
 				</main>
@@ -794,6 +881,29 @@ onBeforeUnmount(() => {
 				</form>
 			</div>
 		</div>
+
+		<Teleport to="body">
+			<div
+				v-if="messageMenu.open"
+				class="message-context-menu"
+				:style="{
+					left: messageMenu.x + 'px',
+					top: messageMenu.y + 'px',
+				}"
+				@pointerdown.stop
+				@contextmenu.prevent
+			>
+				<button
+					v-for="item in messageMenu.items"
+					:key="item.key"
+					type="button"
+					:class="{ danger: item.danger }"
+					@click="runMessageMenu(item.key)"
+				>
+					{{ item.label }}
+				</button>
+			</div>
+		</Teleport>
 
 		<Modal
 			:open="renameOpen"
