@@ -8,4 +8,5 @@ build/
 release/
 CHANGELOG.md
 release-notes.md
+public/changelog.json
 *.spec

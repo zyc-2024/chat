@@ -1,8 +1,17 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import { changelog, changelogTags } from "../data/changelog.js";
-import { isLocalAppRuntime } from "../lib/appVersion.js";
+import {
+	changelogDefinitions,
+	changelogEntries,
+	changelogLoading,
+	changelogSource,
+	loadRemoteChangelog,
+} from "../services/changelogRemote.js";
+import {
+	currentAppVersion,
+	isLocalAppRuntime,
+} from "../lib/appVersion.js";
 import {
 	findLatestStableEntry,
 	findNowEntry,
@@ -11,6 +20,8 @@ import { locale, t } from "../i18n/index.js";
 import "../styles/pages.css";
 
 const activeTag = ref("");
+const appRuntime = isLocalAppRuntime();
+const currentVersion = currentAppVersion().display;
 
 const latestFallback = {
 	id: "latest",
@@ -18,28 +29,39 @@ const latestFallback = {
 	color: "#23db66",
 	background: "#f0f3f1",
 };
-const latestDefinition =
-	changelogTags.find((tag) =>
-		/latest|最新/i.test(`${tag.id || ""} ${tag.label || ""}`),
-	) || latestFallback;
+const latestDefinition = computed(
+	() =>
+		changelogDefinitions.value.find((tag) =>
+			/latest|最新/i.test(`${tag.id || ""} ${tag.label || ""}`),
+		) || latestFallback,
+);
 const nowFallback = {
 	id: "now",
 	label: "now",
 	color: "#0b8ec2",
 	background: "#eaf7fd",
 };
-const nowDefinition =
-	changelogTags.find(
-		(tag) => String(tag.id || "").toLowerCase() === "now",
-	) || nowFallback;
+const nowDefinition = computed(
+	() =>
+		changelogDefinitions.value.find(
+			(tag) => String(tag.id || "").toLowerCase() === "now",
+		) || nowFallback,
+);
 
-const latestEntry = findLatestStableEntry(changelog);
-const nowEntry = findNowEntry(changelog);
-const appRuntime = isLocalAppRuntime();
-const latestHint = t("最新一个非 beta 版本");
-const nowHint = appRuntime
-	? t("当前正在使用的 app 版本")
-	: t("网页当前最新版本");
+const latestEntry = computed(() =>
+	findLatestStableEntry(changelogEntries.value),
+);
+const nowEntry = computed(() =>
+	appRuntime
+		? findNowEntry(changelogEntries.value, currentVersion)
+		: findNowEntry(changelogEntries.value),
+);
+const latestHint = computed(() => t("最新一个非 beta 版本"));
+const nowHint = computed(() =>
+	appRuntime
+		? t("当前正在使用的 app 版本")
+		: t("网页当前最新版本"),
+);
 
 function withHint(tag, hint) {
 	return tag ? { ...tag, hint } : null;
@@ -47,7 +69,9 @@ function withHint(tag, hint) {
 
 function resolveTag(tag) {
 	if (typeof tag === "string") {
-		const found = changelogTags.find((item) => item.id === tag);
+		const found = changelogDefinitions.value.find(
+			(item) => item.id === tag,
+		);
 		if (found) return { ...found, key: found.id || found.label };
 		return {
 			key: tag,
@@ -62,14 +86,20 @@ function resolveTag(tag) {
 
 function tagsOf(entry) {
 	const tags = (entry.tags || []).map(resolveTag).filter(Boolean);
-	if (entry === latestEntry) {
-		const latest = withHint(resolveTag(latestDefinition), latestHint);
+	if (entry === latestEntry.value) {
+		const latest = withHint(
+			resolveTag(latestDefinition.value),
+			latestHint.value,
+		);
 		if (latest && !tags.some((tag) => tag.key === latest.key)) {
 			tags.unshift(latest);
 		}
 	}
-	if (entry === nowEntry) {
-		const now = withHint(resolveTag(nowDefinition), nowHint);
+	if (entry === nowEntry.value) {
+		const now = withHint(
+			resolveTag(nowDefinition.value),
+			nowHint.value,
+		);
 		if (now && !tags.some((tag) => tag.key === now.key)) {
 			tags.unshift(now);
 		}
@@ -79,15 +109,15 @@ function tagsOf(entry) {
 
 const allTags = computed(() => {
 	const map = new Map();
-	for (const tag of changelogTags) {
+	for (const tag of changelogDefinitions.value) {
 		const resolved = resolveTag(tag);
 		if (resolved) map.set(resolved.key, resolved);
 	}
-	const latest = resolveTag(latestDefinition);
+	const latest = resolveTag(latestDefinition.value);
 	if (latest) map.set(latest.key, latest);
-	const now = resolveTag(nowDefinition);
+	const now = resolveTag(nowDefinition.value);
 	if (now) map.set(now.key, now);
-	for (const entry of changelog) {
+	for (const entry of changelogEntries.value) {
 		for (const tag of tagsOf(entry)) {
 			if (!map.has(tag.key)) map.set(tag.key, tag);
 		}
@@ -97,7 +127,7 @@ const allTags = computed(() => {
 
 const tagCounts = computed(() => {
 	const counts = Object.create(null);
-	for (const entry of changelog) {
+	for (const entry of changelogEntries.value) {
 		for (const tag of tagsOf(entry)) {
 			counts[tag.key] = (counts[tag.key] || 0) + 1;
 		}
@@ -107,10 +137,10 @@ const tagCounts = computed(() => {
 
 const filteredChangelog = computed(() =>
 	activeTag.value
-		? changelog.filter((entry) =>
+		? changelogEntries.value.filter((entry) =>
 				tagsOf(entry).some((tag) => tag.key === activeTag.value),
 			)
-		: changelog,
+		: changelogEntries.value,
 );
 
 function toggleTag(key) {
@@ -127,6 +157,10 @@ function tagStyle(tag) {
 			tag.background || (isHex ? `${color}14` : "transparent"),
 	};
 }
+
+onMounted(() => {
+	if (appRuntime) loadRemoteChangelog();
+});
 </script>
 
 <template>
@@ -156,7 +190,9 @@ function tagStyle(tag) {
 					@click="activeTag = ''"
 				>
 					{{ t("全部") }}
-					<span class="tag-filter-count">{{ changelog.length }}</span>
+					<span class="tag-filter-count">
+						{{ changelogEntries.length }}
+					</span>
 				</button>
 				<button
 					v-for="tag in allTags"
@@ -221,6 +257,16 @@ function tagStyle(tag) {
 			<div v-if="!filteredChangelog.length" class="tag-empty">
 				{{ t("没有匹配这个标签的更新记录。") }}
 			</div>
+
+			<p v-if="appRuntime" class="tag-help changelog-source-note">
+				{{
+					changelogLoading
+						? t("正在获取远端更新日志…")
+						: changelogSource === "remote"
+							? t("已加载远端更新日志")
+							: t("远端更新日志不可用，显示本地版本")
+				}}
+			</p>
 
 			<p class="tag-help">
 				{{

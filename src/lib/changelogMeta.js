@@ -16,8 +16,15 @@ export function findLatestStableEntry(entries) {
  * “now”标签对应的版本。
  *
  * 网页版指向当前部署的第一条记录，也就是网站最新版；
- * 本地 app 内置的 changelog 第一条就是正在运行的版本。
+ * 本地 app 指向当前正在运行的内置版本。
  */
-export function findNowEntry(entries) {
-	return (Array.isArray(entries) ? entries : [])[0] || null;
+export function findNowEntry(entries, currentVersion = "") {
+	const list = Array.isArray(entries) ? entries : [];
+	if (currentVersion) {
+		return (
+			list.find((entry) => entry && entry.version === currentVersion) ||
+			null
+		);
+	}
+	return list[0] || null;
 }

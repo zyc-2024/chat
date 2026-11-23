@@ -340,6 +340,10 @@ const english = {
 	"查看更新说明": "View release notes",
 	"稍后": "Later",
 	"检查更新失败（{status}）": "Update check failed ({status})",
+	"正在获取远端更新日志…": "Loading remote changelog…",
+	"已加载远端更新日志": "Remote changelog loaded.",
+	"远端更新日志不可用，显示本地版本":
+		"Remote changelog unavailable. Showing the local version.",
 	"拍一拍": "Nudge",
 	"设置别人拍你时显示的后缀，例如“的小脑袋”，预览：{example}":
 		"Set the suffix shown when someone nudges you, for example “'s little head”. Preview: {example}",

@@ -92,13 +92,17 @@ const sampleVersions = [
 assert.equal(isBetaVersion("3.9.0 beta 1 (223)"), true);
 assert.equal(findNowEntry(sampleVersions).version, "3.9.0 beta 1 (223)");
 assert.equal(
+	findNowEntry(sampleVersions, "3.8.0 (222)").version,
+	"3.8.0 (222)",
+);
+assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.9.0 (225)");
+assert.equal(findNowEntry(changelog).version, "3.9.1 (226)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.9.0 (225)",
+	"3.9.1 (226)",
 );
 
 const releaseA = parseReleaseVersion({

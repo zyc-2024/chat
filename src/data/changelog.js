@@ -44,6 +44,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.9.1 (226)",
+		tags: ["ai", "hotfix"],
+		desc: "本地 app 更新日志改为远端优先：打开更新日志时先拉取远端 changelog.json，失败才使用内置日志；now 标签继续指向 app 当前内置版本，latest 指向远端最新非 beta 版本。构建时会自动生成并部署 changelog.json。",
+	},
+	{
 		version: "3.9.0 (225)",
 		tags: ["ai"],
 		desc: "本地 app 更新检测完成：启动后自动检查 GitHub Releases，发现更高构建号时显示当前/最新版本和下载入口，稍后会记住该版本；网页版保持不显示更新提示。",

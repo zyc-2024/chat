@@ -1,7 +1,7 @@
 {
 	"name": "zyc-chat-vue",
 	"private": true,
-	"version": "3.9.0-225",
+	"version": "3.9.1-226",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
