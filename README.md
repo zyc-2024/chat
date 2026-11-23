@@ -189,7 +189,7 @@ pnpm test
 格式示例：
 
 ```text
-3.7.0 beta 1 (219)   -> Release tag: v3.7.0-beta.1
+3.7.0 (220)          -> Release tag: v3.7.0-220
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 

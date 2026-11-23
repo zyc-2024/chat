@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.7.0 (220)",
+		tags: ["ai"],
+		desc: "好友与私信功能完成：好友列表、右键加好友、主页加好友、登录用户一对一私信、独立 friends/msg 存储和自动刷新均已接入，并补充中英文文案与文档。",
+	},
+	{
 		version: "3.7.0 beta 1 (219)",
 		tags: ["ai", "beta"],
 		desc: "加入好友列表和私信：仅限登录用户，支持聊天消息右键加好友、主页加好友、好友页按用户名添加；好友关系写入双方列表，私信保存在独立的 friends/msg 文件夹，支持 Markdown/LaTeX 和自动刷新。",
