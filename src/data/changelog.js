@@ -38,6 +38,11 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.2.8 (195)",
+		tags: ["ai", "hotfix"],
+		desc: "主页头像改为显示已登录用户的个人主页头像；没有头像或未登录时仍显示首字母。",
+	},
+	{
 		version: "3.2.7 (194)",
 		tags: ["ai", "hotfix"],
 		desc: "已登录用户不再显示“登录可选”提示：首页的可选登录说明和登录页的“登录可选”徽章会自动隐藏。",

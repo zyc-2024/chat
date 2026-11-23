@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import AuthBadge from "../components/AuthBadge.vue";
 import {
@@ -7,6 +7,7 @@ import {
 	fetchPublicChannelSummaries,
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
+import { loadProfile } from "../services/profile.js";
 import {
 	channelColor,
 	channelInitial,
@@ -30,6 +31,8 @@ const privateKey = ref("");
 const joinId = ref("");
 const joinKey = ref("");
 const createNameInput = ref(null);
+const avatarUrl = ref("");
+const avatarFailed = ref(false);
 
 const filteredChannels = computed(() => {
 	const query = search.value.trim().toLowerCase();
@@ -120,6 +123,26 @@ function focusCreate() {
 	createNameInput.value?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+async function loadAvatar() {
+	avatarUrl.value = "";
+	avatarFailed.value = false;
+	if (!auth.session) return;
+	try {
+		const profile = await loadProfile(auth.session.username);
+		if (profile && profile.avatar) {
+			avatarUrl.value = profile.avatar;
+		}
+	} catch (e) {
+		console.warn("读取用户头像失败：", e);
+	}
+}
+
+watch(
+	() => (auth.session ? auth.session.username : ""),
+	loadAvatar,
+	{ immediate: true },
+);
+
 function openAccount() {
 	if (auth.session) {
 		router.push({ name: "user", query: { u: auth.session.username } });
@@ -143,7 +166,14 @@ onMounted(() => {
 					:title="'当前身份：' + chatName"
 					@click="openAccount"
 				>
-					{{ avatarInitial }}
+					<img
+						v-if="avatarUrl && !avatarFailed"
+						class="home-avatar-img"
+						:src="avatarUrl"
+						alt=""
+						@error="avatarFailed = true"
+					/>
+					<span v-else>{{ avatarInitial }}</span>
 				</button>
 				<nav class="home-rail-nav">
 					<button type="button" class="rail-button active" title="频道">
