@@ -440,10 +440,23 @@ onMounted(() => {
 								)
 							}}
 						</p>
-						<form class="card-form" @submit.prevent="createPrivateChannel">
+						<form
+							class="card-form"
+							autocomplete="off"
+							@submit.prevent="createPrivateChannel"
+						>
 							<input
 								v-model="privateKey"
 								type="password"
+								name="private-channel-new-key"
+								autocomplete="new-password"
+								autocapitalize="off"
+								spellcheck="false"
+								data-form-type="other"
+								data-lpignore="true"
+								data-1p-ignore="true"
+								data-bwignore="true"
+								:aria-label="t('设置一段凭证字符串')"
 								:placeholder="t('设置一段凭证字符串')"
 								required
 							/>
@@ -461,17 +474,37 @@ onMounted(() => {
 						</p>
 						<form
 							class="card-form stacked"
+							autocomplete="off"
 							@submit.prevent="joinPrivateChannel"
 						>
 							<input
 								v-model="joinId"
 								type="text"
+								name="private-channel-id"
+								autocomplete="off"
+								autocapitalize="off"
+								spellcheck="false"
+								inputmode="numeric"
+								data-form-type="other"
+								data-lpignore="true"
+								data-1p-ignore="true"
+								data-bwignore="true"
+								:aria-label="t('频道 id')"
 								:placeholder="t('频道 id')"
 								required
 							/>
 							<input
 								v-model="joinKey"
 								type="password"
+								name="private-channel-join-key"
+								autocomplete="new-password"
+								autocapitalize="off"
+								spellcheck="false"
+								data-form-type="other"
+								data-lpignore="true"
+								data-1p-ignore="true"
+								data-bwignore="true"
+								:aria-label="t('频道凭证')"
 								:placeholder="t('频道凭证')"
 								required
 							/>
