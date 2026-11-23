@@ -70,10 +70,11 @@ function persistSession(session) {
 	}
 }
 
-function saveSession(username, displayName) {
+function saveSession(username, displayName, admin = false) {
 	const session = {
 		username,
 		displayName: displayName || username,
+		admin: admin === true,
 		expires: Date.now() + SESSION_DAYS * 86400000,
 	};
 	persistSession(session);
@@ -87,6 +88,9 @@ export const auth = reactive({
 });
 
 export const isLoggedIn = computed(() => !!auth.session);
+export const isAdmin = computed(
+	() => !!(auth.session && auth.session.admin === true),
+);
 export const authDisplayName = computed(() =>
 	auth.session ? auth.session.displayName || auth.session.username : "",
 );
@@ -115,7 +119,11 @@ export async function login(username, password) {
 	}
 	const displayName =
 		(account.data.settings && account.data.settings.lastName) || username;
-	auth.session = saveSession(username, displayName);
+	auth.session = saveSession(
+		username,
+		displayName,
+		account.data.admin === true,
+	);
 	return auth.session;
 }
 
@@ -138,13 +146,40 @@ export async function register(username, password) {
 		username,
 		password: passwordHash(username, password),
 		registeredAt: now,
+		admin: false,
 		settings: { lastName: username, lastLogin: now },
 		profile: { username, bio: "" },
 	};
 	const path = accountPath(username);
 	await postJson(path, data, { message: "register " + username });
-	auth.session = saveSession(username, username);
+	auth.session = saveSession(username, username, false);
 	return auth.session;
+}
+
+/**
+ * 从账号文件刷新管理员属性。管理员标记只保存为账号字段 `admin: true`，
+ * 不会出现在个人资料或界面徽章中。
+ */
+export async function refreshAdmin() {
+	if (!auth.session) return false;
+	const username = auth.session.username;
+	try {
+		const account = await readAccount(username);
+		const admin = !!(
+			account &&
+			account.data &&
+			account.data.username === username &&
+			account.data.admin === true
+		);
+		if (admin !== (auth.session.admin === true)) {
+			auth.session = { ...auth.session, admin };
+			persistSession(auth.session);
+		}
+		return admin;
+	} catch (error) {
+		console.warn("读取管理员属性失败：", error);
+		return auth.session.admin === true;
+	}
 }
 
 /**

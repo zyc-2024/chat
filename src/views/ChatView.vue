@@ -103,7 +103,9 @@ let highlightTimer = null;
 const identity = computed(() => currentIdentity());
 const canDelete = computed(() => {
 	const status = channelStatus.value;
-	if (!status || status.deleted) return false;
+	if (status && status.deleted) return false;
+	if (identity.value.admin) return true;
+	if (!status) return false;
 	if (status.owner !== identity.value.name) return false;
 	if (
 		status.ownerType &&
@@ -527,11 +529,9 @@ function submitInterval() {
 }
 
 function canRecallMessage(message) {
-	return (
-		!message.recalled &&
-		!!message.user &&
-		message.user === identity.value.name
-	);
+	if (!message || message.recalled) return false;
+	if (identity.value.admin) return true;
+	return !!message.user && message.user === identity.value.name;
 }
 
 async function recallMessageAt(index) {

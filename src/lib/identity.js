@@ -97,9 +97,13 @@ export const chatName = computed(() => {
 /** 频道归属使用的唯一身份：真实账号用 username，游客用 Guest_<HASH>。 */
 export function currentIdentity() {
 	if (auth.session) {
-		return { name: auth.session.username, type: "user" };
+		return {
+			name: auth.session.username,
+			type: "user",
+			admin: auth.session.admin === true,
+		};
 	}
-	return { name: guestUsername.value, type: "guest" };
+	return { name: guestUsername.value, type: "guest", admin: false };
 }
 
 export function useIdentity() {

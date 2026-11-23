@@ -43,6 +43,7 @@ function normalizeOwner(owner, fallbackName = "") {
 	return {
 		name,
 		type: owner && owner.type === "user" ? "user" : "guest",
+		admin: !!(owner && owner.admin === true),
 	};
 }
 
@@ -237,23 +238,39 @@ export async function fetchPublicChannelSummaries(rawNames) {
 
 /**
  * 删除频道：只写入 deleted 标记，不删除聊天记录或频道索引。
- * 只有状态文件中记录的创建者可以操作。
+ * 普通用户只能删除自己创建的频道；admin 账号可以删除任意频道，
+ * 包括没有状态文件的旧频道。
  */
 export async function deleteChannel(options, owner) {
 	const normalized = normalizeOwner(owner);
 	const path = statusPath(options);
 	const file = await getJson(path);
-	if (!file) throw new Error("频道没有创建者标记，无法删除");
 	let data;
-	try {
-		data = options.type === "r" ? decryptData(file.data, options.key) : file.data;
-	} catch (e) {
-		throw new Error("频道状态解密失败，可能是频道凭证错误");
+	if (file) {
+		try {
+			data =
+				options.type === "r"
+					? decryptData(file.data, options.key)
+					: file.data;
+		} catch (e) {
+			throw new Error("频道状态解密失败，可能是频道凭证错误");
+		}
+	} else if (normalized.admin) {
+		data = {
+			owner: null,
+			ownerType: null,
+			createdAt: null,
+			deleted: false,
+			deletedAt: null,
+		};
+	} else {
+		throw new Error("频道没有创建者标记，无法删除");
 	}
 	if (
-		!data ||
-		data.owner !== normalized.name ||
-		(data.ownerType && data.ownerType !== normalized.type)
+		!normalized.admin &&
+		(!data ||
+			data.owner !== normalized.name ||
+			(data.ownerType && data.ownerType !== normalized.type))
 	) {
 		throw new Error("只能删除自己创建的频道");
 	}
@@ -266,7 +283,11 @@ export async function deleteChannel(options, owner) {
 	};
 	const payload =
 		options.type === "r" ? encryptData(next, options.key) : next;
-	await putJson(path, payload, `delete ${path}`, file.sha);
+	if (file) {
+		await putJson(path, payload, `delete ${path}`, file.sha);
+	} else {
+		await postJson(path, payload, { message: `delete ${path}` });
+	}
 	return next;
 }
 
@@ -541,7 +562,7 @@ export async function recallChannelMessage(options, messageIndex, owner) {
 			const messages = normalizeMessages(data.msg);
 			const target = messages[messageIndex];
 			if (!target) throw new Error("消息不存在");
-			if (target.user !== normalized.name) {
+			if (!normalized.admin && target.user !== normalized.name) {
 				throw new Error("只能撤回自己发送的消息");
 			}
 			if (target.recalled) return messages;

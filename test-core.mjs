@@ -150,9 +150,10 @@ assert.match(recallByOther.message, /只能撤回自己发送的消息/);
 const publicRecalled = await recallChannelMessage(
 	{ type: "u", ch: "测试频道" },
 	1,
-	alice,
+	{ name: "Bob", type: "user", admin: true },
 );
 assert.equal(publicRecalled[1].recalled, true);
+assert.equal(publicRecalled[1].user, "Alice");
 const publicAfterRecall = await readChannel({
 	type: "u",
 	ch: "测试频道",
@@ -320,6 +321,54 @@ const badDelete = await deleteChannel(
 );
 assert.ok(badDelete instanceof Error);
 assert.match(badDelete.message, /只能删除自己创建的频道/);
+
+const admin = { name: "Bob", type: "user", admin: true };
+await createPublicChannel("管理员频道", "Alice", () => {}, alice);
+const adminDeleted = await deleteChannel(
+	{ type: "u", ch: "管理员频道" },
+	admin,
+);
+assert.equal(adminDeleted.deleted, true);
+assert.equal(adminDeleted.owner, "Alice");
+assert.equal(adminDeleted.deletedBy, "Bob");
+const adminDeletedStatus = await getChannelStatus({
+	type: "u",
+	ch: "管理员频道",
+});
+assert.equal(adminDeletedStatus.data.deleted, true);
+
+put(
+	"public/msg/无标记频道.json",
+	JSON.stringify({
+		msg: [
+			{
+				name: "Legacy",
+				user: "Legacy",
+				time: "20250101 00:00:00",
+				ts: 1,
+				hash: "legacy-hash",
+				quote: null,
+				recalled: false,
+				content: "old",
+			},
+		],
+	}),
+);
+const noStatusNormalDelete = await deleteChannel(
+	{ type: "u", ch: "无标记频道" },
+	{ name: "Bob", type: "user" },
+).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(noStatusNormalDelete instanceof Error);
+assert.match(noStatusNormalDelete.message, /没有创建者标记/);
+const noStatusAdminDelete = await deleteChannel(
+	{ type: "u", ch: "无标记频道" },
+	admin,
+);
+assert.equal(noStatusAdminDelete.deleted, true);
+assert.ok(files.has("status/public/无标记频道.json"));
 
 const deletedPublic = await deleteChannel(
 	{ type: "u", ch: "测试频道" },
