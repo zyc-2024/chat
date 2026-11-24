@@ -38,6 +38,12 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.11.2 (237)",
+		date: "2026-11-24T20:27:24+08:00",
+		tags: ["ai"],
+		desc: "上传文件页面支持拖拽上传：可以把文件直接拖到页面中，拖入后自动开始上传，拖拽悬停时显示高亮提示；仍然支持点击选择文件。",
+	},
+	{
 		version: "3.11.1 (236)",
 		date: "2026-11-24T20:24:50+08:00",
 		tags: ["ai", "hotfix"],

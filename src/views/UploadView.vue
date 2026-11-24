@@ -15,19 +15,75 @@ const progressText = ref("");
 const busy = ref(false);
 const output = ref(null);
 const error = ref("");
+const dragging = ref(false);
 
 const fileInfo = computed(() => {
 	if (!file.value) return "";
 	return `${file.value.name} · ${formatBytes(file.value.size)}`;
 });
 
-function chooseFile(event) {
-	const selected = event.target.files && event.target.files[0];
-	file.value = selected || null;
+function setFile(selected) {
+	if (!selected) return false;
+	if (selected.size >= 104857600) {
+		showToast(t("文件不能超过 100MB"), "error");
+		return false;
+	}
+	file.value = selected;
 	output.value = null;
 	error.value = "";
 	progress.value = 0;
 	progressText.value = "";
+	return true;
+}
+
+function chooseFile(event) {
+	const selected = event.target.files && event.target.files[0];
+	setFile(selected || null);
+	event.target.value = "";
+}
+
+function hasFiles(event) {
+	const types = event.dataTransfer && event.dataTransfer.types;
+	return !!types && Array.from(types).includes("Files");
+}
+
+function onDragEnter(event) {
+	if (!hasFiles(event)) return;
+	event.preventDefault();
+	dragging.value = true;
+}
+
+function onDragOver(event) {
+	if (!hasFiles(event)) return;
+	event.preventDefault();
+	event.dataTransfer.dropEffect = "copy";
+	dragging.value = true;
+}
+
+function onDragLeave(event) {
+	if (!hasFiles(event)) return;
+	if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) {
+		return;
+	}
+	dragging.value = false;
+}
+
+function onDrop(event) {
+	if (!hasFiles(event)) return;
+	event.preventDefault();
+	dragging.value = false;
+	if (busy.value) {
+		showToast(t("正在上传，请稍后再拖入文件"), "info");
+		return;
+	}
+	const files = Array.from(event.dataTransfer.files || []);
+	if (!files.length) return;
+	if (files.length > 1) {
+		showToast(t("一次只能上传一个文件，已选择第一个"), "info");
+	}
+	if (setFile(files[0])) {
+		upload();
+	}
 }
 
 function arrayBufferToBase64(buffer) {
@@ -160,7 +216,13 @@ async function copy(value, label) {
 </script>
 
 <template>
-	<div class="standalone-page">
+	<div
+		class="standalone-page"
+		@dragenter="onDragEnter"
+		@dragover="onDragOver"
+		@dragleave="onDragLeave"
+		@drop="onDrop"
+	>
 		<div class="standalone-card">
 			<div class="standalone-head">
 				<div>
@@ -170,6 +232,8 @@ async function copy(value, label) {
 							t(
 								"文件会以 base64 形式保存到 Gitee 分片仓库（按 MD5 前两位选择 256 个仓库之一），上传后生成可直接引用的链接。",
 							)
+						}}<br />{{
+							t("也可以把文件直接拖到页面中，拖入后会自动上传。")
 						}}
 					</p>
 				</div>
@@ -190,11 +254,15 @@ async function copy(value, label) {
 				</router-link>
 			</div>
 
-			<label class="file-drop">
+			<label class="file-drop" :class="{ dragging }">
 				<input type="file" @change="chooseFile" />
-				<strong>{{ file ? file.name : t("点击选择文件") }}</strong>
+				<strong>
+					{{ file ? file.name : t("拖拽文件到这里，或点击选择") }}
+				</strong>
 				<span v-if="file">{{ formatBytes(file.size) }}</span>
-				<span v-else>{{ t("单个文件不超过 100MB") }}</span>
+				<span v-else>{{
+					t("单个文件不超过 100MB · 拖入后自动上传")
+				}}</span>
 			</label>
 
 			<div v-if="fileInfo" class="file-meta">

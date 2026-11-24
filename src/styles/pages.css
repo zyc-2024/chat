@@ -207,12 +207,19 @@
 	cursor: pointer;
 	transition:
 		border-color 0.15s ease,
-		background 0.15s ease;
+		background 0.15s ease,
+		box-shadow 0.15s ease;
 }
 
 .file-drop:hover {
 	border-color: var(--theme-accent);
 	background: var(--theme-accent-soft);
+}
+
+.file-drop.dragging {
+	border-color: var(--theme-accent);
+	background: var(--theme-accent-soft);
+	box-shadow: 0 0 0 4px var(--theme-accent-soft);
 }
 
 .file-drop input {

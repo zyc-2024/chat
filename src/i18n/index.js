@@ -602,6 +602,16 @@ const english = {
 		"Files are stored as Base64 in one of 256 Gitee shard repositories, chosen by the first two MD5 characters. A direct link is generated after upload.",
 	"点击选择文件": "Click to choose a file",
 	"单个文件不超过 100MB": "Up to 100 MB per file",
+	"拖拽文件到这里，或点击选择":
+		"Drop a file here, or click to choose",
+	"单个文件不超过 100MB · 拖入后自动上传":
+		"Up to 100 MB per file · Dropped files upload automatically",
+	"正在上传，请稍后再拖入文件":
+		"An upload is in progress. Try dropping a file again later.",
+	"一次只能上传一个文件，已选择第一个":
+		"Only one file can be uploaded at a time; the first file was selected.",
+	"也可以把文件直接拖到页面中，拖入后会自动上传。":
+		"You can also drag a file onto the page, and it will upload automatically.",
 	"已选择：{info}": "Selected: {info}",
 	"上传中……": "Uploading…",
 	"开始上传": "Start upload",
