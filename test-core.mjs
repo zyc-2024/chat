@@ -29,6 +29,15 @@ import {
 import { mergeChangelogEntries } from "./src/services/changelogRemote.js";
 import { mathModeAt, wrapLatexSnippet } from "./src/lib/latex.js";
 import {
+	addGroupMember,
+	createGroup,
+	createGroupKey,
+	joinGroup,
+	loadGroupMeta,
+	loadUserGroups,
+	removeGroupFromIndex,
+} from "./src/services/groups.js";
+import {
 	DATA_LOST_DATE,
 	findLatestStableEntry,
 	findNowEntry,
@@ -105,10 +114,10 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.9.6 (231)");
+assert.equal(findNowEntry(changelog).version, "3.10.0 (232)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.9.6 (231)",
+	"3.10.0 (232)",
 );
 assert.equal(isAiAssistedEntry({ tags: ["ai", "beta"] }), true);
 assert.equal(isAiAssistedEntry({ tags: [{ label: "使用AI" }] }), true);
@@ -481,6 +490,106 @@ const corrupt = await readChannel({
 );
 assert.ok(corrupt instanceof Error);
 assert.match(corrupt.message, /无法解密/);
+
+assert.equal(createGroupKey().length, 36);
+const groupProgress = [];
+const group = await createGroup(
+	"测试群组",
+	"Alice",
+	(value, text) => groupProgress.push([value, text]),
+	{ name: "Alice", type: "user" },
+);
+assert.equal(group.id, 9);
+assert.equal(group.name, "测试群组");
+assert.equal(files.get("private/id.json").content, "9");
+assert.equal(group.meta.members.length, 1);
+assert.equal(group.meta.owner, "Alice");
+assert.equal(group.meta.members[0].role, "owner");
+assert.ok(groupProgress.length > 0);
+
+const groupMetaFile = [...files.keys()].find(
+	(path) => path.startsWith("groups/9_") && !path.includes("/index/"),
+);
+assert.ok(groupMetaFile);
+assert.ok(!files.get(groupMetaFile).content.includes("测试群组"));
+const groupChatPath = [...files.keys()].find((path) =>
+	path.startsWith("private/msg/9_"),
+);
+assert.ok(groupChatPath);
+assert.ok(!files.get(groupChatPath).content.includes("测试群组"));
+assert.ok(!files.get("status/private/9.json").content.includes("Alice"));
+
+const aliceGroups = await loadUserGroups("Alice");
+assert.equal(aliceGroups.length, 1);
+assert.equal(aliceGroups[0].id, "9");
+assert.equal(aliceGroups[0].role, "owner");
+
+const groupRead = await readChannel({
+	type: "g",
+	id: "9",
+	key: group.key,
+});
+assert.equal(groupRead.messages.length, 2);
+assert.equal(groupRead.status.owner, "Alice");
+const groupSend = await sendChannelMessage(
+	{ type: "g", id: "9", key: group.key },
+	{
+		name: "Alice",
+		user: "Alice",
+		time: "20260101 00:00:00",
+		ts: Date.now(),
+		recalled: false,
+		content: "group hello",
+	},
+);
+assert.equal(groupSend.length, 3);
+assert.ok(!files.get(groupChatPath).content.includes("group hello"));
+
+const groupMeta = await loadGroupMeta({
+	type: "g",
+	id: "9",
+	key: group.key,
+});
+assert.equal(groupMeta.name, "测试群组");
+
+const joinedGroup = await joinGroup(
+	{ type: "g", id: "9", key: group.key },
+	{ name: "Bob", displayName: "Bob", type: "user" },
+);
+assert.equal(joinedGroup.joined, true);
+assert.equal(joinedGroup.meta.members.length, 2);
+const bobGroups = await loadUserGroups("Bob");
+assert.ok(bobGroups.some((item) => item.id === "9"));
+
+const invited = await addGroupMember(
+	{ type: "g", id: "9", key: group.key },
+	{ username: "FriendUser", name: "Friend User" },
+);
+assert.equal(invited.added, true);
+assert.equal(invited.meta.members.length, 3);
+const invitedAgain = await addGroupMember(
+	{ type: "g", id: "9", key: group.key },
+	{ username: "FriendUser", name: "Friend User" },
+);
+assert.equal(invitedAgain.added, false);
+assert.equal(invitedAgain.meta.members.length, 3);
+const friendGroups = await loadUserGroups("FriendUser");
+assert.ok(friendGroups.some((item) => item.id === "9"));
+
+await removeGroupFromIndex("Bob", "9");
+const bobGroupsAfterRemove = await loadUserGroups("Bob");
+assert.ok(!bobGroupsAfterRemove.some((item) => item.id === "9"));
+
+const wrongGroupKey = await loadGroupMeta({
+	type: "g",
+	id: "9",
+	key: "wrong-group-key",
+}).then(
+	() => null,
+	(error) => error,
+);
+assert.ok(wrongGroupKey instanceof Error);
+assert.match(wrongGroupKey.message, /群组信息不存在|群组凭证错误/);
 
 const friendAccountHash = createHash("sha256")
 	.update("zyc2024-chat-auth-v1:user:FriendUser")

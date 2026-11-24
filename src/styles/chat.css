@@ -87,6 +87,12 @@
 	flex: 0 0 auto;
 }
 
+.chat-group-toggle {
+	height: 30px;
+	padding: 0 10px;
+	font-size: 12px;
+}
+
 .chat-user {
 	display: flex;
 	align-items: center;
@@ -953,6 +959,153 @@
 	line-height: 1.6;
 }
 
+.group-info {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.group-info-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.group-info-name {
+	display: block;
+	color: var(--theme-text);
+	font-size: 16px;
+}
+
+.group-info-sub {
+	color: var(--theme-muted);
+	font-size: 12px;
+}
+
+.group-invite-field {
+	margin-bottom: 0;
+}
+
+.group-invite-row {
+	display: flex;
+	gap: 8px;
+}
+
+.group-invite-row input {
+	flex: 1;
+	min-width: 0;
+}
+
+.group-invite-row .primary-button {
+	flex: 0 0 auto;
+	height: 40px;
+	padding: 0 14px;
+}
+
+.group-hint {
+	margin: 0;
+	color: var(--theme-muted);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.group-section {
+	padding-top: 14px;
+	border-top: 1px solid var(--theme-border);
+}
+
+.group-section-title {
+	margin: 0 0 9px;
+	color: var(--theme-text);
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.group-members,
+.group-friends {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	max-height: 180px;
+	overflow-y: auto;
+}
+
+.group-member,
+.group-friend {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding: 7px 8px;
+	border: 1px solid var(--theme-border);
+	border-radius: 8px;
+}
+
+.group-member-avatar {
+	display: grid;
+	flex: 0 0 auto;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.group-member-main,
+.group-friend-main {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 1px;
+	min-width: 0;
+}
+
+.group-member-name {
+	overflow: hidden;
+	color: var(--theme-text);
+	font-size: 12px;
+	font-weight: 600;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.group-member-sub {
+	overflow: hidden;
+	color: var(--theme-muted);
+	font-size: 11px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.group-owner-badge {
+	flex: 0 0 auto;
+	padding: 2px 6px;
+	border-radius: 5px;
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
+	font-size: 10px;
+}
+
+.group-friend .ghost-button {
+	height: 28px;
+	padding: 0 10px;
+	font-size: 12px;
+}
+
+.group-error {
+	padding: 9px 11px;
+	border: 1px solid #f0d6d6;
+	border-radius: 8px;
+	background: #fff8f8;
+	color: #9d2f2f;
+	font-size: 12px;
+	line-height: 1.6;
+}
+
 @media (max-width: 760px) {
 	.chat-page {
 		height: 100vh;
@@ -1174,6 +1327,12 @@
 
 	.chat-user {
 		padding: 7px 8px;
+	}
+
+	.chat-group-toggle {
+		height: 28px;
+		padding: 0 7px;
+		font-size: 11px;
 	}
 
 	.chat-title {

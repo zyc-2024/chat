@@ -30,9 +30,13 @@ export function privateStatusPath(id) {
 	return `status/private/${id}.json`;
 }
 
+export function isEncryptedChannelType(type) {
+	return type === "r" || type === "g";
+}
+
 function statusPath({ type, ch, id }) {
-	if (type === "r") {
-		if (!id) throw new Error(t("私密频道缺少 id"));
+	if (isEncryptedChannelType(type)) {
+		if (!id) throw new Error(t("频道缺少 id"));
 		return privateStatusPath(id);
 	}
 	return publicStatusPath(String(ch || "main"));
@@ -168,7 +172,9 @@ export async function getChannelStatus(options) {
 	if (!file) return null;
 	let data;
 	try {
-		data = options.type === "r" ? decryptData(file.data, options.key) : file.data;
+		data = isEncryptedChannelType(options.type)
+			? decryptData(file.data, options.key)
+			: file.data;
 	} catch (e) {
 		throw new Error(t("频道状态解密失败，可能是频道凭证错误"));
 	}
@@ -249,10 +255,9 @@ export async function deleteChannel(options, owner) {
 	let data;
 	if (file) {
 		try {
-			data =
-				options.type === "r"
-					? decryptData(file.data, options.key)
-					: file.data;
+			data = isEncryptedChannelType(options.type)
+				? decryptData(file.data, options.key)
+				: file.data;
 		} catch (e) {
 			throw new Error(t("频道状态解密失败，可能是频道凭证错误"));
 		}
@@ -282,8 +287,9 @@ export async function deleteChannel(options, owner) {
 		deletedAt: new Date().toISOString(),
 		deletedBy: normalized.name,
 	};
-	const payload =
-		options.type === "r" ? encryptData(next, options.key) : next;
+	const payload = isEncryptedChannelType(options.type)
+		? encryptData(next, options.key)
+		: next;
 	if (file) {
 		await putJson(path, payload, `delete ${path}`, file.sha);
 	} else {
@@ -454,8 +460,8 @@ export async function createPrivateChannel(
 }
 
 function channelPath({ type, ch, id, key }) {
-	if (type === "r") {
-		if (!id || !key) throw new Error(t("私密频道缺少 id 或凭证"));
+	if (isEncryptedChannelType(type)) {
+		if (!id || !key) throw new Error(t("频道缺少 id 或凭证"));
 		return privateMessagePath(id, key);
 	}
 	const name = String(ch || "main");
@@ -463,7 +469,7 @@ function channelPath({ type, ch, id, key }) {
 }
 
 function unpack(raw, type, key) {
-	if (type !== "r") return raw;
+	if (!isEncryptedChannelType(type)) return raw;
 	// 兼容早期未加密的私密频道数据
 	if (raw && raw.version === undefined && Array.isArray(raw.msg)) return raw;
 	return decryptData(raw, key);
@@ -519,7 +525,9 @@ export async function sendChannelMessage(options, message) {
 			);
 			messages.push(outgoing);
 			const next = { ...data, msg: messages };
-			const payload = options.type === "r" ? encryptData(next, options.key) : next;
+			const payload = isEncryptedChannelType(options.type)
+				? encryptData(next, options.key)
+				: next;
 			await putJson(
 				path,
 				payload,
@@ -528,7 +536,7 @@ export async function sendChannelMessage(options, message) {
 			);
 			await writeStatusSummary(
 				statusPath(options),
-				options.type === "r" ? options.key : null,
+				isEncryptedChannelType(options.type) ? options.key : null,
 				{
 					messageCount: messages.length,
 					lastMessageAt: new Date(
@@ -573,8 +581,9 @@ export async function recallChannelMessage(options, messageIndex, owner) {
 				recalledAt: new Date().toISOString(),
 			};
 			const next = { ...data, msg: messages };
-			const payload =
-				options.type === "r" ? encryptData(next, options.key) : next;
+			const payload = isEncryptedChannelType(options.type)
+				? encryptData(next, options.key)
+				: next;
 			await putJson(
 				path,
 				payload,

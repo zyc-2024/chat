@@ -9,6 +9,7 @@ import {
 	fetchPublicChannelSummaries,
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
+import { loadUserGroups } from "../services/groups.js";
 import { loadProfile } from "../services/profile.js";
 import {
 	channelColor,
@@ -18,7 +19,7 @@ import {
 } from "../lib/format.js";
 import { currentAppVersion } from "../lib/appVersion.js";
 import { t } from "../i18n/index.js";
-import { chatName } from "../lib/identity.js";
+import { chatName, currentIdentity } from "../lib/identity.js";
 import { showToast } from "../lib/toast.js";
 import "../styles/home.css";
 
@@ -30,6 +31,10 @@ const error = ref("");
 const search = ref("");
 const version = currentAppVersion().display;
 const createName = ref("");
+const groupName = ref("");
+const groups = ref([]);
+const groupsLoading = ref(false);
+const groupsError = ref("");
 const privateKey = ref("");
 const joinId = ref("");
 const joinKey = ref("");
@@ -110,6 +115,36 @@ function createPublicChannel() {
 	router.push({ name: "create", query: { type: "u", ch: name } });
 }
 
+async function loadGroups() {
+	groupsLoading.value = true;
+	groupsError.value = "";
+	try {
+		groups.value = await loadUserGroups(currentIdentity().name);
+	} catch (e) {
+		groups.value = [];
+		groupsError.value = e && e.message ? e.message : String(e);
+	} finally {
+		groupsLoading.value = false;
+	}
+}
+
+function createGroupChannel() {
+	const name = groupName.value.trim();
+	if (!name) {
+		showToast(t("请输入群组名称"), "error");
+		return;
+	}
+	router.push({ name: "create", query: { type: "g", ch: name } });
+}
+
+function openGroup(group) {
+	if (!group) return;
+	router.push({
+		name: "chat",
+		query: { type: "g", id: String(group.id), key: group.key },
+	});
+}
+
 function createPrivateChannel() {
 	if (!privateKey.value) {
 		showToast(t("请先设置一段凭证字符串"), "error");
@@ -166,6 +201,12 @@ async function loadAvatar() {
 watch(
 	() => (auth.session ? auth.session.username : ""),
 	loadAvatar,
+	{ immediate: true },
+);
+
+watch(
+	() => (auth.session ? auth.session.username : ""),
+	loadGroups,
 	{ immediate: true },
 );
 
@@ -400,7 +441,7 @@ onMounted(() => {
 				<div class="detail-head">
 					<div class="detail-title">{{ t("频道广场") }}</div>
 					<div class="detail-sub">
-						{{ t("加入一个公开频道，或创建自己的私有频道") }}
+						{{ t("加入一个公开频道，或创建私有频道和群组") }}
 					</div>
 				</div>
 
@@ -426,6 +467,81 @@ onMounted(() => {
 							{{ auth.session ? t("我的主页 →") : t("去登录 →") }}
 						</router-link>
 					</div>
+
+					<section class="home-card home-groups-card">
+						<div class="card-title">
+							{{ t("群组") }}
+							<span class="badge">{{ t("群聊") }}</span>
+						</div>
+						<p class="card-desc">
+							{{
+								t(
+									"创建群组后可以邀请好友，或复制邀请链接发给其他人，点击链接即可加入。登录后才能邀请好友；群组消息使用群凭证加密。",
+								)
+							}}
+						</p>
+						<form
+							class="card-form"
+							autocomplete="off"
+							@submit.prevent="createGroupChannel"
+						>
+							<input
+								v-model="groupName"
+								type="text"
+								maxlength="32"
+								:placeholder="t('输入群组名称')"
+								required
+							/>
+							<button type="submit">{{ t("创建群组") }}</button>
+						</form>
+
+						<div v-if="groups.length" class="home-group-list">
+							<div class="home-group-list-head">
+								<span>{{ t("我的群组") }}</span>
+								<span>{{ t("{count} 个", { count: groups.length }) }}</span>
+							</div>
+							<button
+								v-for="group in groups"
+								:key="group.id"
+								type="button"
+								class="home-group-item"
+								@click="openGroup(group)"
+							>
+								<span class="home-group-avatar">
+									{{ group.name.charAt(0) }}
+								</span>
+								<span class="home-group-main">
+									<span class="home-group-name">
+										{{ group.name }}
+									</span>
+									<span class="home-group-sub">
+										{{
+											group.role === "owner"
+												? t("群主 · 点击进入")
+												: t("成员 · 点击进入")
+										}}
+									</span>
+								</span>
+								<span class="home-group-meta">#{{ group.id }}</span>
+							</button>
+						</div>
+						<div v-else-if="groupsLoading" class="home-group-empty">
+							{{ t("群组加载中……") }}
+						</div>
+						<div v-else-if="groupsError" class="home-group-empty">
+							{{ groupsError }}
+							<button
+								type="button"
+								class="mini-button"
+								@click="loadGroups"
+							>
+								{{ t("重试") }}
+							</button>
+						</div>
+						<div v-else class="home-group-empty">
+							{{ t("还没有加入群组，创建一个吧。") }}
+						</div>
+					</section>
 
 					<section class="home-card">
 						<div class="card-title">

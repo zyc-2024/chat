@@ -18,7 +18,17 @@ import {
 	sendChannelMessage,
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
-import { addFriend } from "../services/friends.js";
+import {
+	addFriend,
+	loadFriends,
+	sendFriendMessage,
+} from "../services/friends.js";
+import {
+	addGroupMember,
+	joinGroup,
+	loadGroupMeta,
+	removeGroupFromIndex,
+} from "../services/groups.js";
 import { rewriteLegacyFileUrls } from "../services/gitee.js";
 import { createNudgeMessage, fetchNudgeSuffix } from "../services/nudge.js";
 import { copyText } from "../lib/clipboard.js";
@@ -42,8 +52,11 @@ function queryString(name, fallback = "") {
 	return typeof value === "string" ? value : fallback;
 }
 
+const groupMeta = ref(null);
+
 const options = computed(() => {
-	const type = queryString("type") === "r" ? "r" : "u";
+	const rawType = queryString("type");
+	const type = rawType === "r" || rawType === "g" ? rawType : "u";
 	return {
 		type,
 		ch: queryString("ch", "main") || "main",
@@ -51,15 +64,34 @@ const options = computed(() => {
 		key: queryString("key"),
 	};
 });
-const isPrivate = computed(() => options.value.type === "r");
-const channelName = computed(() =>
-	isPrivate.value ? `#${options.value.id}` : `# ${safeDecode(options.value.ch)}`,
+const isGroup = computed(() => options.value.type === "g");
+const isPrivate = computed(
+	() => options.value.type === "r" || isGroup.value,
 );
-const channelSub = computed(() =>
-	isPrivate.value
+const channelName = computed(() => {
+	if (isGroup.value) {
+		return groupMeta.value && groupMeta.value.name
+			? groupMeta.value.name
+			: `#${options.value.id}`;
+	}
+	return isPrivate.value
+		? `#${options.value.id}`
+		: `# ${safeDecode(options.value.ch)}`;
+});
+const channelSub = computed(() => {
+	if (isGroup.value) {
+		if (!groupMeta.value) {
+			return t("群组 · 正在读取群组信息…");
+		}
+		const count = groupMeta.value.members.length;
+		return t("群组 · {count} 位成员 · 消息在浏览器内加密", {
+			count,
+		});
+	}
+	return isPrivate.value
 		? t("私密频道 · 消息在浏览器内使用口令加解密")
-		: t("公开频道 · 任何人都可以进入"),
-);
+		: t("公开频道 · 任何人都可以进入");
+});
 const userLink = computed(() =>
 	auth.session
 		? { name: "user", query: { u: auth.session.username } }
@@ -790,6 +822,11 @@ const intervalValue = ref(5);
 const deleteOpen = ref(false);
 const deleteBusy = ref(false);
 const deleteError = ref("");
+const groupInfoOpen = ref(false);
+const groupFriends = ref([]);
+const groupFriendsLoading = ref(false);
+const groupAddBusy = ref("");
+const groupActionError = ref("");
 
 let timer = null;
 let highlightTimer = null;
@@ -809,6 +846,37 @@ const canDelete = computed(() => {
 		return false;
 	}
 	return true;
+});
+
+const groupInviteLink = computed(() => {
+	if (!isGroup.value || !options.value.id || !options.value.key) {
+		return "";
+	}
+	try {
+		const target = router.resolve({
+			name: "chat",
+			query: {
+				type: "g",
+				id: options.value.id,
+				key: options.value.key,
+			},
+		});
+		return new URL(target.href, window.location.href).href;
+	} catch (e) {
+		return "";
+	}
+});
+const groupMemberCount = computed(() =>
+	groupMeta.value ? groupMeta.value.members.length : 0,
+);
+const groupInviteableFriends = computed(() => {
+	if (!groupMeta.value) return [];
+	const memberNames = new Set(
+		groupMeta.value.members.map((member) => member.username),
+	);
+	return groupFriends.value.filter(
+		(friend) => !memberNames.has(friend.username),
+	);
 });
 
 const visibleMessages = computed(() =>
@@ -1117,10 +1185,28 @@ async function load() {
 	try {
 		if (isPrivate.value && (!options.value.id || !options.value.key)) {
 			throw new Error(
-				t("私密频道缺少 id 或凭证，请从首页重新进入"),
+				isGroup.value
+					? t("群组缺少 id 或邀请凭证，请重新打开邀请链接")
+					: t("私密频道缺少 id 或凭证，请从首页重新进入"),
 			);
 		}
 		const result = await readChannel(options.value);
+		if (isGroup.value) {
+			const joined = await joinGroup(options.value, {
+				name: identity.value.name,
+				displayName: chatName.value,
+				type: identity.value.type,
+			});
+			groupMeta.value = joined.meta;
+			if (joined.joined) {
+				showToast(
+					t("已加入群组“{name}”", {
+						name: joined.meta.name,
+					}),
+					"success",
+				);
+			}
+		}
 		channelStatus.value = result.status || null;
 		allMessages.value = result.messages;
 		visibleStart.value = Math.max(0, result.messages.length - PAGE_SIZE);
@@ -1388,13 +1474,87 @@ async function confirmDelete() {
 	deleteError.value = "";
 	try {
 		await deleteChannel(options.value, identity.value);
+		if (isGroup.value) {
+			await removeGroupFromIndex(
+				identity.value.name,
+				options.value.id,
+			).catch(() => {});
+		}
 		deleteOpen.value = false;
-		showToast(t("频道已删除"), "success");
+		showToast(
+			isGroup.value ? t("群组已删除") : t("频道已删除"),
+			"success",
+		);
 		router.push({ name: "home" });
 	} catch (e) {
 		deleteError.value = e && e.message ? e.message : String(e);
 	} finally {
 		deleteBusy.value = false;
+	}
+}
+
+async function openGroupInfo() {
+	if (!isGroup.value) return;
+	groupInfoOpen.value = true;
+	groupActionError.value = "";
+	groupFriendsLoading.value = true;
+	try {
+		groupMeta.value = await loadGroupMeta(options.value);
+		if (auth.session) {
+			groupFriends.value = await loadFriends(auth.session.username);
+		} else {
+			groupFriends.value = [];
+		}
+	} catch (e) {
+		groupActionError.value = e && e.message ? e.message : String(e);
+	} finally {
+		groupFriendsLoading.value = false;
+	}
+}
+
+async function copyGroupInvite() {
+	const link = groupInviteLink.value;
+	if (!link) return;
+	const ok = await copyText(link);
+	showToast(
+		ok ? t("邀请链接已复制") : t("复制失败，请手动复制"),
+		ok ? "success" : "error",
+	);
+}
+
+async function inviteFriendToGroup(friend) {
+	if (!friend || groupAddBusy.value) return;
+	groupAddBusy.value = friend.username;
+	groupActionError.value = "";
+	try {
+		const result = await addGroupMember(options.value, friend);
+		groupMeta.value = result.meta;
+		const link = groupInviteLink.value;
+		if (result.added && auth.session && link) {
+			await sendFriendMessage(
+				{
+					username: auth.session.username,
+					name: chatName.value,
+				},
+				friend.username,
+				t("邀请你加入群组「{name}」：{link}", {
+					name: result.meta.name,
+					link,
+				}),
+			).catch((error) => {
+				console.warn("发送群组邀请私信失败：", error);
+			});
+		}
+		showToast(
+			result.added
+				? t("已邀请 {name} 加入群组", { name: friend.name })
+				: t("{name} 已经在群组里了", { name: friend.name }),
+			"success",
+		);
+	} catch (e) {
+		groupActionError.value = e && e.message ? e.message : String(e);
+	} finally {
+		groupAddBusy.value = "";
 	}
 }
 
@@ -1435,6 +1595,10 @@ watch(
 		channelStatus.value = null;
 		deleteOpen.value = false;
 		deleteError.value = "";
+		groupMeta.value = null;
+		groupInfoOpen.value = false;
+		groupFriends.value = [];
+		groupActionError.value = "";
 		await load();
 		restartTimer();
 	},
@@ -1488,6 +1652,15 @@ onBeforeUnmount(() => {
 					</div>
 				</div>
 				<div class="chat-header-right">
+					<button
+						v-if="isGroup"
+						type="button"
+						class="ghost-button chat-group-toggle"
+						:title="t('群组信息')"
+						@click="openGroupInfo"
+					>
+						{{ t("群组") }}
+					</button>
 					<LanguageSwitcher compact />
 					<router-link
 						class="chat-user"
@@ -1814,7 +1987,7 @@ onBeforeUnmount(() => {
 							class="danger-button"
 							@click="openDelete"
 						>
-							{{ t("删除频道") }}
+							{{ isGroup ? t("删除群组") : t("删除频道") }}
 						</button>
 					</div>
 					<span class="composer-status">{{ statusText }}</span>
@@ -1925,15 +2098,155 @@ onBeforeUnmount(() => {
 		</Modal>
 
 		<Modal
+			:open="groupInfoOpen"
+			:title="t('群组信息')"
+			width="580px"
+			@close="groupInfoOpen = false"
+		>
+			<div class="group-info">
+				<div class="group-info-head">
+					<div>
+						<strong class="group-info-name">
+							{{ groupMeta ? groupMeta.name : t("加载中……") }}
+						</strong>
+						<span class="group-info-sub">
+							#{{ options.id }} ·
+							{{ t("{count} 位成员", { count: groupMemberCount }) }}
+						</span>
+					</div>
+					<button
+						type="button"
+						class="ghost-button"
+						@click="copyGroupInvite"
+					>
+						{{ t("复制邀请链接") }}
+					</button>
+				</div>
+
+				<div class="modal-field group-invite-field">
+					<label for="group-invite-link">{{ t("邀请链接") }}</label>
+					<div class="group-invite-row">
+						<input
+							id="group-invite-link"
+							:value="groupInviteLink"
+							readonly
+							@focus="$event.target.select()"
+						/>
+						<button
+							type="button"
+							class="primary-button"
+							@click="copyGroupInvite"
+						>
+							{{ t("复制") }}
+						</button>
+					</div>
+					<p class="group-hint">
+						{{
+							t(
+								"其他人打开这个链接后会自动加入群组，并能在首页看到群组。",
+							)
+						}}
+					</p>
+				</div>
+
+				<section class="group-section">
+					<h3 class="group-section-title">
+						{{ t("成员（{count}）", { count: groupMemberCount }) }}
+					</h3>
+					<div v-if="groupMeta" class="group-members">
+						<div
+							v-for="member in groupMeta.members"
+							:key="member.username"
+							class="group-member"
+						>
+							<span class="group-member-avatar">
+								{{ member.name.charAt(0) }}
+							</span>
+							<span class="group-member-main">
+								<span class="group-member-name">
+									{{ member.name }}
+								</span>
+								<span class="group-member-sub">
+									@{{ member.username }}
+								</span>
+							</span>
+							<span
+								v-if="member.role === 'owner'"
+								class="group-owner-badge"
+							>
+								{{ t("群主") }}
+							</span>
+						</div>
+					</div>
+					<div v-else class="group-hint">
+						{{ t("正在读取群组成员……") }}
+					</div>
+				</section>
+
+				<section class="group-section">
+					<h3 class="group-section-title">{{ t("邀请好友") }}</h3>
+					<p v-if="!auth.session" class="group-hint">
+						{{ t("登录后才能邀请好友进群。") }}
+					</p>
+					<div v-else-if="groupFriendsLoading" class="group-hint">
+						{{ t("好友加载中……") }}
+					</div>
+					<div
+						v-else-if="!groupInviteableFriends.length"
+						class="group-hint"
+					>
+						{{ t("没有可邀请的好友。") }}
+					</div>
+					<div v-else class="group-friends">
+						<div
+							v-for="friend in groupInviteableFriends"
+							:key="friend.username"
+							class="group-friend"
+						>
+							<span class="group-friend-main">
+								<span class="group-member-name">
+									{{ friend.name }}
+								</span>
+								<span class="group-member-sub">
+									@{{ friend.username }}
+								</span>
+							</span>
+							<button
+								type="button"
+								class="ghost-button"
+								:disabled="groupAddBusy === friend.username"
+								@click="inviteFriendToGroup(friend)"
+							>
+								{{
+									groupAddBusy === friend.username
+										? t("邀请中……")
+										: t("邀请")
+								}}
+							</button>
+						</div>
+					</div>
+				</section>
+
+				<div v-if="groupActionError" class="group-error">
+					{{ groupActionError }}
+				</div>
+			</div>
+		</Modal>
+
+		<Modal
 			:open="deleteOpen"
-			:title="t('删除频道')"
+			:title="isGroup ? t('删除群组') : t('删除频道')"
 			@close="deleteOpen = false"
 		>
 			<p class="chat-delete-note">
 				{{
-					t(
-						"删除后会写入 deleted 标记，频道会从首页隐藏。只有创建者可以操作。",
-					)
+					isGroup
+						? t(
+								"删除后会写入 deleted 标记，群组将无法继续进入。只有群主可以操作。",
+							)
+						: t(
+								"删除后会写入 deleted 标记，频道会从首页隐藏。只有创建者可以操作。",
+							)
 				}}
 			</p>
 			<div v-if="deleteError" class="chat-delete-error">

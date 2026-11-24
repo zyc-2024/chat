@@ -6,6 +6,7 @@ import {
 	createPrivateChannel,
 	createPublicChannel,
 } from "../services/chat.js";
+import { createGroup } from "../services/groups.js";
 import { t } from "../i18n/index.js";
 import { chatName, currentIdentity } from "../lib/identity.js";
 import "../styles/pages.css";
@@ -27,25 +28,56 @@ function queryString(name, fallback = "") {
 	return typeof value === "string" ? value : fallback;
 }
 
-const type = computed(() =>
-	queryString("type") === "r" ? "private" : "public",
-);
-const steps = computed(() =>
-	type.value === "private"
-		? [
-				{ at: 10, text: t("读取频道 id") },
-				{ at: 35, text: t("分配新的频道 id") },
-				{ at: 65, text: t("使用凭证加密初始消息") },
-				{ at: 100, text: t("创建完成") },
-			]
-		: [
-				{ at: 10, text: t("读取公开频道列表") },
-				{ at: 30, text: t("把频道加入列表") },
-				{ at: 60, text: t("创建聊天记录文件") },
-				{ at: 80, text: t("写入欢迎消息") },
-				{ at: 100, text: t("创建完成") },
-			],
-);
+const type = computed(() => {
+	const value = queryString("type");
+	if (value === "r") return "private";
+	if (value === "g") return "group";
+	return "public";
+});
+const steps = computed(() => {
+	if (type.value === "private") {
+		return [
+			{ at: 10, text: t("读取频道 id") },
+			{ at: 35, text: t("分配新的频道 id") },
+			{ at: 65, text: t("使用凭证加密初始消息") },
+			{ at: 100, text: t("创建完成") },
+		];
+	}
+	if (type.value === "group") {
+		return [
+			{ at: 10, text: t("读取群组 id") },
+			{ at: 35, text: t("写入群组创建者标记") },
+			{ at: 60, text: t("加密群组聊天记录") },
+			{ at: 80, text: t("加密群组信息") },
+			{ at: 92, text: t("写入我的群组列表") },
+			{ at: 100, text: t("创建完成") },
+		];
+	}
+	return [
+		{ at: 10, text: t("读取公开频道列表") },
+		{ at: 30, text: t("把频道加入列表") },
+		{ at: 60, text: t("创建聊天记录文件") },
+		{ at: 80, text: t("写入欢迎消息") },
+		{ at: 100, text: t("创建完成") },
+	];
+});
+
+const pageTitle = computed(() => {
+	if (type.value === "private") return t("创建私密频道");
+	if (type.value === "group") return t("创建群组");
+	return t("创建公开频道");
+});
+const pageDesc = computed(() => {
+	if (type.value === "private") {
+		return t("频道 id 会写入仓库，凭证只用于浏览器内的消息加密。");
+	}
+	if (type.value === "group") {
+		return t(
+			"群组消息使用群凭证加密。创建后可以邀请好友，或分享邀请链接让其他人加入。",
+		);
+	}
+	return t("公开频道会出现在首页列表里，所有人都可以进入。");
+});
 
 function onProgress(value, text) {
 	progress.value = value;
@@ -92,6 +124,27 @@ async function run() {
 				name: "chat",
 				query: { type: "u", ch: result.channel },
 			});
+		} else if (type.value === "group") {
+			const name = queryString("ch");
+			if (!name) throw new Error(t("缺少群组名称，请回到首页重新创建"));
+			const result = await createGroup(
+				name,
+				chatName.value,
+				onProgress,
+				currentIdentity(),
+			);
+			resultText.value = t(
+				"群组“{name}”已经创建好了。可以在群组信息里邀请好友或复制邀请链接，正在进入……",
+				{ name: result.name },
+			);
+			startRedirect({
+				name: "chat",
+				query: {
+					type: "g",
+					id: String(result.id),
+					key: result.key,
+				},
+			});
 		} else {
 			const key = queryString("key");
 			if (!key) throw new Error(t("缺少凭证，请回到首页重新创建"));
@@ -129,24 +182,8 @@ onBeforeUnmount(() => {
 		<div class="standalone-card">
 			<div class="standalone-head">
 				<div>
-					<h1>
-						{{
-							type === "private"
-								? t("创建私密频道")
-								: t("创建公开频道")
-						}}
-					</h1>
-					<p>
-						{{
-							type === "private"
-								? t(
-										"频道 id 会写入仓库，凭证只用于浏览器内的消息加密。",
-									)
-								: t(
-										"公开频道会出现在首页列表里，所有人都可以进入。",
-									)
-						}}
-					</p>
+					<h1>{{ pageTitle }}</h1>
+					<p>{{ pageDesc }}</p>
 				</div>
 				<div class="standalone-head-actions">
 					<LanguageSwitcher />
