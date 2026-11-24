@@ -76,10 +76,11 @@
 
 11. **上传文件分片到 256 个仓库**
    - 选择文件和 Base64 上传都会计算内容 MD5，并按前两位保存到 `zyc-2024/chat-files-00` ~ `chat-files-ff` 中的对应仓库。
-   - 上传路径继续使用 `f/<md5>/<文件名>`，生成的 raw 链接会直接指向分片仓库。
-   - 消息、个人资料 Markdown、头像和背景中的旧主仓库上传链接会自动改写到分片仓库；右键复制消息时也会复制改写后的链接。
+   - 分片仓库使用私有仓库，上传路径继续使用 `f/<md5>/<文件名>`，生成的 raw 链接会附带访问凭证。
+   - 消息、个人资料 Markdown、头像和背景中的旧主仓库上传链接会自动改写到分片仓库并补齐访问凭证；右键复制消息时也会复制改写后的链接。
    - 旧文件迁移脚本：`node scripts/gitee-file-repos.mjs migrate`。
-   - 仓库初始化脚本可重复执行：`node scripts/gitee-file-repos.mjs setup`。
+   - 仓库初始化脚本默认创建私有仓库：`node scripts/gitee-file-repos.mjs setup`。
+   - 批量把已有分片仓库设为私有：`node scripts/gitee-file-repos.mjs private`。
 
 12. **中英文 i18n 与 AI 翻译标注**
    - 全站页面、操作提示、弹窗、右键菜单和服务错误支持简体中文与英文。
@@ -228,7 +229,7 @@ pnpm test
 格式示例：
 
 ```text
-3.11.0 (235)         -> Release tag: v3.11.0-235
+3.11.1 (236)         -> Release tag: v3.11.1-236
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 

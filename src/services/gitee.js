@@ -39,16 +39,26 @@ export function fileRepoApi(hash) {
 
 const LEGACY_FILE_RAW_RE =
 	/https:\/\/(?:gitee\.com\/api\/v5\/repos\/zyc-2024\/chat|gitee\.com\/zyc-2024\/chat)\/raw\/f(?:%2F|\/)([0-9a-f]{32})/gi;
+const FILE_RAW_TOKEN_RE =
+	/https:\/\/gitee\.com\/api\/v5\/repos\/zyc-2024\/chat-files-[0-9a-f]{2}\/raw\/[^\s"'<>),;，；。]*/gi;
+
+function withFileAccessToken(url) {
+	if (/[?&]access_token=/.test(url)) return url;
+	return `${url}${url.includes("?") ? "&" : "?"}access_token=${GITEE_TOKEN}`;
+}
 
 /**
  * 把旧主仓库里的上传文件链接改写到对应的分片仓库。
- * 迁移旧文件后，聊天记录里的历史链接仍然可以继续打开。
+ * 分片仓库是私有的，因此统一补上 access_token。
  */
 export function rewriteLegacyFileUrls(text) {
-	return String(text || "").replace(
+	const rewritten = String(text || "").replace(
 		LEGACY_FILE_RAW_RE,
 		(match, hash) =>
 			`https://gitee.com/api/v5/repos/${fileRepoFullName(hash)}/raw/f%2F${hash.toLowerCase()}`,
+	);
+	return rewritten.replace(FILE_RAW_TOKEN_RE, (url) =>
+		withFileAccessToken(url),
 	);
 }
 

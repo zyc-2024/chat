@@ -13,6 +13,7 @@ import {
 	sendChannelMessage,
 } from "./src/services/chat.js";
 import {
+	GITEE_TOKEN,
 	decodeBase64,
 	fileRepoApi,
 	fileRepoFullName,
@@ -93,6 +94,15 @@ assert.equal(
 	rewriteLegacyFileUrl("https://example.com/file.png"),
 	"https://example.com/file.png",
 );
+const shardWithoutToken =
+	"https://gitee.com/api/v5/repos/zyc-2024/chat-files-42/raw/f%2F42e874ae9692483e15ef9c9d0b6a5f8e%2FIMG_6854.jpeg";
+assert.equal(
+	rewriteLegacyFileUrl(shardWithoutToken),
+	`${shardWithoutToken}?access_token=${GITEE_TOKEN}`,
+);
+const shardWithToken =
+	"https://gitee.com/api/v5/repos/zyc-2024/chat-files-42/raw/f%2F42e874ae9692483e15ef9c9d0b6a5f8e%2FIMG_6854.jpeg?access_token=abc";
+assert.equal(rewriteLegacyFileUrl(shardWithToken), shardWithToken);
 assert.equal(isAdminUsername("ChattingSuperAdmin"), true);
 assert.equal(isAdminUsername("ChattingSuperAdmin "), false);
 assert.equal(isAdminUsername("zyc2024"), false);
@@ -120,10 +130,10 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.11.0 (235)");
+assert.equal(findNowEntry(changelog).version, "3.11.1 (236)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.11.0 (235)",
+	"3.11.1 (236)",
 );
 assert.equal(isAiAssistedEntry({ tags: ["ai", "beta"] }), true);
 assert.equal(isAiAssistedEntry({ tags: [{ label: "使用AI" }] }), true);

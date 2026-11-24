@@ -38,6 +38,12 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.11.1 (236)",
+		date: "2026-11-24T20:24:50+08:00",
+		tags: ["ai", "hotfix"],
+		desc: "上传文件分片仓库全部改为私有：chat-files-00 ~ ff 使用私有仓库保存文件，历史分片链接和新上传链接会自动附带访问凭证；初始化脚本默认创建私有仓库，并新增批量设置私有的 private 命令。",
+	},
+	{
 		version: "3.11.0 (235)",
 		date: "2026-11-24T20:18:05+08:00",
 		tags: ["ai"],

@@ -4,9 +4,11 @@
  *
  * 用法：
  *   node scripts/gitee-file-repos.mjs setup
+ *   node scripts/gitee-file-repos.mjs private
  *   node scripts/gitee-file-repos.mjs migrate [md5前缀]
  *
- * setup   ：确保 zyc-2024/chat-files-00 ~ ff 共 256 个仓库存在并设为公开。
+ * setup   ：确保 zyc-2024/chat-files-00 ~ ff 共 256 个仓库存在并设为私有。
+ * private ：把已经存在的 chat-files-xx 全部改为私有。
  * migrate ：把主仓库 f/<md5>/... 下的旧上传文件复制到分片仓库，校验后删除旧文件。
  */
 import {
@@ -88,7 +90,7 @@ async function updateRepo(fullName, name) {
 			access_token: GITEE_TOKEN,
 			name,
 			path: name,
-			private: false,
+			private: true,
 		}),
 	});
 }
@@ -106,14 +108,14 @@ async function ensureRepo(shard) {
 				access_token: GITEE_TOKEN,
 				name,
 				path: name,
-				private: false,
+				private: true,
 				auto_init: true,
 				description: `zyc chat uploaded files ${shard}`,
 			}),
 		});
 		created = true;
 	}
-	if (repo.private) {
+	if (!repo.private) {
 		repo = await updateRepo(fullName, name);
 	}
 	return { fullName, created, private: repo.private };
@@ -141,6 +143,51 @@ async function setupRepos() {
 		Array.from({ length: CONCURRENCY }, () => worker()),
 	);
 	console.log(`file repos ready: ${shards.length}, newly created: ${created}`);
+}
+
+async function setRepoPrivate(shard) {
+	const name = `${FILE_REPO_PREFIX}${shard}`;
+	const fullName = `${FILE_REPO_OWNER}/${name}`;
+	const repo = await getRepo(fullName);
+	if (!repo) return "missing";
+	if (repo.private) return "private";
+	await updateRepo(fullName, name);
+	return "changed";
+}
+
+async function setReposPrivate(onlyShard = "") {
+	const shards = onlyShard
+		? [onlyShard]
+		: Array.from({ length: FILE_REPO_COUNT }, (_, index) =>
+				index.toString(16).padStart(2, "0"),
+			);
+	let cursor = 0;
+	let checked = 0;
+	const counts = { changed: 0, private: 0, missing: 0 };
+	const missing = [];
+	async function worker() {
+		while (cursor < shards.length) {
+			const shard = shards[cursor++];
+			const result = await setRepoPrivate(shard);
+			counts[result]++;
+			if (result === "missing") missing.push(shard);
+			checked++;
+			if (checked % 16 === 0 || checked === shards.length) {
+				console.log(
+					`checked ${checked}/${shards.length}, changed ${counts.changed}, already private ${counts.private}, missing ${counts.missing}`,
+				);
+			}
+		}
+	}
+	await Promise.all(
+		Array.from({ length: CONCURRENCY }, () => worker()),
+	);
+	console.log(
+		`file repos private: ${shards.length}, changed: ${counts.changed}, already private: ${counts.private}, missing: ${counts.missing}`,
+	);
+	if (missing.length) {
+		console.log(`missing shards: ${missing.join(", ")}`);
+	}
 }
 
 async function getContents(repo, path) {
@@ -254,6 +301,13 @@ async function migrateUploads(onlyPrefix = "") {
 const command = process.argv[2];
 if (command === "setup") {
 	await setupRepos();
+} else if (command === "private") {
+	const onlyShard = String(process.argv[3] || "").toLowerCase();
+	if (onlyShard && !/^[0-9a-f]{2}$/.test(onlyShard)) {
+		console.error("分片只能是 2 位十六进制字符，例如 00 或 ff");
+		process.exit(1);
+	}
+	await setReposPrivate(onlyShard);
 } else if (command === "migrate") {
 	const prefix = String(process.argv[3] || "").toLowerCase();
 	if (prefix && !/^[0-9a-f]{2,32}$/.test(prefix)) {
@@ -262,6 +316,8 @@ if (command === "setup") {
 	}
 	await migrateUploads(prefix);
 } else {
-	console.error("用法：node scripts/gitee-file-repos.mjs setup|migrate [md5前缀]");
+	console.error(
+		"用法：node scripts/gitee-file-repos.mjs setup|private [分片]|migrate [md5前缀]",
+	);
 	process.exit(1);
 }
