@@ -292,7 +292,17 @@ onBeforeUnmount(() => {
 		<div class="friends-shell">
 			<aside class="friends-sidebar">
 				<div class="friends-sidebar-head">
-					<div>
+					<router-link
+						class="friends-back"
+						:to="{ name: 'home' }"
+						:title="t('返回首页')"
+						:aria-label="t('返回首页')"
+					>
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<path d="m15 18-6-6 6-6" />
+						</svg>
+					</router-link>
+					<div class="friends-sidebar-title">
 						<h1>{{ t("好友") }}</h1>
 						<p>{{ t("选择好友开始私信") }}</p>
 					</div>

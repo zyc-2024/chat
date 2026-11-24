@@ -38,6 +38,12 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.9.6 (231)",
+		date: "2026-11-24T09:06:50+08:00",
+		tags: ["ai"],
+		desc: "好友界面左侧标题栏新增返回首页按钮，桌面端和手机端均可见；修复手机端私信头部返回首页链接被隐藏后无法快速返回的问题。",
+	},
+	{
 		version: "3.9.5 (230)",
 		date: "2026-11-24T00:47:56+08:00",
 		tags: ["ai"],

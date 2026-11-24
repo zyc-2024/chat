@@ -41,6 +41,39 @@
 	border-bottom: 1px solid var(--theme-border);
 }
 
+.friends-sidebar-title {
+	flex: 1;
+	min-width: 0;
+}
+
+.friends-back {
+	display: grid;
+	flex: 0 0 auto;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	border: 1px solid var(--theme-border);
+	border-radius: 9px;
+	background: var(--theme-surface);
+	color: var(--theme-muted);
+}
+
+.friends-back:hover {
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
+}
+
+.friends-back svg {
+	width: 17px;
+	height: 17px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
 .friends-sidebar-head h1 {
 	margin: 0;
 	color: var(--theme-text);
