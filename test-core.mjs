@@ -28,6 +28,7 @@ import {
 } from "./src/services/appUpdate.js";
 import { mergeChangelogEntries } from "./src/services/changelogRemote.js";
 import { mathModeAt, wrapLatexSnippet } from "./src/lib/latex.js";
+import { channelShareQuery } from "./src/lib/shareLinks.js";
 import {
 	addGroupMember,
 	createGroup,
@@ -114,10 +115,10 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.10.0 (232)");
+assert.equal(findNowEntry(changelog).version, "3.10.1 (234)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.10.0 (232)",
+	"3.10.1 (234)",
 );
 assert.equal(isAiAssistedEntry({ tags: ["ai", "beta"] }), true);
 assert.equal(isAiAssistedEntry({ tags: [{ label: "使用AI" }] }), true);
@@ -160,6 +161,20 @@ assert.equal(
 	"$$\n\\begin{pmatrix}a\\end{pmatrix}\n$$",
 );
 assert.equal(wrapLatexSnippet("$x$", null), "$x$");
+
+assert.deepEqual(channelShareQuery({ type: "u", ch: "测试频道" }), {
+	type: "u",
+	ch: "测试频道",
+});
+assert.deepEqual(
+	channelShareQuery({ type: "r", id: 8, key: "secret-key" }),
+	{ type: "r", id: "8", key: "secret-key" },
+);
+assert.deepEqual(
+	channelShareQuery({ type: "g", id: 9, key: "group-key" }),
+	{ type: "g", id: "9", key: "group-key" },
+);
+assert.deepEqual(channelShareQuery({}), { type: "u", ch: "main" });
 
 const releaseA = parseReleaseVersion({
 	name: "3.9.0 beta 1 (224)",

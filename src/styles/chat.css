@@ -93,6 +93,35 @@
 	font-size: 12px;
 }
 
+.chat-share {
+	display: grid;
+	flex: 0 0 auto;
+	place-items: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid var(--theme-border);
+	border-radius: 9px;
+	background: var(--theme-surface);
+	color: var(--theme-muted);
+}
+
+.chat-share:hover {
+	border-color: var(--theme-accent-border);
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
+}
+
+.chat-share svg {
+	width: 16px;
+	height: 16px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
 .chat-user {
 	display: flex;
 	align-items: center;
@@ -1106,6 +1135,48 @@
 	line-height: 1.6;
 }
 
+.share-link {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.share-link-note {
+	margin: 0;
+	color: var(--theme-muted);
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.share-link-row {
+	display: flex;
+	gap: 8px;
+}
+
+.share-link-row input {
+	flex: 1;
+	min-width: 0;
+	height: 40px;
+	padding: 0 12px;
+	border: 1px solid var(--theme-border);
+	border-radius: 9px;
+	outline: none;
+	background: var(--theme-surface);
+	color: var(--theme-text);
+	font-size: 13px;
+}
+
+.share-link-row input:focus {
+	border-color: var(--theme-accent);
+	box-shadow: 0 0 0 3px var(--theme-accent-soft);
+}
+
+.share-link-row .primary-button {
+	flex: 0 0 auto;
+	height: 40px;
+	padding: 0 14px;
+}
+
 @media (max-width: 760px) {
 	.chat-page {
 		height: 100vh;
@@ -1333,6 +1404,11 @@
 		height: 28px;
 		padding: 0 7px;
 		font-size: 11px;
+	}
+
+	.chat-share {
+		width: 28px;
+		height: 28px;
 	}
 
 	.chat-title {

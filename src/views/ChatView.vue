@@ -34,6 +34,7 @@ import { createNudgeMessage, fetchNudgeSuffix } from "../services/nudge.js";
 import { copyText } from "../lib/clipboard.js";
 import { t } from "../i18n/index.js";
 import { mathModeAt, wrapLatexSnippet } from "../lib/latex.js";
+import { channelShareQuery } from "../lib/shareLinks.js";
 import { prettyTime, safeDecode, timeStamp } from "../lib/format.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { chatName, currentIdentity, useIdentity } from "../lib/identity.js";
@@ -822,6 +823,7 @@ const intervalValue = ref(5);
 const deleteOpen = ref(false);
 const deleteBusy = ref(false);
 const deleteError = ref("");
+const shareOpen = ref(false);
 const groupInfoOpen = ref(false);
 const groupFriends = ref([]);
 const groupFriendsLoading = ref(false);
@@ -860,6 +862,17 @@ const groupInviteLink = computed(() => {
 				id: options.value.id,
 				key: options.value.key,
 			},
+		});
+		return new URL(target.href, window.location.href).href;
+	} catch (e) {
+		return "";
+	}
+});
+const channelShareLink = computed(() => {
+	try {
+		const target = router.resolve({
+			name: "chat",
+			query: channelShareQuery(options.value),
 		});
 		return new URL(target.href, window.location.href).href;
 	} catch (e) {
@@ -1522,6 +1535,20 @@ async function copyGroupInvite() {
 	);
 }
 
+function openShare() {
+	shareOpen.value = true;
+}
+
+async function copyChannelShareLink() {
+	const link = channelShareLink.value;
+	if (!link) return;
+	const ok = await copyText(link);
+	showToast(
+		ok ? t("链接已复制") : t("复制失败，请手动复制"),
+		ok ? "success" : "error",
+	);
+}
+
 async function inviteFriendToGroup(friend) {
 	if (!friend || groupAddBusy.value) return;
 	groupAddBusy.value = friend.username;
@@ -1599,6 +1626,7 @@ watch(
 		groupInfoOpen.value = false;
 		groupFriends.value = [];
 		groupActionError.value = "";
+		shareOpen.value = false;
 		await load();
 		restartTimer();
 	},
@@ -1652,6 +1680,23 @@ onBeforeUnmount(() => {
 					</div>
 				</div>
 				<div class="chat-header-right">
+					<button
+						v-if="!isGroup"
+						type="button"
+						class="chat-share"
+						:title="t('分享频道链接')"
+						:aria-label="t('分享频道链接')"
+						@click="openShare"
+					>
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<path
+								d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11 5"
+							/>
+							<path
+								d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13 19"
+							/>
+						</svg>
+					</button>
 					<button
 						v-if="isGroup"
 						type="button"
@@ -2095,6 +2140,38 @@ onBeforeUnmount(() => {
 					</button>
 				</div>
 			</form>
+		</Modal>
+
+		<Modal
+			:open="shareOpen"
+			:title="t('分享频道链接')"
+			@close="shareOpen = false"
+		>
+			<div class="share-link">
+				<p class="share-link-note">
+					{{
+						isPrivate
+							? t(
+									"链接包含频道 id 和凭证，拿到链接的人可以进入私密频道，请只分享给信任的人。",
+								)
+							: t("任何拿到链接的人都可以进入这个公开频道。")
+					}}
+				</p>
+				<div class="share-link-row">
+					<input
+						:value="channelShareLink"
+						readonly
+						@focus="$event.target.select()"
+					/>
+					<button
+						type="button"
+						class="primary-button"
+						@click="copyChannelShareLink"
+					>
+						{{ t("复制链接") }}
+					</button>
+				</div>
+			</div>
 		</Modal>
 
 		<Modal

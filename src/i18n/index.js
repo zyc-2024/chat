@@ -69,6 +69,11 @@ const english = {
 	"群组已删除": "Group deleted.",
 	"已加入群组“{name}”": "Joined the group “{name}”.",
 	"邀请链接已复制": "Invite link copied.",
+	"分享频道链接": "Share channel link",
+	"链接包含频道 id 和凭证，拿到链接的人可以进入私密频道，请只分享给信任的人。":
+		"The link contains the channel id and key. Anyone with the link can enter the private channel, so share it only with people you trust.",
+	"任何拿到链接的人都可以进入这个公开频道。":
+		"Anyone with the link can enter this public channel.",
 	"复制失败，请手动复制": "Copy failed. Please copy it manually.",
 	"邀请你加入群组「{name}」：{link}":
 		"You're invited to join the group “{name}”: {link}",
