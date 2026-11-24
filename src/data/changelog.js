@@ -38,6 +38,12 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.11.0 (235)",
+		date: "2026-11-24T20:18:05+08:00",
+		tags: ["ai"],
+		desc: "新增好友申请与名片：添加好友需要对方通过；好友私信可以发送其他好友的名片，名片会保存到接收者的 profile，并可在个人主页查看和发起好友申请。",
+	},
+	{
 		version: "3.10.1 (234)",
 		date: "2026-11-24T20:09:45+08:00",
 		tags: ["ai"],

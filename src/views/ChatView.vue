@@ -19,8 +19,8 @@ import {
 } from "../services/chat.js";
 import { auth } from "../services/auth.js";
 import {
-	addFriend,
 	loadFriends,
+	requestFriend,
 	sendFriendMessage,
 } from "../services/friends.js";
 import {
@@ -1120,15 +1120,14 @@ async function nudgeMessage(message) {
 async function addFriendFromMessage(message) {
 	if (!auth.session) return;
 	try {
-		await addFriend(
+		await requestFriend(
 			{
 				username: auth.session.username,
 				name: chatName.value,
 			},
 			message.user,
-			message.name,
 		);
-		showToast(t("已添加好友"), "success");
+		showToast(t("好友申请已发送，等待对方通过"), "success");
 	} catch (error) {
 		showToast(
 			error && error.message ? error.message : String(error),

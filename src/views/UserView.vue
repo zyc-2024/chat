@@ -1,9 +1,14 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import ContactCard from "../components/ContactCard.vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import { auth } from "../services/auth.js";
-import { addFriend } from "../services/friends.js";
+import {
+	loadFriends,
+	loadReceivedCards,
+	requestFriend,
+} from "../services/friends.js";
 import { loadProfile } from "../services/profile.js";
 import { locale, t } from "../i18n/index.js";
 import { renderMarkdown } from "../lib/markdown.js";
@@ -18,6 +23,9 @@ const error = ref("");
 const profile = ref(null);
 const avatarFailed = ref(false);
 const addingFriend = ref(false);
+const cards = ref([]);
+const friendNames = ref([]);
+const cardBusy = ref("");
 
 const username = computed(() => {
 	const value = route.query.u;
@@ -61,24 +69,44 @@ async function addProfileFriend() {
 	if (!auth.session || addingFriend.value || !profile.value) return;
 	addingFriend.value = true;
 	try {
-		await addFriend(
+		await requestFriend(
 			{
 				username: auth.session.username,
 				name: auth.session.displayName || auth.session.username,
 			},
 			username.value,
-			profile.value.user,
 		);
-		showToast(t("已添加好友"), "success");
-		router.push({
-			name: "friends",
-			query: { u: username.value },
-		});
+		showToast(t("好友申请已发送，等待对方通过"), "success");
 	} catch (e) {
 		showToast(e && e.message ? e.message : String(e), "error", 4000);
 	} finally {
 		addingFriend.value = false;
 	}
+}
+
+async function addCardFriend(card) {
+	if (!auth.session || !card || cardBusy.value) return;
+	if (auth.session.username === card.username) return;
+	cardBusy.value = card.username;
+	try {
+		await requestFriend(
+			{
+				username: auth.session.username,
+				name: auth.session.displayName || auth.session.username,
+			},
+			card.username,
+		);
+		showToast(t("好友申请已发送，等待对方通过"), "success");
+	} catch (e) {
+		showToast(e && e.message ? e.message : String(e), "error", 4000);
+	} finally {
+		cardBusy.value = "";
+	}
+}
+
+function openCardProfile(card) {
+	if (!card || !card.username) return;
+	router.push({ name: "user", query: { u: card.username } });
 }
 
 function formatDate(value) {
@@ -100,6 +128,8 @@ async function load() {
 	error.value = "";
 	profile.value = null;
 	avatarFailed.value = false;
+	cards.value = [];
+	friendNames.value = [];
 	if (!username.value) {
 		if (auth.session) {
 			router.replace({
@@ -129,6 +159,18 @@ async function load() {
 		document.title = t("{name} 的个人主页 · zyc2024 的聊天网页", {
 			name: data.user,
 		});
+		if (isOwner.value) {
+			try {
+				const [received, myFriends] = await Promise.all([
+					loadReceivedCards(username.value),
+					loadFriends(username.value),
+				]);
+				cards.value = received;
+				friendNames.value = myFriends.map((item) => item.username);
+			} catch (e) {
+				console.warn("读取名片失败：", e);
+			}
+		}
 	} catch (e) {
 		error.value = e && e.message ? e.message : String(e);
 	} finally {
@@ -198,6 +240,27 @@ onMounted(load);
 					<div v-else class="profile-empty">
 						{{ t("这个人很懒，还没有写自我介绍。") }}
 					</div>
+
+					<section
+						v-if="isOwner && cards.length"
+						class="profile-cards"
+					>
+						<h2 class="profile-cards-title">
+							{{ t("收到的名片") }}
+							<span>{{ cards.length }}</span>
+						</h2>
+						<div class="profile-cards-list">
+							<ContactCard
+								v-for="card in cards"
+								:key="`${card.from}:${card.username}`"
+								:card="card"
+								:added="friendNames.includes(card.username)"
+								:busy="cardBusy === card.username"
+								@open="openCardProfile(card)"
+								@add="addCardFriend(card)"
+							/>
+						</div>
+					</section>
 
 					<div class="profile-actions">
 						<router-link class="ghost-button" :to="{ name: 'home' }">

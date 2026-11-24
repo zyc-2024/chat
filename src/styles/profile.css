@@ -202,6 +202,39 @@
 	text-align: center;
 }
 
+.profile-cards {
+	margin-top: 20px;
+	padding-top: 16px;
+	border-top: 1px solid #e9ecea;
+}
+
+.profile-cards-title {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	margin: 0 0 10px;
+	color: var(--theme-text);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.profile-cards-title span {
+	padding: 1px 7px;
+	border-radius: 999px;
+	background: var(--theme-accent-soft);
+	color: var(--theme-accent);
+	font-size: 11px;
+	font-weight: 500;
+}
+
+.profile-cards-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 8px;
+	max-height: 42vh;
+	overflow-y: auto;
+}
+
 .profile-actions {
 	display: flex;
 	flex-wrap: wrap;

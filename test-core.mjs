@@ -48,10 +48,15 @@ import {
 	isBetaVersion,
 } from "./src/lib/changelogMeta.js";
 import {
-	addFriend,
+	approveFriendRequest,
 	friendConversationPath,
 	loadFriendMessages,
+	loadFriendRequests,
 	loadFriends,
+	loadReceivedCards,
+	rejectFriendRequest,
+	requestFriend,
+	sendFriendCard,
 	sendFriendMessage,
 	sendFriendNudge,
 } from "./src/services/friends.js";
@@ -115,10 +120,10 @@ assert.equal(
 	findLatestStableEntry(sampleVersions).version,
 	"3.8.0 (222)",
 );
-assert.equal(findNowEntry(changelog).version, "3.10.1 (234)");
+assert.equal(findNowEntry(changelog).version, "3.11.0 (235)");
 assert.equal(
 	findLatestStableEntry(changelog).version,
-	"3.10.1 (234)",
+	"3.11.0 (235)",
 );
 assert.equal(isAiAssistedEntry({ tags: ["ai", "beta"] }), true);
 assert.equal(isAiAssistedEntry({ tags: [{ label: "使用AI" }] }), true);
@@ -606,21 +611,53 @@ const wrongGroupKey = await loadGroupMeta({
 assert.ok(wrongGroupKey instanceof Error);
 assert.match(wrongGroupKey.message, /群组信息不存在|群组凭证错误/);
 
-const friendAccountHash = createHash("sha256")
-	.update("zyc2024-chat-auth-v1:user:FriendUser")
-	.digest("hex");
-put(
-	`private/user_${friendAccountHash}.json`,
-	JSON.stringify({
-		username: "FriendUser",
-		settings: { lastName: "Friend User", nudge: "的小脑袋" },
-		profile: { username: "FriendUser" },
-	}),
-);
+function putUserAccount(username, displayName, settings = {}) {
+	const hash = createHash("sha256")
+		.update(`zyc2024-chat-auth-v1:user:${username}`)
+		.digest("hex");
+	const path = `private/user_${hash}.json`;
+	put(
+		path,
+		JSON.stringify({
+			username,
+			settings: { lastName: displayName, ...settings },
+			profile: { username },
+		}),
+	);
+	return path;
+}
+
+const friendAccountPath = putUserAccount("FriendUser", "Friend User", {
+	nudge: "的小脑袋",
+});
+putUserAccount("ThirdUser", "Third User");
+putUserAccount("RejectUser", "Reject User");
+putUserAccount("TestUser", "Tester");
 const friendMe = { username: "TestUser", name: "Tester" };
-const addedFriend = await addFriend(friendMe, "FriendUser");
-assert.equal(addedFriend.username, "FriendUser");
-assert.equal(addedFriend.name, "Friend User");
+
+const pendingFriend = await requestFriend(friendMe, "FriendUser");
+assert.equal(pendingFriend.status, "pending");
+assert.ok(
+	!(await loadFriends("TestUser")).some(
+		(item) => item.username === "FriendUser",
+	),
+);
+const friendRequests = await loadFriendRequests("FriendUser");
+assert.ok(
+	friendRequests.some(
+		(item) => item.from === "TestUser" && item.name === "Tester",
+	),
+);
+const friendAccountBefore = JSON.parse(
+	files.get(friendAccountPath).content,
+);
+assert.equal(friendAccountBefore.profile.friendRequests.length, 1);
+
+const approvedFriend = await approveFriendRequest("FriendUser", "TestUser");
+assert.equal(approvedFriend.username, "TestUser");
+assert.equal(approvedFriend.name, "Tester");
+assert.equal((await loadFriendRequests("FriendUser")).length, 0);
+
 const myFriends = await loadFriends("TestUser");
 assert.ok(myFriends.some((item) => item.username === "FriendUser"));
 const theirFriends = await loadFriends("FriendUser");
@@ -665,6 +702,54 @@ const friendRejected = await sendFriendMessage(
 );
 assert.ok(friendRejected instanceof Error);
 assert.match(friendRejected.message, /还不是好友/);
+
+await requestFriend(friendMe, "ThirdUser");
+await approveFriendRequest("ThirdUser", "TestUser");
+const cardMessages = await sendFriendCard(friendMe, "FriendUser", {
+	username: "ThirdUser",
+	name: "Third User",
+	avatar: "https://example.com/avatar.png",
+	bio: "hello card",
+});
+assert.equal(cardMessages.length, 3);
+const cardMessage = cardMessages[2];
+assert.equal(cardMessage.type, "card");
+assert.equal(cardMessage.card.username, "ThirdUser");
+assert.equal(cardMessage.card.from, "TestUser");
+assert.equal(cardMessage.card.fromName, "Tester");
+const receivedCards = await loadReceivedCards("FriendUser");
+assert.equal(receivedCards.length, 1);
+assert.equal(receivedCards[0].username, "ThirdUser");
+assert.equal(receivedCards[0].bio, "hello card");
+const friendAccountAfterCard = JSON.parse(
+	files.get(friendAccountPath).content,
+);
+assert.equal(friendAccountAfterCard.profile.cards[0].username, "ThirdUser");
+
+await requestFriend(friendMe, "RejectUser");
+assert.ok(
+	(await loadFriendRequests("RejectUser")).some(
+		(item) => item.from === "TestUser",
+	),
+);
+await rejectFriendRequest("RejectUser", "TestUser");
+assert.equal((await loadFriendRequests("RejectUser")).length, 0);
+assert.ok(
+	!(await loadFriends("TestUser")).some(
+		(item) => item.username === "RejectUser",
+	),
+);
+
+await requestFriend(
+	{ username: "FriendUser", name: "Friend User" },
+	"ThirdUser",
+);
+await approveFriendRequest("ThirdUser", "FriendUser");
+assert.ok(
+	(await loadFriends("FriendUser")).some(
+		(item) => item.username === "ThirdUser",
+	),
+);
 
 const badDelete = await deleteChannel(
 	{ type: "u", ch: "测试频道" },

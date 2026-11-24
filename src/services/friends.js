@@ -1,6 +1,6 @@
 import CryptoJS from "crypto-js";
 import { getJson, postJson, putJson } from "./gitee.js";
-import { getProfile } from "./auth.js";
+import { getProfile, updateAccountProfileRecord } from "./auth.js";
 import { t } from "../i18n/index.js";
 import { timeStamp } from "../lib/format.js";
 import { createNudgeMessage, fetchNudgeSuffix } from "./nudge.js";
@@ -8,6 +8,8 @@ import { createNudgeMessage, fetchNudgeSuffix } from "./nudge.js";
 const FRIEND_DIR = "friends";
 const FRIEND_MSG_DIR = "friends/msg";
 const MAX_FRIENDS = 200;
+const MAX_REQUESTS = 100;
+const MAX_CARDS = 100;
 
 function sha256(text) {
 	return CryptoJS.SHA256(text).toString(CryptoJS.enc.Hex);
@@ -44,6 +46,44 @@ function normalizeFriend(entry) {
 function normalizeFriends(list) {
 	return (Array.isArray(list) ? list : [])
 		.map(normalizeFriend)
+		.filter(Boolean);
+}
+
+function normalizeFriendRequest(entry) {
+	if (!entry || typeof entry !== "object") return null;
+	const from = String(entry.from || entry.username || "").trim();
+	if (!from) return null;
+	return {
+		from,
+		name: String(entry.name || from).trim() || from,
+		at: String(entry.at || ""),
+	};
+}
+
+function normalizeFriendRequests(list) {
+	return (Array.isArray(list) ? list : [])
+		.map(normalizeFriendRequest)
+		.filter(Boolean);
+}
+
+function normalizeCard(entry) {
+	if (!entry || typeof entry !== "object") return null;
+	const username = String(entry.username || "").trim();
+	if (!username) return null;
+	return {
+		username,
+		name: String(entry.name || username).trim() || username,
+		avatar: String(entry.avatar || ""),
+		bio: String(entry.bio || ""),
+		from: String(entry.from || "").trim(),
+		fromName: String(entry.fromName || "").trim(),
+		at: String(entry.at || ""),
+	};
+}
+
+function normalizeCards(list) {
+	return (Array.isArray(list) ? list : [])
+		.map(normalizeCard)
 		.filter(Boolean);
 }
 
@@ -84,13 +124,21 @@ export async function loadFriends(username) {
 	return normalizeFriends(file.data.friends);
 }
 
-export async function addFriend(me, targetUsername, targetName = "") {
+function accountDisplayName(profile, username) {
+	return (
+		String(
+			(profile && profile.settings && profile.settings.lastName) ||
+				username ||
+				"",
+		).trim() || username
+	);
+}
+
+async function linkFriends(me, targetUsername, targetName = "") {
+	const target = String(targetUsername || "").trim();
+	if (!target) throw new Error(t("没有找到这个用户。"));
 	if (!me || !me.username) {
 		throw new Error(t("请先登录自己的账号"));
-	}
-	const target = String(targetUsername || "").trim();
-	if (!target) {
-		throw new Error(t("没有找到这个用户。"));
 	}
 	if (target === me.username) {
 		throw new Error(t("不能添加自己为好友"));
@@ -99,19 +147,18 @@ export async function addFriend(me, targetUsername, targetName = "") {
 		throw new Error(t("只能添加真实登录用户为好友"));
 	}
 	const profile = await getProfile(target);
-	if (!profile) {
-		throw new Error(t("没有找到这个用户。"));
-	}
+	if (!profile) throw new Error(t("没有找到这个用户。"));
 	const targetDisplay =
 		String(targetName || "").trim() ||
-		String(
-			(profile.settings && profile.settings.lastName) || target,
-		).trim() ||
-		target;
+		accountDisplayName(profile, target);
 	const myDisplay = String(me.name || me.username).trim() || me.username;
 	const now = new Date().toISOString();
 	const friend = { username: target, name: targetDisplay, addedAt: now };
 	const myEntry = { username: me.username, name: myDisplay, addedAt: now };
+	const existing = await loadFriends(me.username);
+	if (existing.some((item) => item.username === target)) {
+		return existing.find((item) => item.username === target);
+	}
 	await updateFriendList(
 		me.username,
 		(friends) => {
@@ -146,6 +193,138 @@ export async function addFriend(me, targetUsername, targetName = "") {
 		throw error;
 	}
 	return friend;
+}
+
+/** 发送好友申请；对方通过后才会真正成为好友。 */
+export async function requestFriend(me, targetUsername) {
+	if (!me || !me.username) {
+		throw new Error(t("请先登录自己的账号"));
+	}
+	const target = String(targetUsername || "").trim();
+	if (!target) throw new Error(t("没有找到这个用户。"));
+	if (target === me.username) throw new Error(t("不能添加自己为好友"));
+	if (/^Guest_/i.test(target)) {
+		throw new Error(t("只能添加真实登录用户为好友"));
+	}
+	const profile = await getProfile(target);
+	if (!profile) throw new Error(t("没有找到这个用户。"));
+	const friends = await loadFriends(me.username);
+	if (friends.some((item) => item.username === target)) {
+		throw new Error(t("你们已经是好友"));
+	}
+	const requests = await loadFriendRequests(target);
+	if (requests.some((item) => item.from === me.username)) {
+		return { status: "pending", existing: true, target };
+	}
+	const myDisplay = String(me.name || me.username).trim() || me.username;
+	const request = {
+		from: me.username,
+		name: myDisplay,
+		at: new Date().toISOString(),
+	};
+	await updateAccountProfileRecord(
+		target,
+		(accountProfile) => {
+			const list = normalizeFriendRequests(accountProfile.friendRequests);
+			if (list.some((item) => item.from === me.username)) {
+				return accountProfile;
+			}
+			if (list.length >= MAX_REQUESTS) {
+				throw new Error(t("好友申请过多，请稍后再试"));
+			}
+			return {
+				...accountProfile,
+				friendRequests: [...list, request],
+			};
+		},
+		`friend request ${me.username} -> ${target}`,
+	);
+	return {
+		status: "pending",
+		existing: false,
+		target: {
+			username: target,
+			name: accountDisplayName(profile, target),
+		},
+	};
+}
+
+export async function loadFriendRequests(username) {
+	const data = await getProfile(username);
+	if (!data) return [];
+	const profile =
+		data.profile && typeof data.profile === "object" ? data.profile : {};
+	return normalizeFriendRequests(profile.friendRequests);
+}
+
+async function removeFriendRequest(username, fromUsername) {
+	const from = String(fromUsername || "").trim();
+	if (!from) return;
+	await updateAccountProfileRecord(
+		username,
+		(profile) => {
+			const list = normalizeFriendRequests(profile.friendRequests);
+			const next = list.filter((item) => item.from !== from);
+			if (next.length === list.length) return profile;
+			return { ...profile, friendRequests: next };
+		},
+		`friend request remove ${from}`,
+	);
+}
+
+/** 通过好友申请，双方好友列表同时写入。 */
+export async function approveFriendRequest(username, fromUsername) {
+	const meName = String(username || "").trim();
+	const from = String(fromUsername || "").trim();
+	if (!meName || !from) throw new Error(t("好友申请不存在或已处理"));
+	const account = await getProfile(meName);
+	if (!account) throw new Error(t("找不到这个账号"));
+	const requests = normalizeFriendRequests(
+		account.profile && account.profile.friendRequests,
+	);
+	const request = requests.find((item) => item.from === from);
+	if (!request) throw new Error(t("好友申请不存在或已处理"));
+	const me = {
+		username: meName,
+		name: accountDisplayName(account, meName),
+	};
+	const friend = await linkFriends(me, from, request.name);
+	await removeFriendRequest(meName, from);
+	return friend;
+}
+
+export async function rejectFriendRequest(username, fromUsername) {
+	await removeFriendRequest(username, fromUsername);
+}
+
+export async function loadReceivedCards(username) {
+	const data = await getProfile(username);
+	if (!data) return [];
+	const profile =
+		data.profile && typeof data.profile === "object" ? data.profile : {};
+	return normalizeCards(profile.cards);
+}
+
+export async function saveReceivedCard(username, card) {
+	const normalized = normalizeCard(card);
+	if (!normalized) throw new Error(t("名片信息不完整"));
+	await updateAccountProfileRecord(
+		username,
+		(profile) => {
+			const cards = normalizeCards(profile.cards);
+			const next = cards.filter(
+				(item) =>
+					!(
+						item.username === normalized.username &&
+						item.from === normalized.from
+					),
+			);
+			next.unshift(normalized);
+			return { ...profile, cards: next.slice(0, MAX_CARDS) };
+		},
+		`friend card ${normalized.from || "unknown"} -> ${username}`,
+	);
+	return normalized;
 }
 
 export async function areFriends(me, target) {
@@ -245,6 +424,39 @@ export async function sendFriendMessage(me, target, content) {
 		ts,
 		content: text,
 	});
+}
+
+/** 发送好友名片，并把名片保存到接收者的 profile 里。 */
+export async function sendFriendCard(me, target, card) {
+	if (!(await areFriends(me, target))) {
+		throw new Error(t("你们还不是好友"));
+	}
+	const normalized = normalizeCard(card);
+	if (!normalized) throw new Error(t("名片信息不完整"));
+	const displayName = String(me.name || me.username).trim() || me.username;
+	const at = new Date().toISOString();
+	const cardEntry = {
+		...normalized,
+		from: me.username,
+		fromName: displayName,
+		at,
+	};
+	const ts = Date.now();
+	const messages = await appendFriendMessage(me, target, {
+		type: "card",
+		name: displayName,
+		user: me.username,
+		time: timeStamp(new Date(ts)),
+		ts,
+		content: t("分享名片：{name}", { name: normalized.name }),
+		card: cardEntry,
+	});
+	try {
+		await saveReceivedCard(target, cardEntry);
+	} catch (error) {
+		console.warn("名片写入对方 profile 失败：", error);
+	}
+	return messages;
 }
 
 export async function sendFriendNudge(me, target) {

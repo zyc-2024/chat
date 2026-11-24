@@ -329,3 +329,47 @@ export async function getProfile(username) {
 	delete data.password;
 	return data;
 }
+
+/**
+ * 修改任意账号的 profile 字段，用于好友申请、名片等需要写入对方资料的场景。
+ * 写入冲突时会重新读取账号再尝试。
+ */
+export async function updateAccountProfileRecord(
+	username,
+	mutate,
+	message = "",
+) {
+	const name = String(username || "").trim();
+	if (!name) throw new Error(t("缺少用户名"));
+	let attempt = 0;
+	while (attempt < 3) {
+		try {
+			const account = await readAccount(name);
+			if (!account || account.data.username !== name) {
+				throw new Error(t("找不到这个账号"));
+			}
+			const current =
+				account.data.profile &&
+				typeof account.data.profile === "object"
+					? account.data.profile
+					: {};
+			const profile = { ...current, username: name };
+			const next = mutate(profile) || profile;
+			if (JSON.stringify(next) === JSON.stringify(profile)) {
+				return profile;
+			}
+			account.data.profile = next;
+			await putJson(
+				account.path,
+				account.data,
+				message || `profile update ${name}`,
+				account.sha,
+			);
+			return next;
+		} catch (error) {
+			attempt++;
+			if (attempt >= 3) throw error;
+		}
+	}
+	throw new Error(t("资料更新失败"));
+}
