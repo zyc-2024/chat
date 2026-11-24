@@ -230,7 +230,7 @@ pnpm test
 格式示例：
 
 ```text
-3.11.2 (237)         -> Release tag: v3.11.2-237
+3.11.3 (238)         -> Release tag: v3.11.3-238
 3.0.0 beta 2 (174)   -> Release tag: v3.0.0-beta.2
 ```
 

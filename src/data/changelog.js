@@ -38,6 +38,12 @@ export const changelogTags = [
 
 export const changelog = [
 	{
+		version: "3.11.3 (238)",
+		date: "2026-11-24T20:28:54+08:00",
+		tags: ["ai", "hotfix"],
+		desc: "移除首页底部版权栏中的 Gitee 外链，仅保留 Github、更新日志、个性设置、好友和本地版下载等入口。",
+	},
+	{
 		version: "3.11.2 (237)",
 		date: "2026-11-24T20:27:24+08:00",
 		tags: ["ai"],

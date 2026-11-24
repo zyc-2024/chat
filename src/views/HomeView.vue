@@ -402,13 +402,6 @@ onMounted(() => {
 							>Github</a
 						>
 						·
-						<a
-							href="https://gitee.com/zyc-2024/chat-realease"
-							target="_blank"
-							rel="noreferrer"
-							>Gitee</a
-						>
-						·
 						<router-link :to="{ name: 'changelog' }">
 							{{ t("更新日志") }}
 						</router-link>
